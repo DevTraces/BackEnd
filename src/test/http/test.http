@@ -1,2 +1,9 @@
+### run test controller
+GET http://localhost:8080/run-test-controller
+
 ### join test
 GET http://localhost:8080/run-sns
+
+### feed delete
+DELETE http://localhost:8080/api/feeds/1
+Content-Type: application/json
