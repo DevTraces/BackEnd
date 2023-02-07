@@ -47,7 +47,9 @@ public class User extends BaseEntity {
     private Long id;
 
     private String username;
+    @Column(unique = true)
     private String nickname;
+    @Column(unique = true)
     private String email;
     private String description;
 
