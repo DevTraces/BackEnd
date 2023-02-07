@@ -31,6 +31,13 @@ public class BookmarkService {
 		);
 	}
 
+	public void deleteBookmark(String email, Long feedId) {
+
+		User user = validateUser(email);
+
+		bookmarkRepository.deleteByUserIdAndFeedId(user.getId(), feedId);
+	}
+
 	private User validateUser(String email) {
 		return userRepository.findByEmail(email).orElseThrow(
 			() -> new BaseException(USER_NOT_FOUND)

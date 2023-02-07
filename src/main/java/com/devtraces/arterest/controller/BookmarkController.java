@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.Mapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,6 +27,15 @@ public class BookmarkController {
 		@PathVariable Long feedId
 	){
 		bookmarkService.createBookmark(user.getUsername(), feedId);
+		return ApiSuccessResponse.NO_DATA_RESPONSE;
+	}
+
+	@DeleteMapping("/{feedId}")
+	public ApiSuccessResponse<?> deleteBookmark(
+		@AuthenticationPrincipal UserDetails user,
+		@PathVariable Long feedId
+	){
+		bookmarkService.deleteBookmark(user.getUsername(), feedId);
 		return ApiSuccessResponse.NO_DATA_RESPONSE;
 	}
 }
