@@ -6,6 +6,7 @@ import com.devtraces.arterest.domain.user.User;
 import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -20,6 +21,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.envers.AuditOverride;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 
 @Getter
@@ -27,9 +30,9 @@ import org.hibernate.envers.AuditOverride;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AuditOverride(forClass = BaseEntity.class)
-@Table(name = "bookmark")
 @Entity
+@EntityListeners(value = {AuditingEntityListener.class})
+@Table(name = "bookmark")
 public class Bookmark {
 
 	@Id
@@ -40,6 +43,7 @@ public class Bookmark {
 	private Long feedId;
 	private Long userId;
 
+	@CreatedDate
 	private LocalDateTime createdAt;
 
 	// N:1 mapping with User
