@@ -11,7 +11,7 @@ import static org.mockito.Mockito.verify;
 import com.devtraces.arterest.domain.bookmark.Bookmark;
 import com.devtraces.arterest.domain.bookmark.BookmarkRepository;
 import com.devtraces.arterest.domain.feed.Feed;
-import com.devtraces.arterest.dto.GetBookmarkListResponseDto;
+import com.devtraces.arterest.dto.GetBookmarkListResponse;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -52,7 +52,7 @@ class BookmarkServiceTest {
 			.willReturn(bookmarkPage);
 
 		//when
-		List<GetBookmarkListResponseDto> response = bookmarkService.getBookmarkList(1L, 0, 10);
+		List<GetBookmarkListResponse> response = bookmarkService.getBookmarkList(1L, 0, 10);
 
 		//then
 		assertEquals(1L, response.get(0).getFeedId());

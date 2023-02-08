@@ -11,13 +11,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
-public class GetBookmarkListResponseDto {
+public class GetBookmarkListResponse {
 
 	private Long feedId;
 	private String imageUrl;
 
-	public static GetBookmarkListResponseDto from(Bookmark bookmark){
-		return GetBookmarkListResponseDto.builder()
+	public static GetBookmarkListResponse from(Bookmark bookmark){
+		return GetBookmarkListResponse.builder()
 			.feedId(bookmark.getFeed().getId())
 			.imageUrl(getFirstImageUrl(bookmark.getFeed().getImageUrls()))
 			.build();

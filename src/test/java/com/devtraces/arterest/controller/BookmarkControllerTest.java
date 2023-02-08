@@ -11,7 +11,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.devtraces.arterest.dto.GetBookmarkListResponseDto;
+import com.devtraces.arterest.dto.GetBookmarkListResponse;
 import com.devtraces.arterest.service.BookmarkService;
 import java.util.Arrays;
 import java.util.List;
@@ -36,8 +36,8 @@ class BookmarkControllerTest {
 	@WithMockUser
 	void testGetBookmarkList() throws Exception{
 		// given
-		List<GetBookmarkListResponseDto> response =
-			Arrays.asList(GetBookmarkListResponseDto.builder()
+		List<GetBookmarkListResponse> response =
+			Arrays.asList(GetBookmarkListResponse.builder()
 				.feedId(1L)
 				.imageUrl("imageUrl")
 				.build());

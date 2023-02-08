@@ -1,7 +1,7 @@
 package com.devtraces.arterest.controller;
 
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
-import com.devtraces.arterest.dto.GetBookmarkListResponseDto;
+import com.devtraces.arterest.dto.GetBookmarkListResponse;
 import com.devtraces.arterest.service.BookmarkService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -22,12 +22,12 @@ public class BookmarkController {
 	private final BookmarkService bookmarkService;
 
 	@GetMapping
-	public ApiSuccessResponse<List<GetBookmarkListResponseDto>> getBookmarkList(
+	public ApiSuccessResponse<List<GetBookmarkListResponse>> getBookmarkList(
 		@AuthenticationPrincipal Long userId,
 		@RequestParam Integer page,
 		@RequestParam(required = false, defaultValue = "10") Integer pageSize
 	){
-		List<GetBookmarkListResponseDto> response =
+		List<GetBookmarkListResponse> response =
 			bookmarkService.getBookmarkList(userId, page, pageSize);
 		return ApiSuccessResponse.from(response);
 	}

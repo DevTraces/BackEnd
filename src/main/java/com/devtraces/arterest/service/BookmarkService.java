@@ -2,7 +2,7 @@ package com.devtraces.arterest.service;
 
 import com.devtraces.arterest.domain.bookmark.Bookmark;
 import com.devtraces.arterest.domain.bookmark.BookmarkRepository;
-import com.devtraces.arterest.dto.GetBookmarkListResponseDto;
+import com.devtraces.arterest.dto.GetBookmarkListResponse;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
@@ -18,12 +18,12 @@ public class BookmarkService {
 	private final BookmarkRepository bookmarkRepository;
 
 	@Transactional
-	public List<GetBookmarkListResponseDto> getBookmarkList(Long userId, Integer page, Integer pageSize) {
+	public List<GetBookmarkListResponse> getBookmarkList(Long userId, Integer page, Integer pageSize) {
 
 		Pageable pageable = PageRequest.of(page, pageSize);
 
 		return bookmarkRepository.findByUserId(userId, pageable)
-			.stream().map(Bookmark -> GetBookmarkListResponseDto.from(Bookmark))
+			.stream().map(Bookmark -> GetBookmarkListResponse.from(Bookmark))
 			.collect(Collectors.toList());
 	}
 
