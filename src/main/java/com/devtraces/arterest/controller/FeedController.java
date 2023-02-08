@@ -20,20 +20,20 @@ public class FeedController {
 
     private final FeedService feedService;
 
-    @GetMapping
+    //JWT에서 userId 가져오게 될 경우, 수정 필요.
+    @GetMapping("/{nickname}")
     public ApiSuccessResponse<List<FeedResponse>> getFeedList(
-        @RequestParam Long userId, @RequestParam int page
+        @RequestParam Long userId, @RequestParam int page, @RequestParam int pageSize
     ){
-        // 마법의 상수가 들어가 있음. 즉, 1 페이지에 포함될 요소의 개수를 팀에서 정해놔야 함.
-        PageRequest pageRequest = PageRequest.of(page, 20);
+        PageRequest pageRequest = PageRequest.of(page, pageSize);
         return ApiSuccessResponse.from(feedService.getFeedResponseList(userId, pageRequest));
     }
 
+    // JWT와 연계할 경우, userId를 가져올 수 있다. JWT와의 연계가 끝난 후 요청 url과 파라미터를 수정한다.
     @GetMapping("/{userId}/{feedId}")
     public ApiSuccessResponse<FeedResponse> getOneFeed(
         @PathVariable Long userId, @PathVariable Long feedId
     ){
-        // 여기서도 유저 아이디가 필요하다.
         return ApiSuccessResponse.from(feedService.getOneFeed(userId, feedId));
     }
 

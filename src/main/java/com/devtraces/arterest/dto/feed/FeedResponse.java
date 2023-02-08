@@ -25,34 +25,34 @@ public class FeedResponse {
     private Long feedId;
 
     private Long authorId;
-    private String authorProfileImageLink;
+    private String authorProfileImageUrl;
     private String authorNickname;
 
     private String content;
-    private List<String> imageLinks;
+    private List<String> imageUrls;
     private List<String> hashtags; // ["#감자", "#potato", "#이얍이얍"]
 
     private Long numberOfLike;
     private Integer numberOfReply;
-    private boolean likeBefore; // 트루이면 좋아요 눌렀던 게시물인 것.
+    private boolean isLiked; // 트루이면 좋아요 눌렀던 게시물인 것.
 
     private LocalDateTime createdAt; // 프런트엔드 측에서는 "2023-02-07T09:59:23.653281"라는 문자열 받음.
     private LocalDateTime modifiedAt;
 
-    public static FeedResponse from(Feed feed, Set<Long> likedFeedSet){
+    public static FeedResponse from(Feed feed, Set<Long> likedFeedSet, Long numberOfLike){
         return FeedResponse.builder()
             .feedId(feed.getId())
             .authorId(feed.getAuthorId())
-            .authorProfileImageLink(feed.getUser().getProfileImageLink())
+            .authorProfileImageUrl(feed.getUser().getProfileImageLink())
             .authorNickname(feed.getUser().getNickname())
             .content(feed.getContent())
-            .imageLinks(Arrays.stream(feed.getImageLinks().split(","))
+            .imageUrls(Arrays.stream(feed.getImageLinks().split(","))
                 .collect(Collectors.toList()))
             .hashtags(Arrays.stream(feed.getHashtags().split(","))
                 .collect(Collectors.toList()))
-            // 좋아요 개수는 이 메서드 밖에서 별도로 처리한다.
+            .numberOfLike(numberOfLike)
             .numberOfReply(feed.getReplyList().size())
-            .likeBefore(likedFeedSet.contains(feed.getId()))
+            .isLiked(likedFeedSet.contains(feed.getId()))
             .createdAt(feed.getCreatedAt())
             .modifiedAt(feed.getModifiedAt())
             .build();

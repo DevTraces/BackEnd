@@ -7,3 +7,18 @@ GET http://localhost:8080/run-sns
 ### feed delete
 DELETE http://localhost:8080/api/feeds/1
 Content-Type: application/json
+
+
+### get one feed
+GET http://localhost:8080/api/feeds/1/1
+Content-Type: application/json
+
+
+### get feed List written by {nickname == dongvin99} user
+GET http://localhost:8080/api/feeds/dongvin99?userId=1&page=0&pageSize=10
+Content-Type: application/json
+
+
+### get one feed
+GET http://localhost:8080/api/feeds/1/1
+Content-Type: application/json

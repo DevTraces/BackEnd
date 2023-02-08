@@ -2,14 +2,13 @@ package com.devtraces.arterest.service;
 
 import com.devtraces.arterest.domain.feed.Feed;
 import com.devtraces.arterest.domain.feed.FeedRepository;
-import com.devtraces.arterest.domain.like.Like;
+import com.devtraces.arterest.domain.like.Likes;
 import com.devtraces.arterest.domain.like.LikeRepository;
 import com.devtraces.arterest.domain.reply.Reply;
 import com.devtraces.arterest.domain.reply.ReplyRepository;
 import com.devtraces.arterest.domain.rereply.Rereply;
 import com.devtraces.arterest.domain.rereply.RereplyRepository;
 import com.devtraces.arterest.dto.feed.FeedResponse;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,35 +31,32 @@ public class FeedService {
     * */
     @Transactional(readOnly = true)
     public List<FeedResponse> getFeedResponseList(Long userId, PageRequest pageRequest){
+        System.out.println("겟피드리스트 서비스 메서드 호출");
         // 요청한 사용자가 좋아요를 누른 피드들의 주키 아이디 번호들을 먼저 불러온다.
         // 레디스가 셋팅된 후에는 레디스에 캐시된 좋아요 게시물 주키 번호 리스트를 먼저 보고, 없을 때만 DB 보게 만든다.
         Set<Long> likedFeedSet = likeRepository.findAllByUserId(userId)
-            .stream().map(Like::getFeedId).collect(Collectors.toSet());
+            .stream().map(Likes::getFeedId).collect(Collectors.toSet());
 
         // 특정 사용자가 작성한 피드들을 페이징 처리해서 불러온 후, Response 타입으로 매핑한다.
         // 피드 별 좋아요 개수는 레디스를 먼저 보게 만들고, 그게 불가능 할때만 Like 테이블에서 찾도록 한다.
         // 현재 레디스 셋팅이 완료되지 않았으므로 DB에서 좋아요 개수를 찾아내게 만든다.
         return feedRepository.findAllByAuthorId(userId, pageRequest).stream().map(
-            feed -> {
-                FeedResponse feedResponse = FeedResponse.from(feed, likedFeedSet);
-                feedResponse.setNumberOfLike(likeRepository.countByFeedId(feedResponse.getFeedId()));
-                return feedResponse;
-            }
-        ).collect(Collectors.toList());
+            feed -> FeedResponse.from(
+                feed, likedFeedSet, likeRepository.countByFeedId(feed.getId())
+        )).collect(Collectors.toList());
     }
 
     // 레디스 추가 후 수정 필요.
     @Transactional(readOnly = true)
     public FeedResponse getOneFeed(Long userId, Long feedId){
         Set<Long> likedFeedSet = likeRepository.findAllByUserId(userId)
-            .stream().map(Like::getFeedId).collect(Collectors.toSet());
+            .stream().map(Likes::getFeedId).collect(Collectors.toSet());
 
-        FeedResponse feedResponse = FeedResponse.from(
-            feedRepository.findById(feedId).orElseThrow(RuntimeException::new), likedFeedSet
+        //커스텀 예외 사용방법 확정 후 수정 필요.
+        return FeedResponse.from(
+            feedRepository.findById(feedId).orElseThrow(RuntimeException::new),
+            likedFeedSet, likeRepository.countByFeedId(feedId)
         );
-        feedResponse.setNumberOfLike(likeRepository.countByFeedId(feedId));
-
-        return feedResponse;
     }
 
     /*
@@ -87,7 +83,7 @@ public class FeedService {
         );
 
         // 좋아요 테이블에서 정보 삭제
-        likeRepository.deleteAllByFeedId(feedId);
+        //likeRepository.deleteAllByFeedId(feedId);
 
         // 대댓글 삭제
         for(Reply reply : feed.getReplyList()){
