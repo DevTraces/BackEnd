@@ -137,6 +137,10 @@ class FeedServiceTest {
     void successDeleteFeed(){
 
         // given
+        User user = User.builder()
+            .id(1L)
+            .build();
+
         Rereply rereply = Rereply.builder()
             .id(1L)
             .build();
@@ -150,6 +154,7 @@ class FeedServiceTest {
         Feed feed = Feed.builder()
             .id(1L)
             .replyList(new ArrayList<>())
+            .user(user)
             .build();
         feed.getReplyList().add(reply);
 
@@ -161,7 +166,7 @@ class FeedServiceTest {
         doNothing().when(feedRepository).deleteById(anyLong());
 
         // when
-        feedService.deleteFeed(1L);
+        feedService.deleteFeed(1L, 1L);
 
         List<Long> longList = new ArrayList<>();
         longList.add(1L);

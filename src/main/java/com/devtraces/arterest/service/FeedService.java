@@ -10,6 +10,7 @@ import com.devtraces.arterest.domain.rereply.Rereply;
 import com.devtraces.arterest.domain.rereply.RereplyRepository;
 import com.devtraces.arterest.dto.feed.FeedResponse;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +38,6 @@ public class FeedService {
         Set<Long> likedFeedSet = likeRepository.findAllByUserId(userId)
             .stream().map(Likes::getFeedId).collect(Collectors.toSet());
 
-        // 특정 사용자가 작성한 피드들을 페이징 처리해서 불러온 후, Response 타입으로 매핑한다.
         // 피드 별 좋아요 개수는 레디스를 먼저 보게 만들고, 그게 불가능 할때만 Like 테이블에서 찾도록 한다.
         // 현재 레디스 셋팅이 완료되지 않았으므로 DB에서 좋아요 개수를 찾아내게 만든다.
         return feedRepository.findAllByAuthorId(userId, pageRequest).stream().map(
@@ -76,14 +76,18 @@ public class FeedService {
      * 비동기가 아닌 동기 식으로 처리한다면 서버에 큰 부담을 줄 수 있음.
      * */
     @Transactional
-    public Feed deleteFeed(Long feedId){
+    public Feed deleteFeed(Long userId, Long feedId){
         Feed feed = feedRepository.findById(feedId).orElseThrow(
             // BaseException 클래스에 커스텀 예외들을 어떻게 상수화 할 것인지 논의를 끝낸 후 수정.
             () -> new RuntimeException("feed not found")
         );
+        if(!Objects.equals(feed.getUser().getId(), userId)){
+            // 상수화한 커스텀 예외를 어떻게 사용할 것인지에 대한 합의가 이루어진 후 수정할 예정.
+            throw new RuntimeException("다른 사람의 게시물은 삭제할 수 없습니다.");
+        }
 
         // 좋아요 테이블에서 정보 삭제
-        //likeRepository.deleteAllByFeedId(feedId);
+        likeRepository.deleteAllByFeedId(feedId);
 
         // 대댓글 삭제
         for(Reply reply : feed.getReplyList()){
