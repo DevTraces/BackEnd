@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 @Getter
 @Setter
-@Service
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
