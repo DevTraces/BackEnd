@@ -17,12 +17,10 @@ import java.security.Key;
 import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -33,19 +31,16 @@ public class JwtProvider {
 
 	private final UserDetailsService userDetailsService;
 	private final RedisService redisService;
-	private final PasswordEncoder passwordEncoder;
 
 	private final Key secretKey;
 
 	public JwtProvider(
 		UserDetailsService userDetailsService,
 		RedisService redisService,
-		@Lazy PasswordEncoder passwordEncoder,
 		@Value("${jwt.secret}") String secretKey
 	) {
 		this.userDetailsService = userDetailsService;
 		this.redisService = redisService;
-		this.passwordEncoder = passwordEncoder;
 
 		byte[] keyBytes = Decoders.BASE64.decode(secretKey);
 		this.secretKey = Keys.hmacShaKeyFor(keyBytes);
@@ -71,8 +66,7 @@ public class JwtProvider {
 			.signWith(secretKey, SignatureAlgorithm.HS256)
 			.compact();
 
-		String encodingRefreshToken = passwordEncoder.encode(refreshToken);
-		redisService.setEncodingRefreshTokenValue(userId, encodingRefreshToken, refreshTokenExpiresIn);
+		redisService.setRefreshTokenValue(userId, refreshToken, refreshTokenExpiresIn);
 
 		return TokenDto.builder()
 			.accessToken(accessToken)
@@ -113,5 +107,17 @@ public class JwtProvider {
 			log.info("JWT claims string is empty.");
 		}
 		return false;
+	}
+
+	// 만료된 JWT 토큰인지 검증
+	public boolean isExpiredToken(String token) {
+		try {
+			Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token);
+			return false;
+		} catch (ExpiredJwtException e) {
+			return true;
+		} catch (Exception e) {
+			throw BaseException.INVALID_TOKEN;
+		}
 	}
 }

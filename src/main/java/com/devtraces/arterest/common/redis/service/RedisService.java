@@ -5,6 +5,7 @@ import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -14,8 +15,9 @@ public class RedisService {
 	private static final String ACCESS_TOKEN_BLACK_LIST_PREFIX = "AT-BL:";
 
 	private final RedisTemplate<String, String> redisTemplate;
+	private final PasswordEncoder passwordEncoder;
 
-	public void setEncodingRefreshTokenValue(long userId, String encodingRefreshToken, Date expiredDate) {
+	public void setRefreshTokenValue(long userId, String refreshToken, Date expiredDate) {
 		Date now = new Date();
 		long expirationSeconds = (expiredDate.getTime() - now.getTime()) / 1000;
 
@@ -23,17 +25,18 @@ public class RedisService {
 			ValueOperations<String, String> values = redisTemplate.opsForValue();
 			values.set(
 				REFRESH_TOKEN_PREFIX + userId,
-				encodingRefreshToken,
+				passwordEncoder.encode(refreshToken),
 				Duration.ofDays(expirationSeconds));
 		}
 	}
 
-	public String getEncodingRefreshTokenValue(long userId) {
+	public boolean hasSameRefreshToken(long userId, String refreshToken) {
 		ValueOperations<String, String> values = redisTemplate.opsForValue();
-		return values.get(REFRESH_TOKEN_PREFIX + userId);
+		String encodingRefreshToken = values.get(REFRESH_TOKEN_PREFIX + userId);
+		return passwordEncoder.matches(refreshToken, encodingRefreshToken);
 	}
 
-	public void deleteEncodingRefreshTokenBy(long userId) {
+	public void deleteRefreshTokenBy(long userId) {
 		redisTemplate.delete(REFRESH_TOKEN_PREFIX + userId);
 	}
 

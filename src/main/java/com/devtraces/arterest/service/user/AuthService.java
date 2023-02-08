@@ -38,7 +38,7 @@ public class AuthService {
 
 	@Transactional
 	public void signOut(long userId, String accessToken) {
-		redisService.deleteEncodingRefreshTokenBy(userId);
+		redisService.deleteRefreshTokenBy(userId);
 
 		// Access Token을 무효화시킬 수 없으므로 Redis에 블랙리스트 작성
 		Date expiredDate = jwtProvider.getExpiredDate(accessToken);
