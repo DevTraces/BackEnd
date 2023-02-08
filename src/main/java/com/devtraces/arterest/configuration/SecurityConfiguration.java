@@ -1,5 +1,6 @@
 package com.devtraces.arterest.configuration;
 
+import com.devtraces.arterest.common.jwt.JwtAuthenticationEntryPoint;
 import com.devtraces.arterest.common.jwt.JwtAuthenticationFilter;
 import com.devtraces.arterest.common.jwt.JwtProvider;
 import com.devtraces.arterest.common.redis.service.RedisService;
@@ -36,6 +37,9 @@ public class SecurityConfiguration {
 			.addFilterBefore(new JwtAuthenticationFilter(jwtProvider, redisService),
 				UsernamePasswordAuthenticationFilter.class);
 
+		http
+			.exceptionHandling()
+			.authenticationEntryPoint(new JwtAuthenticationEntryPoint());
 		return http.build();
 	}
 }

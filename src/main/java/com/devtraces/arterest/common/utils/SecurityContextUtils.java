@@ -10,7 +10,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-// TODO: 이름 바꾸기
 @RequiredArgsConstructor
 @Component
 public class SecurityContextUtils {

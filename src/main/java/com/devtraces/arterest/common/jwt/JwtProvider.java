@@ -8,9 +8,7 @@ import com.devtraces.arterest.common.jwt.dto.TokenDto;
 import com.devtraces.arterest.common.redis.service.RedisService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import java.security.Key;
@@ -90,23 +88,6 @@ public class JwtProvider {
 	public Date getExpiredDate(String token) {
 		return Jwts.parserBuilder().setSigningKey(secretKey).build()
 			.parseClaimsJws(token).getBody().getExpiration();
-	}
-
-	// JWT 토큰 검증
-	public boolean isValidateToken(String token) {
-		try {
-			Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
-			return true;
-		} catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
-			log.info("Invalid JWT Token");
-		} catch (ExpiredJwtException e) {
-			log.info("Expired JWT Token");
-		} catch (UnsupportedJwtException e) {
-			log.info("Unsupported JWT Token");
-		} catch (IllegalArgumentException e) {
-			log.info("JWT claims string is empty.");
-		}
-		return false;
 	}
 
 	// 만료된 JWT 토큰인지 검증
