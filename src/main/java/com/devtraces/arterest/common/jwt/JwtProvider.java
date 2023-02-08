@@ -3,6 +3,7 @@ package com.devtraces.arterest.common.jwt;
 import static com.devtraces.arterest.common.jwt.JwtProperties.ACCESS_TOKEN_EXPIRATION_TIME;
 import static com.devtraces.arterest.common.jwt.JwtProperties.REFRESH_TOKEN_EXPIRATION_TIME;
 
+import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.jwt.dto.TokenDto;
 import com.devtraces.arterest.common.redis.service.RedisService;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -16,6 +17,7 @@ import java.security.Key;
 import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -38,7 +40,7 @@ public class JwtProvider {
 	public JwtProvider(
 		UserDetailsService userDetailsService,
 		RedisService redisService,
-		PasswordEncoder passwordEncoder,
+		@Lazy PasswordEncoder passwordEncoder,
 		@Value("${jwt.secret}") String secretKey
 	) {
 		this.userDetailsService = userDetailsService;
@@ -85,9 +87,15 @@ public class JwtProvider {
 	}
 
 	// JWT 토큰에서 회원 구별 정보 추출
-	private String getUserId(String token) {
+	private String getUserId(String accessToken) {
 		return Jwts.parserBuilder().setSigningKey(secretKey).build()
-			.parseClaimsJws(token).getBody().getSubject();
+			.parseClaimsJws(accessToken).getBody().getSubject();
+	}
+
+	// JWT 토큰에서 만료 기간 정보 추출
+	public Date getExpiredDate(String token) {
+		return Jwts.parserBuilder().setSigningKey(secretKey).build()
+			.parseClaimsJws(token).getBody().getExpiration();
 	}
 
 	// JWT 토큰 검증

@@ -34,6 +34,7 @@ public class SecurityConfiguration {
 
 		http
 			.authorizeRequests()
+				.antMatchers("/api/auth/sign-out").hasRole("USER")
 				.anyRequest().permitAll();
 
 		http

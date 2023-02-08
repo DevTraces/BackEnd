@@ -3,8 +3,10 @@ package com.devtraces.arterest.service.user;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.jwt.JwtProvider;
 import com.devtraces.arterest.common.jwt.dto.TokenDto;
+import com.devtraces.arterest.common.redis.service.RedisService;
 import com.devtraces.arterest.domain.user.User;
 import com.devtraces.arterest.domain.user.UserRepository;
+import java.util.Date;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ public class AuthService {
 
 	private final PasswordEncoder passwordEncoder;
 	private final JwtProvider jwtProvider;
+	private final RedisService redisService;
 	private final UserRepository userRepository;
 
 	@Transactional(readOnly = true)
@@ -31,5 +34,14 @@ public class AuthService {
 		if (!passwordEncoder.matches(passwordInput, user.getPassword())) {
 			throw BaseException.WRONG_EMAIL_OR_PASSWORD;
 		}
+	}
+
+	@Transactional
+	public void signOut(long userId, String accessToken) {
+		redisService.deleteEncodingRefreshTokenBy(userId);
+
+		// Access Token을 무효화시킬 수 없으므로 Redis에 블랙리스트 작성
+		Date expiredDate = jwtProvider.getExpiredDate(accessToken);
+		redisService.setAccessTokenBlackListValue(accessToken, userId, expiredDate);
 	}
 }

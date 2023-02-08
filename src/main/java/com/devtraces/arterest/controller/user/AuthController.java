@@ -5,6 +5,7 @@ import static com.devtraces.arterest.common.jwt.JwtProperties.TOKEN_PREFIX;
 
 import com.devtraces.arterest.common.jwt.dto.TokenDto;
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
+import com.devtraces.arterest.common.utils.SecurityContextUtils;
 import com.devtraces.arterest.controller.user.dto.SignInRequest;
 import com.devtraces.arterest.service.user.AuthService;
 import javax.validation.Valid;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,5 +39,13 @@ public class AuthController {
 			.ok()
 			.headers(httpHeaders)
 			.body(ApiSuccessResponse.NO_DATA_RESPONSE);
+	}
+
+	@PostMapping("/sign-out")
+	public ApiSuccessResponse<?> signOut(@RequestHeader("authorization") String bearerToken) {
+		long userId = SecurityContextUtils.parseUserId();
+		String accessToken = bearerToken.substring(TOKEN_PREFIX.length() + 1);
+		authService.signOut(userId, accessToken);
+		return ApiSuccessResponse.NO_DATA_RESPONSE;
 	}
 }
