@@ -1,6 +1,5 @@
 package com.devtraces.arterest.domain.bookmark;
 
-import com.devtraces.arterest.common.domain.BaseEntity;
 import com.devtraces.arterest.domain.feed.Feed;
 import com.devtraces.arterest.domain.user.User;
 import java.time.LocalDateTime;
@@ -20,7 +19,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.hibernate.envers.AuditOverride;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 

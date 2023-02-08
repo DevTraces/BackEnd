@@ -1,17 +1,14 @@
 package com.devtraces.arterest.domain.user;
 
-import com.devtraces.arterest.common.domain.BaseEntity;
 import com.devtraces.arterest.common.UserSignUpType;
 import com.devtraces.arterest.common.UserStatusType;
+import com.devtraces.arterest.common.domain.BaseEntity;
 import com.devtraces.arterest.domain.feed.Feed;
 import com.devtraces.arterest.domain.reply.Reply;
 import com.devtraces.arterest.domain.rereply.Rereply;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -27,7 +24,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.envers.AuditOverride;
 

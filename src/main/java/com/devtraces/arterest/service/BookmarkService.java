@@ -1,46 +1,45 @@
 package com.devtraces.arterest.service;
 
-import static com.devtraces.arterest.common.exception.ErrorCode.USER_NOT_FOUND;
-
-import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.domain.bookmark.Bookmark;
 import com.devtraces.arterest.domain.bookmark.BookmarkRepository;
-import com.devtraces.arterest.domain.user.User;
-import com.devtraces.arterest.domain.user.UserRepository;
+import com.devtraces.arterest.dto.GetBookmarkListResponseDto;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class BookmarkService {
 
-	private final UserRepository userRepository;
 	private final BookmarkRepository bookmarkRepository;
 
 	@Transactional
-	public void createBookmark(String email, Long feedId) {
+	public List<GetBookmarkListResponseDto> getBookmarkList(Long userId, Integer page, Integer pageSize) {
 
-		User user = validateUser(email);
+		Pageable pageable = PageRequest.of(page, pageSize);
+
+		return bookmarkRepository.findByUserId(userId, pageable)
+			.stream().map(Bookmark -> GetBookmarkListResponseDto.from(Bookmark))
+			.collect(Collectors.toList());
+	}
+
+	@Transactional
+	public void createBookmark(Long userId, Long feedId) {
 
 		bookmarkRepository.save(
 			Bookmark.builder()
 				.feedId(feedId)
-				.userId(user.getId())
+				.userId(userId)
 				.build()
 		);
 	}
 
-	public void deleteBookmark(String email, Long feedId) {
+	public void deleteBookmark(Long userId, Long feedId) {
 
-		User user = validateUser(email);
-
-		bookmarkRepository.deleteByUserIdAndFeedId(user.getId(), feedId);
-	}
-
-	private User validateUser(String email) {
-		return userRepository.findByEmail(email).orElseThrow(
-			() -> new BaseException(USER_NOT_FOUND)
-		);
+		bookmarkRepository.deleteByUserIdAndFeedId(userId, feedId);
 	}
 }
