@@ -2,8 +2,9 @@ name: CI-CD
 
 on:
   push:
-    branches:
-      - main
+    branches: [deploy/8-config]
+  pull_request:
+    branches: [deploy/8-config]
 
 env:
   S3_BUCKET_NAME: arterest
