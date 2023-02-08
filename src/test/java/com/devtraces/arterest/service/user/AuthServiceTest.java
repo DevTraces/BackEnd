@@ -1,9 +1,11 @@
 package com.devtraces.arterest.service.user;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willDoNothing;
 
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.jwt.JwtProvider;
@@ -11,6 +13,7 @@ import com.devtraces.arterest.common.jwt.dto.TokenDto;
 import com.devtraces.arterest.common.redis.service.RedisService;
 import com.devtraces.arterest.domain.user.User;
 import com.devtraces.arterest.domain.user.UserRepository;
+import java.util.Date;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -84,5 +87,15 @@ class AuthServiceTest {
 			() -> authService.signInAndGenerateJwtToken("email@gmail.com", "wrongPw"));
 
 		assertEquals(BaseException.WRONG_EMAIL_OR_PASSWORD, exception);
+	}
+
+	@Test
+	void testSignOut() {
+		willDoNothing()
+			.given(redisService).deleteRefreshTokenBy(anyLong());
+		given(jwtProvider.getExpiredDate(anyString()))
+			.willReturn(new Date(new Date().getTime() + (60 * 60 * 1000)));
+		willDoNothing()
+			.given(redisService).setAccessTokenBlackListValue(anyString(), anyLong(), any());
 	}
 }
