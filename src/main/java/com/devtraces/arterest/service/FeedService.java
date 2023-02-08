@@ -2,14 +2,19 @@ package com.devtraces.arterest.service;
 
 import com.devtraces.arterest.domain.feed.Feed;
 import com.devtraces.arterest.domain.feed.FeedRepository;
+import com.devtraces.arterest.domain.like.Like;
+import com.devtraces.arterest.domain.like.LikeRepository;
 import com.devtraces.arterest.domain.reply.Reply;
 import com.devtraces.arterest.domain.reply.ReplyRepository;
 import com.devtraces.arterest.domain.rereply.Rereply;
 import com.devtraces.arterest.domain.rereply.RereplyRepository;
 import com.devtraces.arterest.dto.feed.FeedResponse;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,15 +25,48 @@ public class FeedService {
     private final FeedRepository feedRepository;
     private final ReplyRepository replyRepository;
     private final RereplyRepository rereplyRepository;
+    private final LikeRepository likeRepository;
 
-    public List<FeedResponse> getFeedResponseList(){
-        return null;
+    /*
+    *
+    * */
+    @Transactional(readOnly = true)
+    public List<FeedResponse> getFeedResponseList(Long userId, PageRequest pageRequest){
+        // 요청한 사용자가 좋아요를 누른 피드들의 주키 아이디 번호들을 먼저 불러온다.
+        // 레디스가 셋팅된 후에는 레디스에 캐시된 좋아요 게시물 주키 번호 리스트를 먼저 보고, 없을 때만 DB 보게 만든다.
+        Set<Long> likedFeedSet = likeRepository.findAllByUserId(userId)
+            .stream().map(Like::getFeedId).collect(Collectors.toSet());
+
+        // 특정 사용자가 작성한 피드들을 페이징 처리해서 불러온 후, Response 타입으로 매핑한다.
+        // 피드 별 좋아요 개수는 레디스를 먼저 보게 만들고, 그게 불가능 할때만 Like 테이블에서 찾도록 한다.
+        // 현재 레디스 셋팅이 완료되지 않았으므로 DB에서 좋아요 개수를 찾아내게 만든다.
+        return feedRepository.findAllByAuthorId(userId, pageRequest).stream().map(
+            feed -> {
+                FeedResponse feedResponse = FeedResponse.from(feed, likedFeedSet);
+                feedResponse.setNumberOfLike(likeRepository.countByFeedId(feedResponse.getFeedId()));
+                return feedResponse;
+            }
+        ).collect(Collectors.toList());
+    }
+
+    // 레디스 추가 후 수정 필요.
+    @Transactional(readOnly = true)
+    public FeedResponse getOneFeed(Long userId, Long feedId){
+        Set<Long> likedFeedSet = likeRepository.findAllByUserId(userId)
+            .stream().map(Like::getFeedId).collect(Collectors.toSet());
+
+        FeedResponse feedResponse = FeedResponse.from(
+            feedRepository.findById(feedId).orElseThrow(RuntimeException::new), likedFeedSet
+        );
+        feedResponse.setNumberOfLike(likeRepository.countByFeedId(feedId));
+
+        return feedResponse;
     }
 
     /*
      * 엔티티 매핑관계에서 Cascade 옵션을 ALL로 설정해서 피드가 사라지면 연관돼 있는 댓글, 대댓글도 모두 삭제되게
      * 만드는 방법이 있음. 그러나 피드, 댓글, 대댓글은 유저 엔티티와도 연관관계가 존재하기 때문에 Cascade ALL 옵션이
-     * 예상치 못한 방향으로 작동할 수 있고, 이 또한 동기처리될 것이기 때문에 상당한 시간을 필요로 할 것임.
+     * 예상치 못한 방향으로 작동할 수 있고, 이 또한 동기식으로 처리될 것이기 때문에 상당한 시간을 필요로 할 것임.
      * 그리고 이는 유저의 탈퇴와도 관련이 깊어서 유저 관련 API가 완성된 후에 다시 생각해볼 필요가 있음.
      * 우선 안전한 방법으로 삭제하는 것으로 구현하고 추후 Cascade 옵션에 대한 테스트 후 결정을 진행함.
      *
@@ -47,6 +85,9 @@ public class FeedService {
             // BaseException 클래스에 커스텀 예외들을 어떻게 상수화 할 것인지 논의를 끝낸 후 수정.
             () -> new RuntimeException("feed not found")
         );
+
+        // 좋아요 테이블에서 정보 삭제
+        likeRepository.deleteAllByFeedId(feedId);
 
         // 대댓글 삭제
         for(Reply reply : feed.getReplyList()){

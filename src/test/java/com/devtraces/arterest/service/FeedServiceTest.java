@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import com.devtraces.arterest.domain.feed.Feed;
 import com.devtraces.arterest.domain.feed.FeedRepository;
+import com.devtraces.arterest.domain.like.LikeRepository;
 import com.devtraces.arterest.domain.reply.Reply;
 import com.devtraces.arterest.domain.reply.ReplyRepository;
 import com.devtraces.arterest.domain.rereply.Rereply;
@@ -34,6 +35,8 @@ class FeedServiceTest {
     private ReplyRepository replyRepository;
     @Mock
     private RereplyRepository rereplyRepository;
+    @Mock
+    private LikeRepository likeRepository;
 
     @InjectMocks
     private FeedService feedService;
@@ -61,6 +64,7 @@ class FeedServiceTest {
 
         given(feedRepository.findById(anyLong())).willReturn(Optional.of(feed));
 
+        doNothing().when(likeRepository).deleteAllByFeedId(anyLong());
         doNothing().when(rereplyRepository).deleteAllByIdIn(anyList());
         doNothing().when(replyRepository).deleteAllByIdIn(anyList());
         doNothing().when(feedRepository).deleteById(anyLong());
@@ -72,6 +76,7 @@ class FeedServiceTest {
         longList.add(1L);
 
         // then
+        verify(likeRepository, times(1)).deleteAllByFeedId(1L);
         verify(rereplyRepository, times(1)).deleteAllByIdIn(longList);
         verify(replyRepository, times(1)).deleteAllByIdIn(longList);
         verify(feedRepository).deleteById(anyLong());
