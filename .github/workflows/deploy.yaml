@@ -40,6 +40,18 @@ jobs:
         with:
           arguments: clean build -x test
 
+      # 하위 디렉토리 생성
+      - name: Make Directory
+        run: mkdir deploy
+
+      # JAR 파일 복사
+      - name: Copy Jar File
+        run: cp ./build/libs/*.jar ./deploy/
+
+       # JAR 디렉토리 -> ZIP
+      - name: Zip Directory
+        run: zip -r -qq -j ./spring-project.zip ./deploy
+
       # (4) AWS 인증 (IAM 사용자 Access Key, Secret Key 활용)
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -61,7 +73,7 @@ jobs:
       - name: Deploy to AWS EC2 from S3
         run: |
           aws deploy create-deployment \
-            --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
-            --deployment-config-name CodeDeployDefault.AllAtOnce \
-            --deployment-group-name ${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }} \
-            --s3-location bucket=$S3_BUCKET_NAME,key=$GITHUB_SHA.zip,bundleType=zip
+          --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
+          --deployment-group-name ${{ env.CODE_DEPLOY_GROUP_NAME }} \
+          --file-exists-behavior OVERWRITE \
+          --s3-location bucket=${{ env.S3_BUCKET_NAME }},bundleType=zip,key=spring-project.zip \
