@@ -27,12 +27,8 @@ public class FeedService {
     private final RereplyRepository rereplyRepository;
     private final LikeRepository likeRepository;
 
-    /*
-    *
-    * */
     @Transactional(readOnly = true)
     public List<FeedResponse> getFeedResponseList(Long userId, PageRequest pageRequest){
-        System.out.println("겟피드리스트 서비스 메서드 호출");
         // 요청한 사용자가 좋아요를 누른 피드들의 주키 아이디 번호들을 먼저 불러온다.
         // 레디스가 셋팅된 후에는 레디스에 캐시된 좋아요 게시물 주키 번호 리스트를 먼저 보고, 없을 때만 DB 보게 만든다.
         Set<Long> likedFeedSet = likeRepository.findAllByUserId(userId)
@@ -76,7 +72,7 @@ public class FeedService {
      * 비동기가 아닌 동기 식으로 처리한다면 서버에 큰 부담을 줄 수 있음.
      * */
     @Transactional
-    public Feed deleteFeed(Long userId, Long feedId){
+    public void deleteFeed(Long userId, Long feedId){
         Feed feed = feedRepository.findById(feedId).orElseThrow(
             // BaseException 클래스에 커스텀 예외들을 어떻게 상수화 할 것인지 논의를 끝낸 후 수정.
             () -> new RuntimeException("feed not found")
@@ -106,7 +102,6 @@ public class FeedService {
 
         // 피드 삭제.
         feedRepository.deleteById(feedId);
-        return feed;
     }
 
 }
