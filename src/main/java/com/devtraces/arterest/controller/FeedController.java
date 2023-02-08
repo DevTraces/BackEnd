@@ -25,7 +25,8 @@ public class FeedController {
     @GetMapping("/{nickname}")
     public ApiSuccessResponse<List<FeedResponse>> getFeedList(
         @AuthenticationPrincipal Long userId,
-        @RequestParam int page, @RequestParam int pageSize
+        @RequestParam int page,
+        @RequestParam(required = false, defaultValue = "10") int pageSize
     ){
         PageRequest pageRequest = PageRequest.of(page, pageSize);
         return ApiSuccessResponse.from(feedService.getFeedResponseList(userId, pageRequest));
