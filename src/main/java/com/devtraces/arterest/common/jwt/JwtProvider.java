@@ -4,6 +4,7 @@ import static com.devtraces.arterest.common.jwt.JwtProperties.ACCESS_TOKEN_EXPIR
 import static com.devtraces.arterest.common.jwt.JwtProperties.REFRESH_TOKEN_EXPIRATION_TIME;
 
 import com.devtraces.arterest.common.jwt.dto.TokenDto;
+import com.devtraces.arterest.common.redis.service.RedisService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
@@ -19,6 +20,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -28,20 +30,26 @@ public class JwtProvider {
 	private static final String REFRESH_TOKEN_SUBJECT_PREFIX = "refresh:";
 
 	private final UserDetailsService userDetailsService;
+	private final RedisService redisService;
+	private final PasswordEncoder passwordEncoder;
 
 	private final Key secretKey;
 
 	public JwtProvider(
 		UserDetailsService userDetailsService,
+		RedisService redisService,
+		PasswordEncoder passwordEncoder,
 		@Value("${jwt.secret}") String secretKey
 	) {
 		this.userDetailsService = userDetailsService;
+		this.redisService = redisService;
+		this.passwordEncoder = passwordEncoder;
 
 		byte[] keyBytes = Decoders.BASE64.decode(secretKey);
 		this.secretKey = Keys.hmacShaKeyFor(keyBytes);
 	}
 
-	// Jwt Access Token + Refresh Token 생성
+	// Jwt Access Token + Refresh Token 생성 및 Redis에 Refresh Token 저장
 	public TokenDto generateAccessTokenAndRefreshToken(Long userId) {
 		Date now = new Date();
 
@@ -61,7 +69,8 @@ public class JwtProvider {
 			.signWith(secretKey, SignatureAlgorithm.HS256)
 			.compact();
 
-		// TODO: Refresh Token을 Redis 서버에 저장
+		String encodingRefreshToken = passwordEncoder.encode(refreshToken);
+		redisService.setEncodingRefreshTokenValue(userId, encodingRefreshToken, refreshTokenExpiresIn);
 
 		return TokenDto.builder()
 			.accessToken(accessToken)
