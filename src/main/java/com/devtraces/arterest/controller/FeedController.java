@@ -33,7 +33,7 @@ public class FeedController {
     }
 
     // JWT와 연계할 경우, userId를 가져올 수 있다. JWT와의 연계가 끝난 후 요청 url과 파라미터를 수정한다.
-    @GetMapping("/{nickname}/{feedId}")
+    @GetMapping("/{feedId}")
     public ApiSuccessResponse<FeedResponse> getOneFeed(
         @AuthenticationPrincipal Long userId, @PathVariable Long feedId
     ){
