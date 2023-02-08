@@ -16,15 +16,22 @@ import com.devtraces.arterest.domain.reply.Reply;
 import com.devtraces.arterest.domain.reply.ReplyRepository;
 import com.devtraces.arterest.domain.rereply.Rereply;
 import com.devtraces.arterest.domain.rereply.RereplyRepository;
+import com.devtraces.arterest.domain.user.User;
+import com.devtraces.arterest.dto.feed.FeedResponse;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 
 @ExtendWith(MockitoExtension.class)
 class FeedServiceTest {
@@ -42,8 +49,92 @@ class FeedServiceTest {
     private FeedService feedService;
 
     @Test
+    @DisplayName("피드 1개 읽기")
+    void successGetOneFeed(){
+        //given
+        Reply reply = Reply.builder()
+            .id(1L)
+            .content("this is reply")
+            .build();
+        List<Reply> replyList = new ArrayList<>();
+        replyList.add(reply);
+
+        User user = User.builder()
+            .id(1L)
+            .description("introduction")
+            .profileImageLink("url1")
+            .nickname("dongvin99")
+            .username("박동빈")
+            .build();
+
+        Feed feed = Feed.builder()
+            .id(1L)
+            .authorId(2L)
+            .replyList(replyList)
+            .imageLinks("url2,url3")
+            .hashtags("#h1,#h2,#h3")
+            .user(user)
+            .build();
+
+        given(feedRepository.findById(1L)).willReturn(Optional.of(feed));
+        given(likeRepository.countByFeedId(1L)).willReturn(0L);
+
+        //when
+        FeedResponse feedResponse = feedService.getOneFeed(2L, 1L);
+
+        //then
+        verify(likeRepository, times(1)).countByFeedId(1L);
+        verify(feedRepository, times(1)).findById(1L);
+        assertEquals(feedResponse.getFeedId(), 1L);
+    }
+
+    @Test
+    @DisplayName("피드 리스트 읽기")
+    void successGetFeedList(){
+        //given
+        Reply reply = Reply.builder()
+            .id(1L)
+            .content("this is reply")
+            .build();
+        List<Reply> replyList = new ArrayList<>();
+        replyList.add(reply);
+
+        User user = User.builder()
+            .id(1L)
+            .description("introduction")
+            .profileImageLink("url1")
+            .nickname("dongvin99")
+            .username("박동빈")
+            .build();
+
+        Feed feed = Feed.builder()
+            .id(1L)
+            .authorId(2L)
+            .replyList(replyList)
+            .imageLinks("url2,url3")
+            .hashtags("#h1,#h2,#h3")
+            .user(user)
+            .build();
+
+        List<Feed> feedList = new ArrayList<>();
+        feedList.add(feed);
+
+        Slice<Feed> slice = new PageImpl<>(feedList);
+
+        given(feedRepository.findAllByAuthorId(1L, PageRequest.of(0, 10))).willReturn(slice);
+        given(likeRepository.countByFeedId(1L)).willReturn(0L);
+
+        //when
+        List<FeedResponse> feedResponseList = feedService.getFeedResponseList(1L, PageRequest.of(0, 10));
+
+        //then
+        verify(feedRepository, times(1)).findAllByAuthorId(1L, PageRequest.of(0, 10));
+        assertEquals(feedResponseList.size(), 1);
+    }
+
+    @Test
     @DisplayName("피드 1개 제거")
-    void success_delete_feed(){
+    void successDeleteFeed(){
 
         // given
         Rereply rereply = Rereply.builder()
