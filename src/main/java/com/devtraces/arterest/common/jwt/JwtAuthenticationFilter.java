@@ -3,6 +3,7 @@ package com.devtraces.arterest.common.jwt;
 import static com.devtraces.arterest.common.jwt.JwtProperties.AUTHORIZATION_HEADER;
 import static com.devtraces.arterest.common.jwt.JwtProperties.TOKEN_PREFIX;
 
+import com.devtraces.arterest.common.redis.service.RedisService;
 import java.io.IOException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -19,13 +20,15 @@ import org.springframework.web.filter.GenericFilterBean;
 public class JwtAuthenticationFilter extends GenericFilterBean {
 
 	private final JwtProvider jwtProvider;
+	private final RedisService redisService;
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 		throws IOException, ServletException {
 		String token = resolveToken((HttpServletRequest) request);
 
-		if (token != null && jwtProvider.isValidateToken(token)) {
+		if (token != null && jwtProvider.isValidateToken(token)
+			&& redisService.notExistsInAccessTokenBlackListBy(token)) {
 			Authentication authentication = jwtProvider.getAuthentication(token);
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 		}

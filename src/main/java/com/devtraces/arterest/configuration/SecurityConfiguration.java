@@ -2,6 +2,7 @@ package com.devtraces.arterest.configuration;
 
 import com.devtraces.arterest.common.jwt.JwtAuthenticationFilter;
 import com.devtraces.arterest.common.jwt.JwtProvider;
+import com.devtraces.arterest.common.redis.service.RedisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfiguration {
 
 	private final JwtProvider jwtProvider;
+	private final RedisService redisService;
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
@@ -38,7 +40,7 @@ public class SecurityConfiguration {
 				.anyRequest().permitAll();
 
 		http
-			.addFilterBefore(new JwtAuthenticationFilter(jwtProvider),
+			.addFilterBefore(new JwtAuthenticationFilter(jwtProvider, redisService),
 				UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
