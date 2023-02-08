@@ -9,6 +9,7 @@ import lombok.Setter;
 import org.springframework.stereotype.Service;
 
 @Getter
+@AllArgsConstructor
 public class ReplyRequest {
-
+    private String content;
 }

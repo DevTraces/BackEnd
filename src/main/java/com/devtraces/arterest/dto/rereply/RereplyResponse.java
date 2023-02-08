@@ -1,5 +1,6 @@
 package com.devtraces.arterest.dto.rereply;
 
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,5 +14,16 @@ import lombok.Setter;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class RereplyResponse {
+
+    private Long rereplyId;
+    private Long feedId;
+    private Long replyId;
+
+    private Long authorId;
+    private String authorProfileImageUrl;
+    private String content;
+
+    private LocalDateTime createdAt;
+    private LocalDateTime modifiedAt;
 
 }
