@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public class BaseException extends RuntimeException {
 
+	public static final BaseException WRONG_EMAIL_OR_PASSWORD = new BaseException(ErrorCode.WRONG_EMAIL_OR_PASSWORD);
 	public static final BaseException USER_NOT_FOUND = new BaseException(ErrorCode.USER_NOT_FOUND);
 
 	private final ErrorCode errorCode;
