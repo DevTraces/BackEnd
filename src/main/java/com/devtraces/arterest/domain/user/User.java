@@ -60,7 +60,7 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private UserSignUpType signupType;
 
-    private String profileImageLink;
+    private String profileImageUrl;
 
     @Enumerated(EnumType.STRING)
     private UserStatusType userStatus;
