@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class JwtProvider {
 
-	private static final String REFRESH_TOKEN_SUBJECT_PREFIX = "refresh:";
+	protected static final String REFRESH_TOKEN_SUBJECT_PREFIX = "refresh:";
 
 	private final UserDetailsService userDetailsService;
 	private final RedisService redisService;
@@ -48,23 +48,23 @@ public class JwtProvider {
 	public TokenDto generateAccessTokenAndRefreshToken(Long userId) {
 		Date now = new Date();
 
-		Date accessTokenExpiresIn = new Date(now.getTime() + ACCESS_TOKEN_EXPIRATION_TIME);
+		Date accessTokenExpiredIn = new Date(now.getTime() + ACCESS_TOKEN_EXPIRATION_TIME);
 		String accessToken = Jwts.builder()
 			.setSubject(String.valueOf(userId))
 			.setIssuedAt(now)
-			.setExpiration(accessTokenExpiresIn)
+			.setExpiration(accessTokenExpiredIn)
 			.signWith(secretKey, SignatureAlgorithm.HS256)
 			.compact();
 
-		Date refreshTokenExpiresIn = new Date(now.getTime() + REFRESH_TOKEN_EXPIRATION_TIME);
+		Date refreshTokenExpiredIn = new Date(now.getTime() + REFRESH_TOKEN_EXPIRATION_TIME);
 		String refreshToken = Jwts.builder()
 			.setSubject(REFRESH_TOKEN_SUBJECT_PREFIX + userId)	// refresh token으로 인증인가할 수 없도록 PREFIX 설정
 			.setIssuedAt(now)
-			.setExpiration(refreshTokenExpiresIn)
+			.setExpiration(refreshTokenExpiredIn)
 			.signWith(secretKey, SignatureAlgorithm.HS256)
 			.compact();
 
-		redisService.setRefreshTokenValue(userId, refreshToken, refreshTokenExpiresIn);
+		redisService.setRefreshTokenValue(userId, refreshToken, refreshTokenExpiredIn);
 
 		return TokenDto.builder()
 			.accessToken(accessToken)
