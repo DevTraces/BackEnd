@@ -33,27 +33,28 @@ public class ReplyController {
 
     @GetMapping("/{feedId}/replies")
     public ApiSuccessResponse<List<ReplyResponse>> getReplyList(
-        @AuthenticationPrincipal Long userId,
+        @PathVariable Long feedId,
         @RequestParam Integer page,
         @RequestParam(required = false, defaultValue = "10") Integer pageSize
     ){
-        return null;
+        return ApiSuccessResponse.from(replyService.getReplyList(feedId, page, pageSize));
     }
 
     @PutMapping("/{feedId}/replies/{replyId}")
     public ApiSuccessResponse<ReplyResponse> updateReply(
         @AuthenticationPrincipal Long userId,
+        @RequestParam Long replyId,
         @RequestBody ReplyRequest replyRequest
     ){
-        return null;
+        return ApiSuccessResponse.from(replyService.updateReply(userId, replyId, replyRequest));
     }
 
     @DeleteMapping("/{feedId}/replies/{replyId}")
     public ApiSuccessResponse<?> deleteReply(
         @AuthenticationPrincipal Long userId,
-        @RequestParam Long feedId,
         @RequestParam Long replyId
     ){
+        replyService.deleteReply(userId, replyId);
         return ApiSuccessResponse.NO_DATA_RESPONSE;
     }
 

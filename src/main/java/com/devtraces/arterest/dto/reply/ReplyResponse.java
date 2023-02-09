@@ -35,6 +35,7 @@ public class ReplyResponse {
             .feedId(reply.getFeed().getId())
             .authorNickname(reply.getUser().getNickname())
             .content(reply.getContent())
+            .authorProfileImageUrl(reply.getUser().getProfileImageLink())
             .numberOfRereply(reply.getRereplyList().size())
             .createdAt(reply.getCreatedAt())
             .modifiedAt(reply.getModifiedAt())

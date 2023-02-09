@@ -40,6 +40,9 @@ public class Reply extends BaseEntity {
     @Column(name = "reply_id")
     private Long id;
 
+    // 특정 게시물의 댓글의 리스트를 가져오기 위한 필드.
+    private Long feedId;
+
     private String content;
 
     // 1:N mapping with User
@@ -59,5 +62,8 @@ public class Reply extends BaseEntity {
     @ToString.Exclude
     private List<Rereply> rereplyList = new ArrayList<>();
 
+    public void updateContent(String content){
+        this.content = content;
+    }
 }
 

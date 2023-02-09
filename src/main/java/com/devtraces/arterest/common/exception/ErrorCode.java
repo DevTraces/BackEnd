@@ -12,7 +12,8 @@ public enum ErrorCode {
 	REPLY_NOT_FOUND(HttpStatus.BAD_REQUEST, "REPLY_NOT_FOUND", "존재하지 않는 댓글입니다."),
 	REREPLY_NOT_FOUND(HttpStatus.BAD_REQUEST, "REREPLY_NOT_FOUND", "존재하지 않는 대댓글입니다."),
 	USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "USER_NOT_FOUND", "존재하지 않는 유저입니다."),
-	CONTENT_LIMIT_EXCEED(HttpStatus.BAD_REQUEST,"CONTENT_LIMIT_EXCEED","1000자를 초과하여 입력할 수 없습니다.");
+	CONTENT_LIMIT_EXCEED(HttpStatus.BAD_REQUEST,"CONTENT_LIMIT_EXCEED","1000자를 초과하여 입력할 수 없습니다."),
+	USER_INFO_NOT_MATCH(HttpStatus.BAD_REQUEST,"USER_INFO_NOT_MATCH","작성자만 내용을 수정할 수 있습니다.");
 
 	private final HttpStatus httpStatus;
 	private final String code;
