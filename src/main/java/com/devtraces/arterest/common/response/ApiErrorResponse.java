@@ -21,4 +21,8 @@ public class ApiErrorResponse {
 			.message(errorCode.getMessage())
 			.build();
 	}
+
+	public void changeMessage(String message) {
+		this.message = message;
+	}
 }
