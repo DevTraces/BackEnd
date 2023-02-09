@@ -3,7 +3,7 @@ package com.devtraces.arterest.common.jwt.controller;
 import static com.devtraces.arterest.common.jwt.JwtProperties.AUTHORIZATION_HEADER;
 import static com.devtraces.arterest.common.jwt.JwtProperties.TOKEN_PREFIX;
 
-import com.devtraces.arterest.common.jwt.dto.ReIssueRequest;
+import com.devtraces.arterest.common.jwt.dto.ReissueRequest;
 import com.devtraces.arterest.common.jwt.dto.TokenDto;
 import com.devtraces.arterest.common.jwt.service.JwtService;
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
@@ -24,7 +24,7 @@ public class JwtController {
 	private final JwtService jwtService;
 
 	@PostMapping("/reissue")
-	public ResponseEntity<ApiSuccessResponse<?>> reissue(@RequestBody @Valid ReIssueRequest request) {
+	public ResponseEntity<ApiSuccessResponse<?>> reissue(@RequestBody @Valid ReissueRequest request) {
 		TokenDto tokenDto = jwtService.reissue(
 			request.getNickname(),
 			request.getAccessToken(),

@@ -88,14 +88,4 @@ class AuthServiceTest {
 
 		assertEquals(BaseException.WRONG_EMAIL_OR_PASSWORD, exception);
 	}
-
-	@Test
-	void testSignOut() {
-		willDoNothing()
-			.given(redisService).deleteRefreshTokenBy(anyLong());
-		given(jwtProvider.getExpiredDate(anyString()))
-			.willReturn(new Date(new Date().getTime() + (60 * 60 * 1000)));
-		willDoNothing()
-			.given(redisService).setAccessTokenBlackListValue(anyString(), anyLong(), any());
-	}
 }
