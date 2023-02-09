@@ -38,9 +38,6 @@ public class Bookmark {
 	@Column(name = "bookmark_id")
 	private Long id;
 
-	private Long feedId;
-	private Long userId;
-
 	@CreatedDate
 	private LocalDateTime createdAt;
 
