@@ -75,7 +75,7 @@ public class JwtProvider {
 	// JWT 토큰에서 인증 정보 조회
 	public Authentication getAuthentication(String accessToken) {
 		UserDetails userDetails = userDetailsService.loadUserByUsername(this.getUserId(accessToken));
-		return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+		return new UsernamePasswordAuthenticationToken(Long.parseLong(this.getUserId(accessToken)), "", userDetails.getAuthorities());
 	}
 
 	// JWT 토큰에서 회원 구별 정보 추출
