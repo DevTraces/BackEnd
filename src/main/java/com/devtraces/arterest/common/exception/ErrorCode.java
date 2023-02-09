@@ -7,7 +7,12 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum ErrorCode {
 
-	INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR", "예상치 못한 서버 에러가 발생했습니다.");
+	INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR", "예상치 못한 서버 에러가 발생했습니다."),
+	FEED_NOT_FOUND(HttpStatus.BAD_REQUEST, "FEED_NOT_FOUND", "존재하지 않는 게시물입니다."),
+	REPLY_NOT_FOUND(HttpStatus.BAD_REQUEST, "REPLY_NOT_FOUND", "존재하지 않는 댓글입니다."),
+	REREPLY_NOT_FOUND(HttpStatus.BAD_REQUEST, "REREPLY_NOT_FOUND", "존재하지 않는 대댓글입니다."),
+	USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "USER_NOT_FOUND", "존재하지 않는 유저입니다."),
+	CONTENT_LIMIT_EXCEED(HttpStatus.BAD_REQUEST,"CONTENT_LIMIT_EXCEED","1000자를 초과하여 입력할 수 없습니다.");
 
 	private final HttpStatus httpStatus;
 	private final String code;

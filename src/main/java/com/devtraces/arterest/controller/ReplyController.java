@@ -26,8 +26,9 @@ public class ReplyController {
 
     @PostMapping("/{feedId}")
     public ApiSuccessResponse<ReplyResponse> createReply(
+        @AuthenticationPrincipal Long userId,
         @PathVariable Long feedId, @RequestBody ReplyRequest replyRequest){
-        return null;
+        return ApiSuccessResponse.from(replyService.createReply(userId, feedId, replyRequest));
     }
 
     @GetMapping("/{feedId}/replies")

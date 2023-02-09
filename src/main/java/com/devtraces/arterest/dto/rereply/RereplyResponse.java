@@ -19,7 +19,7 @@ public class RereplyResponse {
     private Long feedId;
     private Long replyId;
 
-    private Long authorId;
+    private String authorNickname;
     private String authorProfileImageUrl;
     private String content;
 
