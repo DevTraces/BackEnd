@@ -1,4 +1,4 @@
-package com.devtraces.arterest.service;
+package com.devtraces.arterest.service.bookmark;
 
 import static com.devtraces.arterest.common.exception.ErrorCode.FEED_NOT_FOUND;
 import static com.devtraces.arterest.common.exception.ErrorCode.USER_NOT_FOUND;
@@ -10,7 +10,7 @@ import com.devtraces.arterest.domain.feed.Feed;
 import com.devtraces.arterest.domain.feed.FeedRepository;
 import com.devtraces.arterest.domain.user.User;
 import com.devtraces.arterest.domain.user.UserRepository;
-import com.devtraces.arterest.dto.GetBookmarkListResponse;
+import com.devtraces.arterest.controller.bookmark.dto.GetBookmarkListResponse;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
