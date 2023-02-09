@@ -39,7 +39,7 @@ public class Feed extends BaseEntity {
     private Long id;
 
     private String content;
-    private String imageLinks;
+    private String imageUrls;
     private String hashtags;
 
     // 1:N mapping with User
