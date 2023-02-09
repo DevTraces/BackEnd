@@ -98,7 +98,7 @@ class BookmarkServiceTest {
 	}
 
 	@Test
-	void testNotUserFoundInCreateBookmark() throws Exception{
+	void testUserNotFoundInCreateBookmark() throws Exception{
 		//given
 
 		//when
@@ -110,7 +110,7 @@ class BookmarkServiceTest {
 	}
 
 	@Test
-	void testNotFeedFoundInCreateBookmark() throws Exception{
+	void testFeedNotFoundInCreateBookmark() throws Exception{
 		//given
 		given(userRepository.findById(anyLong()))
 			.willReturn(Optional.ofNullable(User.builder()
