@@ -2,6 +2,8 @@ package com.devtraces.arterest.service;
 
 import com.devtraces.arterest.domain.bookmark.Bookmark;
 import com.devtraces.arterest.domain.bookmark.BookmarkRepository;
+import com.devtraces.arterest.domain.feed.Feed;
+import com.devtraces.arterest.domain.user.User;
 import com.devtraces.arterest.dto.GetBookmarkListResponse;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,8 +34,8 @@ public class BookmarkService {
 
 		bookmarkRepository.save(
 			Bookmark.builder()
-				.feedId(feedId)
-				.userId(userId)
+				.feed(Feed.builder().id(feedId).build())
+				.user(User.builder().id(userId).build())
 				.build()
 		);
 	}

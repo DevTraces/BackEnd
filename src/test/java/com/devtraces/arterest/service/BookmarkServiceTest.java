@@ -69,8 +69,8 @@ class BookmarkServiceTest {
 
 		// then
 		verify(bookmarkRepository, times(1)).save(captor.capture());
-		assertEquals(1L, captor.getValue().getUserId());
-		assertEquals(2L, captor.getValue().getFeedId());
+		assertEquals(1L, captor.getValue().getUser().getId());
+		assertEquals(2L, captor.getValue().getFeed().getId());
 	}
 
 	@Test
