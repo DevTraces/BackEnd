@@ -1,5 +1,6 @@
 package com.devtraces.arterest.service;
 
+import com.devtraces.arterest.common.CommonUtils;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.domain.reply.Reply;
 import com.devtraces.arterest.domain.reply.ReplyRepository;
@@ -10,6 +11,7 @@ import com.devtraces.arterest.domain.user.UserRepository;
 import com.devtraces.arterest.dto.rereply.RereplyRequest;
 import com.devtraces.arterest.dto.rereply.RereplyResponse;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -52,5 +54,33 @@ public class RereplyService {
             .getContent().stream().map(
                 rereply -> RereplyResponse.from(rereply, feedId)
             ).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public RereplyResponse updateRereply(
+        Long userId, Long feedId, Long rereplyId, RereplyRequest rereplyRequest
+    ) {
+        if(rereplyRequest.getContent().length() > CommonUtils.CONTENT_LENGTH_LIMIT){
+            throw BaseException.CONTENT_LIMIT_EXCEED;
+        }
+        Rereply rereply = rereplyRepository.findById(rereplyId).orElseThrow(
+            () -> BaseException.REREPLY_NOT_FOUND
+        );
+        if(!Objects.equals(rereply.getUser().getId(), userId)){
+            throw BaseException.USER_INFO_NOT_MATCH;
+        }
+        rereply.updateContent(rereplyRequest.getContent());
+        return RereplyResponse.from(rereplyRepository.save(rereply), feedId);
+    }
+
+    @Transactional
+    public void deleteRereply(Long userId, Long rereplyId) {
+        Rereply rereply = rereplyRepository.findById(rereplyId).orElseThrow(
+            () -> BaseException.REREPLY_NOT_FOUND
+        );
+        if(!Objects.equals(rereply.getUser().getId(), userId)){
+            throw BaseException.USER_INFO_NOT_MATCH;
+        }
+        rereplyRepository.deleteById(rereplyId);
     }
 }

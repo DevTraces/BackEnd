@@ -46,13 +46,16 @@ public class RereplyController {
         );
     }
 
-    @PutMapping("/{feedId}/replies/{replyId}/rereplies")
+    @PutMapping("/{feedId}/replies/{replyId}/rereplies/{rereplyId}")
     public ApiSuccessResponse<RereplyResponse> updateRereply(
         @AuthenticationPrincipal Long userId,
-        @PathVariable Long feedId, @PathVariable Long replyId,
+        @PathVariable Long feedId,
+        @PathVariable Long rereplyId,
         @RequestBody RereplyRequest rereplyRequest
     ){
-        return null;
+        return ApiSuccessResponse.from(
+            rereplyService.updateRereply(userId, feedId, rereplyId, rereplyRequest)
+        );
     }
 
     @DeleteMapping("/{feedId}/replies/{replyId}/rereplies/{rereplyId}")
@@ -60,6 +63,7 @@ public class RereplyController {
         @AuthenticationPrincipal Long userId,
         @PathVariable Long rereplyId
     ){
+        rereplyService.deleteRereply(userId, rereplyId);
         return ApiSuccessResponse.NO_DATA_RESPONSE;
     }
 

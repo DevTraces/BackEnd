@@ -52,4 +52,7 @@ public class Rereply extends BaseEntity {
     @ToString.Exclude
     private Reply reply;
 
+    public void updateContent(String content){
+        this.content = content;
+    }
 }
