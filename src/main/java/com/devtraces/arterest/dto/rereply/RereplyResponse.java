@@ -1,5 +1,6 @@
 package com.devtraces.arterest.dto.rereply;
 
+import com.devtraces.arterest.domain.rereply.Rereply;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -25,5 +26,18 @@ public class RereplyResponse {
 
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
+
+    public static RereplyResponse from(Rereply rereply, Long feedId){
+        return RereplyResponse.builder()
+            .rereplyId(rereply.getId())
+            .feedId(feedId)
+            .replyId(rereply.getReply().getId())
+            .authorNickname(rereply.getUser().getNickname())
+            .authorProfileImageUrl(rereply.getUser().getProfileImageLink())
+            .content(rereply.getContent())
+            .createdAt(rereply.getCreatedAt())
+            .modifiedAt(rereply.getModifiedAt())
+            .build();
+    }
 
 }

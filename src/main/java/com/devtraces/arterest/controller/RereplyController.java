@@ -30,17 +30,20 @@ public class RereplyController {
         @PathVariable Long feedId, @PathVariable Long replyId,
         @RequestBody RereplyRequest rereplyRequest
     ){
-        return null;
+        return ApiSuccessResponse.from(
+            rereplyService.createRereply(userId, feedId, replyId, rereplyRequest)
+        );
     }
 
     @GetMapping("/{feedId}/replies/{replyId}/rereplies")
     public ApiSuccessResponse<List<RereplyResponse>> getRereplyList(
-        @AuthenticationPrincipal Long userId,
         @PathVariable Long feedId, @PathVariable Long replyId,
         @RequestParam Integer page,
         @RequestParam(required = false, defaultValue = "10") Integer pageSize
     ){
-        return null;
+        return ApiSuccessResponse.from(
+            rereplyService.getRereplyList(feedId, replyId, page, pageSize)
+        );
     }
 
     @PutMapping("/{feedId}/replies/{replyId}/rereplies")
