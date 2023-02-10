@@ -8,6 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface FeedRepository extends JpaRepository<Feed, Long> {
 
     // 이걸로 찾는게 되나??
-    Slice<Feed> findAllByAuthorId(Long authorId, PageRequest pageRequest);
+    Slice<Feed> findAllByUserId(Long authorId, PageRequest pageRequest);
 
 }

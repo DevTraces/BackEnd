@@ -41,7 +41,6 @@ public class FeedResponse {
     public static FeedResponse from(Feed feed, Set<Long> likedFeedSet, Long numberOfLike){
         return FeedResponse.builder()
             .feedId(feed.getId())
-            .authorId(feed.getAuthorId())
             .authorProfileImageUrl(feed.getUser().getProfileImageLink())
             .authorNickname(feed.getUser().getNickname())
             .content(feed.getContent())
@@ -50,7 +49,7 @@ public class FeedResponse {
             .hashtags(Arrays.stream(feed.getHashtags().split(","))
                 .collect(Collectors.toList()))
             .numberOfLike(numberOfLike)
-            .numberOfReply(feed.getReplyList().size())
+            .numberOfReply(feed.getReplyList() == null ? 0 : feed.getReplyList().size())
             .isLiked(likedFeedSet.contains(feed.getId()))
             .createdAt(feed.getCreatedAt())
             .modifiedAt(feed.getModifiedAt())

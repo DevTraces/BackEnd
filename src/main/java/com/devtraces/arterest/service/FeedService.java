@@ -36,7 +36,7 @@ public class FeedService {
 
         // 피드 별 좋아요 개수는 레디스를 먼저 보게 만들고, 그게 불가능 할때만 Like 테이블에서 찾도록 한다.
         // 현재 레디스 셋팅이 완료되지 않았으므로 DB에서 좋아요 개수를 찾아내게 만든다.
-        return feedRepository.findAllByAuthorId(userId, pageRequest).stream().map(
+        return feedRepository.findAllByUserId(userId, pageRequest).stream().map(
             feed -> FeedResponse.from(
                 feed, likedFeedSet, likeRepository.countByFeedId(feed.getId())
         )).collect(Collectors.toList());
