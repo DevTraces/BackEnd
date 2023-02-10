@@ -6,12 +6,15 @@ import static com.devtraces.arterest.common.jwt.JwtProperties.TOKEN_PREFIX;
 import com.devtraces.arterest.common.jwt.dto.TokenDto;
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
 import com.devtraces.arterest.controller.user.dto.SignInRequest;
+import com.devtraces.arterest.controller.user.dto.UserRegistrationRequest;
+import com.devtraces.arterest.controller.user.dto.UserRegistrationResponse;
 import com.devtraces.arterest.service.user.AuthService;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -22,8 +25,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-
 	private final AuthService authService;
+
+	@PostMapping("sign-up")
+	public ApiSuccessResponse<UserRegistrationResponse> signUp(@ModelAttribute @Valid UserRegistrationRequest request) {
+		UserRegistrationResponse response = authService.register(request);
+		return ApiSuccessResponse.from(response);
+	}
 
 	@PostMapping("/sign-in")
 	public ResponseEntity<ApiSuccessResponse<?>> signIn(@RequestBody @Valid SignInRequest request) {

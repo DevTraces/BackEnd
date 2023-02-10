@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public class BaseException extends RuntimeException {
 
+	public static final BaseException ALREADY_EXIST_EMAIL = new BaseException(ErrorCode.ALREADY_EXIST_EMAIL);
+	public static final BaseException ALREADY_EXIST_NICKNAME = new BaseException(ErrorCode.ALREADY_EXIST_NICKNAME);
 	public static final BaseException WRONG_EMAIL_OR_PASSWORD = new BaseException(ErrorCode.WRONG_EMAIL_OR_PASSWORD);
 	public static final BaseException NOT_EXPIRED_ACCESS_TOKEN = new BaseException(ErrorCode.NOT_EXPIRED_ACCESS_TOKEN);
   public static final BaseException INVALID_IMAGE_EXTENSION = new BaseException(ErrorCode.INVALID_IMAGE_EXTENSION);
