@@ -82,7 +82,7 @@ public class ReplyService {
             throw BaseException.USER_INFO_NOT_MATCH;
         }
         // 댓글에 달려 있는 대댓글을 삭제한다.
-        if(reply.getRereplyList().size() > 0){
+        if(reply.getRereplyList() != null && reply.getRereplyList().size() > 0){
             rereplyRepository.deleteAllByIdIn(
                 reply.getRereplyList().stream().map(Rereply::getId).collect(Collectors.toList())
             );
