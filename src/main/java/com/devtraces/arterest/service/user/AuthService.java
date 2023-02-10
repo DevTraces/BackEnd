@@ -36,7 +36,7 @@ public class AuthService {
 		redisService.setAuthKeyValue(email, authKey);
 	}
 
-	private String generateAuthKey() {
+	protected String generateAuthKey() {
 		Random random = new Random();
 		StringBuilder resultNumber = new StringBuilder();
 

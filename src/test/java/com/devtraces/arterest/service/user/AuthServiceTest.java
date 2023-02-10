@@ -1,19 +1,18 @@
 package com.devtraces.arterest.service.user;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 
+import com.devtraces.arterest.common.component.MailUtil;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.jwt.JwtProvider;
 import com.devtraces.arterest.common.jwt.dto.TokenDto;
 import com.devtraces.arterest.common.redis.service.RedisService;
 import com.devtraces.arterest.domain.user.User;
 import com.devtraces.arterest.domain.user.UserRepository;
-import java.util.Date;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,12 +29,49 @@ class AuthServiceTest {
 	@Mock
 	private JwtProvider jwtProvider;
 	@Mock
+	private MailUtil mailUtil;
+	@Mock
 	private RedisService redisService;
 	@Mock
 	private UserRepository userRepository;
 
 	@InjectMocks
 	private AuthService authService;
+
+	@Test
+	void testSendMailWithAuthKey() {
+		given(userRepository.existsByEmail(anyString()))
+			.willReturn(false);
+		willDoNothing()
+			.given(mailUtil).sendMail(anyString(), anyString(), anyString());
+		willDoNothing()
+			.given(redisService).setAuthKeyValue(anyString(), anyString());
+
+		authService.sendMailWithAuthKey("example@gmail.com");
+	}
+
+	// 이미 가입한 이메일로 인증 코드를 요청할 경우
+	@Test
+	void testSendMailWithAuthKeyByRegisteredUser() {
+		given(userRepository.existsByEmail(anyString()))
+			.willReturn(true);
+
+		BaseException exception = assertThrows(BaseException.class,
+			() -> authService.sendMailWithAuthKey("example@gmail.com"));
+
+		assertEquals(BaseException.ALREADY_EXIST_EMAIL, exception);
+	}
+
+	// 인증 코드 랜덤으로 6글자 잘 생성되는지 검사
+	@Test
+	void testGenerateAuthKey() {
+		String authKey1 = authService.generateAuthKey();
+		String authKey2 = authService.generateAuthKey();
+
+		assertNotEquals(authKey1, authKey2);
+		assertEquals(6, authKey1.length());
+		assertEquals(6, authKey2.length());
+	}
 
 	@Test
 	void testSignInAndGenerateJwtToken() {
