@@ -11,6 +11,11 @@ env:
   CODE_DEPLOY_APPLICATION_NAME: arterest-code-deploy
   CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: arterest
 
+permissions:
+  pull-requests: write
+  issues: write
+  repository-projects: write
+
 jobs:
   deploy:
     name: Deploy
