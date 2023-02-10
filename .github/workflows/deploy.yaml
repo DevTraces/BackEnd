@@ -24,7 +24,7 @@ jobs:
     environment: production
 
     steps:
-      # (1) 기본 체크아웃
+      # 1. 기본 체크아웃
       - name: Checkout
         uses: actions/checkout@v3
 
