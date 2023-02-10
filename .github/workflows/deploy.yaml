@@ -52,6 +52,10 @@ jobs:
           JWT_YML: ${{ secrets.JWT_YML }}
           SECRET_YML: ${{ secrets.SECRET_YML }}
 
+      - name: Change application level (local -> prod)
+        run: |
+          sed -i 's/spring.config.active.on-profile=local/spring.config.active.on-profile=prod/g' src/main/resources/application.yml
+
       # (3) Gradle build (Test 제외)
       - name: Build with Gradle
         uses: gradle/gradle-build-action@0d13054264b0bb894ded474f08ebb30921341cee
