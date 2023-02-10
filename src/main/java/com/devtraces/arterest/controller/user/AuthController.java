@@ -5,6 +5,9 @@ import static com.devtraces.arterest.common.jwt.JwtProperties.TOKEN_PREFIX;
 
 import com.devtraces.arterest.common.jwt.dto.TokenDto;
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
+import com.devtraces.arterest.controller.user.dto.MailAuthKeyCheckRequest;
+import com.devtraces.arterest.controller.user.dto.MailAuthKeyCheckResponse;
+import com.devtraces.arterest.controller.user.dto.MailAuthKeyRequest;
 import com.devtraces.arterest.controller.user.dto.SignInRequest;
 import com.devtraces.arterest.controller.user.dto.UserRegistrationRequest;
 import com.devtraces.arterest.controller.user.dto.UserRegistrationResponse;
@@ -31,6 +34,18 @@ public class AuthController {
 	public ApiSuccessResponse<UserRegistrationResponse> signUp(@ModelAttribute @Valid UserRegistrationRequest request) {
 		UserRegistrationResponse response = authService.register(request);
 		return ApiSuccessResponse.from(response);
+	}
+
+	@PostMapping("/email/auth-key")
+	public ApiSuccessResponse<?> sendMailWithAuthKey(@RequestBody @Valid MailAuthKeyRequest request) {
+		authService.sendMailWithAuthKey(request.getEmail());
+		return ApiSuccessResponse.NO_DATA_RESPONSE;
+	}
+
+	@PostMapping("/email/auth-key/check")
+	public ApiSuccessResponse<MailAuthKeyCheckResponse> checkAuthKey(@RequestBody @Valid MailAuthKeyCheckRequest request) {
+		boolean isCorrect = authService.checkAuthKey(request.getEmail(), request.getAuthKey());
+		return ApiSuccessResponse.from(new MailAuthKeyCheckResponse(isCorrect));
 	}
 
 	@PostMapping("/sign-in")
