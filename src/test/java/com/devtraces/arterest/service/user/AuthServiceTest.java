@@ -74,6 +74,46 @@ class AuthServiceTest {
 	}
 
 	@Test
+	void checkAuthKeyWhenCorrect() {
+		given(userRepository.existsByEmail(anyString()))
+			.willReturn(false);
+		given(redisService.getAuthKeyValue(anyString()))
+			.willReturn("010101");
+		willDoNothing()
+			.given(redisService).deleteAuthKeyValue(anyString());
+		willDoNothing()
+			.given(redisService).setAuthCompletedValue(anyString());
+
+		boolean isCorrect = authService.checkAuthKey("example@gmail.com", "010101");
+
+		assertTrue(isCorrect);
+	}
+
+	// Redis에 정보가 없거나 그 값과 다른 경우
+	@Test
+	void checkAuthKeyWhenNotCorrect() {
+		given(userRepository.existsByEmail(anyString()))
+			.willReturn(false);
+		given(redisService.getAuthKeyValue(anyString()))
+			.willReturn("111111");
+
+		boolean isCorrect = authService.checkAuthKey("example@gmail.com", "010101");
+
+		assertFalse(isCorrect);
+	}
+
+	@Test
+	void checkAuthKeyByRegisteredUser() {
+		given(userRepository.existsByEmail(anyString()))
+			.willReturn(true);
+
+		BaseException exception = assertThrows(BaseException.class,
+			() -> authService.sendMailWithAuthKey("example@gmail.com"));
+
+		assertEquals(BaseException.ALREADY_EXIST_EMAIL, exception);
+	}
+
+	@Test
 	void testSignInAndGenerateJwtToken() {
 		User mockUser = User.builder()
 			.id(1L)
