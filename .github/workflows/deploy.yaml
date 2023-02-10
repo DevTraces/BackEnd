@@ -39,13 +39,13 @@ jobs:
       - name: Create spring properties
         run: |
           touch src/main/resources/application-prod.properties
-          echo "$PROD_YML" > application-prod.properties.b64
+          echo "PROD_PROPERTIES" > application-prod.properties.b64
           base64 -d -i application-prod.properties.b64 > src/main/resources/application-prod.properties
           touch src/main/resources/application-jwt.properties
-          echo "$JWT_YML" > application-jwt.properties.b64
+          echo "JWT_PROPERTIES" > application-jwt.properties.b64
           base64 -d -i application-jwt.properties.b64 > src/main/resources/application-jwt.properties
           touch src/main/resources/application-secret.properties
-          echo "$SECRET_YML" > application-secret.properties.b64
+          echo "SECRET_PROPERTIES" > application-secret.properties.b64
           base64 -d -i application-secret.properties.b64 > src/main/resources/application-secret.properties
         env:
           PROD_YML: ${{ secrets.PROD_PROPERTIES }}
