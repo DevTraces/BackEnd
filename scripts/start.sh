@@ -1,5 +1,7 @@
-PROJECT_ROOT="/home/ubuntu/app/deploy"
-JAR_FILE="$PROJECT_ROOT/spring-project.jar"
+#!/usr/bin/env bash
+
+PROJECT_ROOT="/home/ubuntu/app"
+JAR_FILE="$PROJECT_ROOT/spring-webapp.jar"
 
 APP_LOG="$PROJECT_ROOT/application.log"
 ERROR_LOG="$PROJECT_ROOT/error.log"
