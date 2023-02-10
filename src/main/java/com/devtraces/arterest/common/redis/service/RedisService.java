@@ -58,4 +58,14 @@ public class RedisService {
 		ValueOperations<String, String> values = redisTemplate.opsForValue();
 		return values.get(ACCESS_TOKEN_BLACK_LIST_PREFIX + accessToken) == null;
 	}
+
+	public void setTrieValue(String key, String data) {
+		ValueOperations<String, String> values = redisTemplate.opsForValue();
+		values.set(key, data);
+	}
+
+	public String getTrieValue(String key) {
+		ValueOperations<String, String> values = redisTemplate.opsForValue();
+		return values.get(key);
+	}
 }
