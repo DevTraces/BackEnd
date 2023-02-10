@@ -1,11 +1,7 @@
 package com.devtraces.arterest.service.search;
 
-import static com.devtraces.arterest.common.exception.ErrorCode.INTERNAL_SERVER_ERROR;
-
 import com.devtraces.arterest.common.exception.BaseException;
-import com.devtraces.arterest.common.exception.ErrorCode;
 import com.devtraces.arterest.common.redis.service.RedisService;
-import com.devtraces.arterest.domain.feed.Feed;
 import com.devtraces.arterest.domain.feed.FeedRepository;
 import com.devtraces.arterest.domain.feed.FeedVo;
 import java.io.ByteArrayInputStream;
@@ -66,7 +62,7 @@ public class SearchService {
 			}
 		} catch (IOException e) {
 			log.error(e.getMessage());
-			throw new BaseException(INTERNAL_SERVER_ERROR);
+			throw BaseException.INTERNAL_SERVER_ERROR;
 		}
 
 		String encodingTrie = Base64.getEncoder().encodeToString(serializedTrie);
@@ -88,14 +84,14 @@ public class SearchService {
 				trie = (Trie) objectTrie;
 			} catch (IOException e) {
 				log.error(e.getMessage());
-				throw new BaseException(INTERNAL_SERVER_ERROR);
+				throw BaseException.INTERNAL_SERVER_ERROR;
 			} catch (ClassNotFoundException e) {
 				log.error(e.getMessage());
-				throw new BaseException(INTERNAL_SERVER_ERROR);
+				throw BaseException.INTERNAL_SERVER_ERROR;
 			}
 		} catch (IOException e) {
 			log.error(e.getMessage());
-			throw new BaseException(INTERNAL_SERVER_ERROR);
+			throw BaseException.INTERNAL_SERVER_ERROR;
 		}
 
 		return (List<String>) trie.prefixMap(keyword).keySet()
