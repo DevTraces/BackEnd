@@ -48,9 +48,9 @@ jobs:
           echo "SECRET_PROPERTIES" > application-secret.properties.b64
           base64 -d -i application-secret.properties.b64 > src/main/resources/application-secret.properties
         env:
-          PROD_YML: ${{ secrets.PROD_PROPERTIES }}
-          JWT_YML: ${{ secrets.JWT_PROPERTIES }}
-          SECRET_YML: ${{ secrets.SECRET_PROPERTIES }}
+          PROD_PROPERTIES: ${{ secrets.PROD_PROPERTIES }}
+          JWT_PROPERTIES: ${{ secrets.JWT_PROPERTIES }}
+          SECRET_PROPERTIES: ${{ secrets.SECRET_PROPERTIES }}
 
       # 애플리케이션 설정을 local 에서 prod 상태로 변경
       - name: Change application level in properties (local -> prod)
