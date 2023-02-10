@@ -1,5 +1,6 @@
 plugins {
 	id 'java'
+	id 'jacoco'
 	id 'org.springframework.boot' version '2.7.8'
 	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
 }
@@ -26,7 +27,11 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 	implementation 'org.springframework.data:spring-data-envers'
-	compileOnly 'org.projectlombok:lombok'
+	implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+	implementation 'org.json:json:20220924'
+    implementation 'org.jacoco:org.jacoco.core:0.8.8'
+    compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -35,4 +40,8 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+jacoco {
+	toolVersion = "0.8.8"
 }
