@@ -24,7 +24,7 @@ jobs:
     environment: production
 
     steps:
-      # 1. 기본 체크아웃
+      # (1) 기본 체크아웃
       - name: Checkout
         uses: actions/checkout@v3
 
@@ -35,7 +35,7 @@ jobs:
           distribution: 'temurin'
           java-version: '8'
 
-      # Git Secret을 이용한 application-xxx.yml 생성
+      # Git Secret 을 이용한 application-xxx.yml 생성
       - name: Create spring yml
         run: |
           touch src/main/resources/application-prod.yml
