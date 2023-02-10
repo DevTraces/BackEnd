@@ -8,7 +8,6 @@ import com.devtraces.arterest.common.jwt.dto.TokenDto;
 import com.devtraces.arterest.common.redis.service.RedisService;
 import com.devtraces.arterest.controller.user.dto.UserRegistrationRequest;
 import com.devtraces.arterest.controller.user.dto.UserRegistrationResponse;
-import com.devtraces.arterest.controller.user.dto.MailAuthKeyCheckResponse;
 import com.devtraces.arterest.domain.user.User;
 import com.devtraces.arterest.domain.user.UserRepository;
 import java.util.Date;
@@ -50,7 +49,9 @@ public class AuthService {
 	}
 
 	private void validateRegistration(UserRegistrationRequest request) {
-		// TODO: 이메일 인증을 하지 않은 경우
+		if (redisService.notExistsAuthCompletedValue(request.getEmail())) {
+			throw BaseException.NOT_AUTHENTICATION_YET;
+		}
 
 		if (userRepository.existsByEmail(request.getEmail())) {
 			throw BaseException.ALREADY_EXIST_EMAIL;
