@@ -5,6 +5,7 @@ import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.jwt.JwtProvider;
 import com.devtraces.arterest.common.jwt.dto.TokenDto;
 import com.devtraces.arterest.common.redis.service.RedisService;
+import com.devtraces.arterest.controller.user.dto.MailAuthKeyCheckResponse;
 import com.devtraces.arterest.domain.user.User;
 import com.devtraces.arterest.domain.user.UserRepository;
 import java.util.Date;
@@ -52,6 +53,20 @@ public class AuthService {
 			+ "<p>Arterest에 가입하신 것을 환영합니다.<br>아래의 인증코드를 입력하시면 가입이 정상적으로 완료됩니다.</p>\n"
 			+ "<p style=\"background: #EFEFEF; font-size: 30px;padding: 10px\">" + authKey + "</p>";
 		mailUtil.sendMail(email, subject, text);
+	}
+
+	public boolean checkAuthKey(String email, String authKey) {
+		if (userRepository.existsByEmail(email)) {
+			throw BaseException.ALREADY_EXIST_EMAIL;
+		}
+		String authKeyInRedis = redisService.getAuthKeyValue(email);
+		if (!authKey.equals(authKeyInRedis)) {
+			return false;
+		}
+		// 인증 완료했으므로 Redis 정보 변경
+		redisService.deleteAuthKeyValue(email);
+		redisService.setAuthCompletedValue(email);
+		return true;
 	}
 
 	@Transactional(readOnly = true)

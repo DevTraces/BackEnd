@@ -14,6 +14,7 @@ public class RedisService {
 	private static final String REFRESH_TOKEN_PREFIX = "RT:";
 	private static final String ACCESS_TOKEN_BLACK_LIST_PREFIX = "AT-BL:";
 	private static final String AUTH_KEY_PREFIX = "AK:";
+	private static final String AUTH_COMPLETED_PREFIX = "AC:";
 
 	private static final int AUTH_KEY_VALID_MINUTE = 10;
 
@@ -74,5 +75,19 @@ public class RedisService {
 
 	public void deleteAuthKeyValue(String email) {
 		redisTemplate.delete(AUTH_KEY_PREFIX + email);
+	}
+
+	public void setAuthCompletedValue(String email) {
+		ValueOperations<String, String> values = redisTemplate.opsForValue();
+		values.set(AUTH_COMPLETED_PREFIX + email, "O");
+	}
+
+	public boolean existsAuthCompletedValue(String email) {
+		ValueOperations<String, String> values = redisTemplate.opsForValue();
+		return values.get(AUTH_COMPLETED_PREFIX + email) != null;
+	}
+
+	public void deleteAuthCompletedValue(String email) {
+		redisTemplate.delete(AUTH_COMPLETED_PREFIX + email);
 	}
 }
