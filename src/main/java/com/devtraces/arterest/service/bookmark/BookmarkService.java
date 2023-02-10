@@ -41,10 +41,10 @@ public class BookmarkService {
 	public void createBookmark(Long userId, Long feedId) {
 
 		User user = userRepository.findById(userId)
-			.orElseThrow(() -> new BaseException(USER_NOT_FOUND));
+			.orElseThrow(() -> BaseException.USER_NOT_FOUND);
 
 		Feed feed = feedRepository.findById(feedId)
-			.orElseThrow(() -> new BaseException(FEED_NOT_FOUND));
+			.orElseThrow(() -> BaseException.FEED_NOT_FOUND);
 
 		bookmarkRepository.save(
 			Bookmark.builder()

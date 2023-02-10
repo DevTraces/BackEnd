@@ -13,6 +13,7 @@ public class BaseException extends RuntimeException {
 	public static final BaseException FORBIDDEN = new BaseException(ErrorCode.FORBIDDEN);
 	public static final BaseException EXPIRED_OR_PREVIOUS_REFRESH_TOKEN = new BaseException(ErrorCode.EXPIRED_OR_PREVIOUS_REFRESH_TOKEN);
 	public static final BaseException USER_NOT_FOUND = new BaseException(ErrorCode.USER_NOT_FOUND);
+	public static final BaseException FEED_NOT_FOUND = new BaseException(ErrorCode.FEED_NOT_FOUND);
 
 	private final ErrorCode errorCode;
 

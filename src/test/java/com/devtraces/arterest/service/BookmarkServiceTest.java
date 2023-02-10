@@ -107,7 +107,7 @@ class BookmarkServiceTest {
 			() -> bookmarkService.createBookmark(1L, 2L));
 
 		//then
-		assertEquals(new BaseException(USER_NOT_FOUND).getErrorCode(), exception.getErrorCode());
+		assertEquals(BaseException.USER_NOT_FOUND.getErrorCode(), exception.getErrorCode());
 	}
 
 	@Test
@@ -123,7 +123,7 @@ class BookmarkServiceTest {
 			() -> bookmarkService.createBookmark(1L, 2L));
 
 		//then
-		assertEquals(new BaseException(FEED_NOT_FOUND).getErrorCode(), exception.getErrorCode());
+		assertEquals(BaseException.FEED_NOT_FOUND.getErrorCode(), exception.getErrorCode());
 	}
 
 	@Test
