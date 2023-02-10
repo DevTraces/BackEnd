@@ -36,7 +36,7 @@ public class ReplyResponse {
             .authorNickname(reply.getUser().getNickname())
             .content(reply.getContent())
             .authorProfileImageUrl(reply.getUser().getProfileImageLink())
-            .numberOfRereply(reply.getRereplyList().size())
+            .numberOfRereply(reply.getRereplyList() == null ? 0 : reply.getRereplyList().size())
             .createdAt(reply.getCreatedAt())
             .modifiedAt(reply.getModifiedAt())
             .build();

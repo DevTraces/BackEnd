@@ -37,7 +37,6 @@ public class RereplyService {
         );
         Rereply rereply = rereplyRepository.save(
             Rereply.builder()
-                .replyId(replyId)
                 .content(rereplyRequest.getContent())
                 .user(authorUser)
                 .reply(reply)

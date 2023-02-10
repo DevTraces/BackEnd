@@ -24,7 +24,7 @@ public class ReplyController {
 
     private final ReplyService replyService;
 
-    @PostMapping("/{feedId}")
+    @PostMapping("/{feedId}/{userId}")
     public ApiSuccessResponse<ReplyResponse> createReply(
         @AuthenticationPrincipal Long userId,
         @PathVariable Long feedId, @RequestBody ReplyRequest replyRequest){
@@ -43,7 +43,7 @@ public class ReplyController {
     @PutMapping("/{feedId}/replies/{replyId}")
     public ApiSuccessResponse<ReplyResponse> updateReply(
         @AuthenticationPrincipal Long userId,
-        @RequestParam Long replyId,
+        @PathVariable Long replyId,
         @RequestBody ReplyRequest replyRequest
     ){
         return ApiSuccessResponse.from(replyService.updateReply(userId, replyId, replyRequest));
@@ -52,7 +52,7 @@ public class ReplyController {
     @DeleteMapping("/{feedId}/replies/{replyId}")
     public ApiSuccessResponse<?> deleteReply(
         @AuthenticationPrincipal Long userId,
-        @RequestParam Long replyId
+        @PathVariable Long replyId
     ){
         replyService.deleteReply(userId, replyId);
         return ApiSuccessResponse.NO_DATA_RESPONSE;

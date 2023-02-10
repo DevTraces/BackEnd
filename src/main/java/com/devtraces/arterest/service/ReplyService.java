@@ -40,16 +40,14 @@ public class ReplyService {
         Feed feed = feedRepository.findById(feedId).orElseThrow(
             () -> BaseException.FEED_NOT_FOUND
         );
-        return ReplyResponse.from(
-            replyRepository.save(
-                Reply.builder()
-                    .feedId(feed.getId())
-                    .content(replyRequest.getContent())
-                    .user(authorUser)
-                    .feed(feed)
-                    .build()
-            )
+        Reply reply = replyRepository.save(
+            Reply.builder()
+                .content(replyRequest.getContent())
+                .user(authorUser)
+                .feed(feed)
+                .build()
         );
+        return ReplyResponse.from(reply);
     }
 
     @Transactional(readOnly = true)

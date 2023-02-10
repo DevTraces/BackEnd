@@ -35,9 +35,6 @@ public class Rereply extends BaseEntity {
     @Column(name = "rereply_id")
     private Long id;
 
-    // 대댓글 리스트 검색을 위한 필드.
-    private Long replyId;
-
     private String content;
 
     // 1:N mapping with User

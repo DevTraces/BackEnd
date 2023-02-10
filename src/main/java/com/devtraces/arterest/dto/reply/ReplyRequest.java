@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReplyRequest {
     private String content;
 }
