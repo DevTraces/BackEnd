@@ -7,6 +7,11 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public class BaseException extends RuntimeException {
 
+	public static final BaseException FEED_NOT_FOUND = new BaseException(ErrorCode.FEED_NOT_FOUND);
+	public static final BaseException REPLY_NOT_FOUND = new BaseException(ErrorCode.REPLY_NOT_FOUND);
+	public static final BaseException REREPLY_NOT_FOUND = new BaseException(ErrorCode.REREPLY_NOT_FOUND);
+	public static final BaseException CONTENT_LIMIT_EXCEED = new BaseException(ErrorCode.CONTENT_LIMIT_EXCEED);
+	public static final BaseException USER_INFO_NOT_MATCH = new BaseException(ErrorCode.USER_INFO_NOT_MATCH);
 	public static final BaseException WRONG_EMAIL_OR_PASSWORD = new BaseException(ErrorCode.WRONG_EMAIL_OR_PASSWORD);
 	public static final BaseException NOT_EXPIRED_ACCESS_TOKEN = new BaseException(ErrorCode.NOT_EXPIRED_ACCESS_TOKEN);
   public static final BaseException INVALID_IMAGE_EXTENSION = new BaseException(ErrorCode.INVALID_IMAGE_EXTENSION);

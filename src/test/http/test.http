@@ -1,5 +1,5 @@
 ### run test controller
-GET http://localhost:8080/run-test-controller
+GET http://localhost:8080/run-reply
 
 ### join test
 GET http://localhost:8080/run-sns
@@ -22,3 +22,58 @@ Content-Type: application/json
 ### get one feed
 GET http://localhost:8080/api/feeds/1/1
 Content-Type: application/json
+
+
+### create Reply OK
+POST http://localhost:8080/api/feeds/1/1
+Content-Type: application/json
+
+{
+  "content" : "새로운 댓글"
+}
+
+### read Reply List OK
+GET http://localhost:8080/api/feeds/1/replies?page=0
+Content-Type: application/json
+
+### update Reply OK
+PUT http://localhost:8080/api/feeds/1/replies/1/1
+Content-Type: application/json
+
+{
+  "content" : "수정된 댓글"
+}
+
+### delete Reply OK
+DELETE http://localhost:8080/api/feeds/1/replies/1/1
+
+
+
+
+
+
+### create Rereply OK
+POST http://localhost:8080/api/feeds/1/replies/1/rereplies/1
+Content-Type: application/json
+
+{
+  "content" : "새로운 대댓글"
+}
+
+### read Rereply list OK
+GET http://localhost:8080/api/feeds/1/replies/1/rereplies?page=0
+Content-Type: application/json
+
+
+### update Rereply OK
+PUT http://localhost:8080/api/feeds/1/replies/1/rereplies/1/1
+Content-Type: application/json
+
+{
+  "content" : "수정된 대댓글"
+}
+
+
+### delete Rereply OK
+DELETE http://localhost:8080/api/feeds/1/replies/1/rereplies/1/1
+
