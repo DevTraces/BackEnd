@@ -151,7 +151,7 @@ class ReplyServiceTest {
         User user = User.builder()
             .id(1L)
             .description("introduction")
-            .profileImageLink("url1")
+            .profileImageUrl("url1")
             .nickname("dongvin99")
             .username("박동빈")
             .build();
@@ -159,7 +159,7 @@ class ReplyServiceTest {
         Feed feed = Feed.builder()
             .id(1L)
             .authorId(2L)
-            .imageLinks("url2,url3")
+            .imageUrls("url2,url3")
             .hashtags("#h1,#h2,#h3")
             .user(user)
             .build();

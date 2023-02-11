@@ -149,7 +149,7 @@ class RereplyServiceTest {
         User user = User.builder()
             .id(1L)
             .description("introduction")
-            .profileImageLink("url1")
+            .profileImageUrl("url1")
             .nickname("dongvin99")
             .username("박동빈")
             .build();
