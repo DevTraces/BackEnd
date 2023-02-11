@@ -3,9 +3,11 @@ package com.devtraces.arterest.service.search;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.redis.service.RedisService;
 import com.devtraces.arterest.controller.search.dto.GetHashtagsSearchResponse;
+import com.devtraces.arterest.controller.search.dto.GetUsernameSearchResponse;
 import com.devtraces.arterest.domain.feed.FeedRepository;
 import com.devtraces.arterest.domain.feed.FeedVo;
 import com.devtraces.arterest.domain.hashtag.HashtagRepository;
+import com.devtraces.arterest.domain.user.UserRepository;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -28,6 +30,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class SearchService {
 
+	private final UserRepository userRepository;
 	private final FeedRepository feedRepository;
 	private final HashtagRepository hashtagRepository;
 	private final Trie trie;
@@ -52,9 +55,15 @@ public class SearchService {
 	public List<GetHashtagsSearchResponse> getSearchResultUsingHashtags(
 		String keyword, Integer page, Integer pageSize) {
 		Pageable pageable = PageRequest.of(page, pageSize);
-
 		return hashtagRepository.findByHashtag(keyword, pageable)
 			.stream().map(Hashtag -> GetHashtagsSearchResponse.from(Hashtag))
+			.collect(Collectors.toList());
+	}
+
+	public List<GetUsernameSearchResponse> getSearchResultUsingUsername(String keyword, Integer page, Integer pageSize) {
+		Pageable pageable = PageRequest.of(page, pageSize);
+		return userRepository.findByUsername(keyword, pageable)
+			.stream().map(User -> GetUsernameSearchResponse.from(User))
 			.collect(Collectors.toList());
 	}
 
