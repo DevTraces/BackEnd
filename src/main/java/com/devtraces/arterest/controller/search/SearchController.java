@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SearchController {
 	private final SearchService searchService;
 
-	@GetMapping
+	@GetMapping("/autocomplete")
 	public ApiSuccessResponse<List<String>> getAutoCompleteWords(
 		@RequestParam String keyword,
 		@RequestParam(required = false, defaultValue = "5") Integer numberOfWords
