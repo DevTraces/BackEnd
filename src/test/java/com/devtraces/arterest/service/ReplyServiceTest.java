@@ -13,17 +13,15 @@ import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.exception.ErrorCode;
 import com.devtraces.arterest.domain.feed.Feed;
 import com.devtraces.arterest.domain.feed.FeedRepository;
-import com.devtraces.arterest.domain.like.LikeRepository;
 import com.devtraces.arterest.domain.reply.Reply;
 import com.devtraces.arterest.domain.reply.ReplyRepository;
 import com.devtraces.arterest.domain.rereply.Rereply;
 import com.devtraces.arterest.domain.rereply.RereplyRepository;
 import com.devtraces.arterest.domain.user.User;
 import com.devtraces.arterest.domain.user.UserRepository;
-import com.devtraces.arterest.dto.feed.FeedResponse;
-import com.devtraces.arterest.dto.reply.ReplyRequest;
-import com.devtraces.arterest.dto.reply.ReplyResponse;
-import java.time.LocalDate;
+import com.devtraces.arterest.controller.reply.dto.ReplyRequest;
+import com.devtraces.arterest.controller.reply.dto.ReplyResponse;
+import com.devtraces.arterest.service.reply.ReplyService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -55,7 +53,7 @@ class ReplyServiceTest {
     @Test
     @DisplayName("댓글 1개 생성")
     void successCreateReply(){
-        //given
+        // given
         User user = User.builder()
             .id(1L)
             .build();
@@ -77,10 +75,10 @@ class ReplyServiceTest {
         given(feedRepository.findById(anyLong())).willReturn(Optional.of(feed));
         given(replyRepository.save(any())).willReturn(reply);
 
-        //when
+        // when
         replyService.createReply(1L, 1L, replyRequest);
 
-        //then
+        // then
         verify(userRepository, times(1)).findById(anyLong());
         verify(feedRepository, times(1)).findById(anyLong());
         verify(replyRepository, times(1)).save(any());
@@ -89,7 +87,7 @@ class ReplyServiceTest {
     @Test
     @DisplayName("댓글 생성 실패 - 제한 길이 1000자 초과.")
     void failedCreateReplyContentLimitExceed(){
-        //given
+        // given
         StringBuilder sb = new StringBuilder();
         for(int i=1; i<=1001; i++){
             sb.append('c');
@@ -97,36 +95,36 @@ class ReplyServiceTest {
 
         ReplyRequest replyRequest = new ReplyRequest(sb.toString());
 
-        //when
+        // when
         BaseException exception = assertThrows(
             BaseException.class ,
             () -> replyService.createReply(1L, 1L, replyRequest)
         );
 
-        //then
+        // then
         assertEquals(ErrorCode.CONTENT_LIMIT_EXCEED, exception.getErrorCode());
     }
 
     @Test
     @DisplayName("댓글 생성 실패 - 유저 정보 확인 불가")
     void failedCreateReplyUserNotFound(){
-        //given
+        // given
         ReplyRequest replyRequest = new ReplyRequest("댓글 내용");
 
-        //when
+        // when
         BaseException exception = assertThrows(
             BaseException.class ,
             () -> replyService.createReply(1L, 1L, replyRequest)
         );
 
-        //then
+        // then
         assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
     @DisplayName("댓글 생성 실패 - 댓글이 달리게 될 게시물의 정보 확인 불가")
     void failedCreateReplyFeedNotFound(){
-        //given
+        // given
         ReplyRequest replyRequest = new ReplyRequest("댓글 내용");
 
         User user = User.builder()
@@ -135,20 +133,20 @@ class ReplyServiceTest {
 
         given(userRepository.findById(1L)).willReturn(Optional.of(user));
 
-        //when
+        // when
         BaseException exception = assertThrows(
             BaseException.class ,
             () -> replyService.createReply(1L, 1L, replyRequest)
         );
 
-        //then
+        // then
         assertEquals(ErrorCode.FEED_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
     @DisplayName("댓글 리스트 읽기")
     void successGetReplyList(){
-        //given
+        // given
 
         User user = User.builder()
             .id(1L)
@@ -180,10 +178,10 @@ class ReplyServiceTest {
 
         given(replyRepository.findAllByFeedId(1L, PageRequest.of(0, 10))).willReturn(slice);
 
-        //when
+        // when
         List<ReplyResponse> replyResponseList = replyService.getReplyList(1L, 0, 10);
 
-        //then
+        // then
         verify(replyRepository, times(1)).findAllByFeedId(1L, PageRequest.of(0, 10));
         assertEquals(replyResponseList.size(), 1);
     }
@@ -191,7 +189,7 @@ class ReplyServiceTest {
     @Test
     @DisplayName("댓글 1개 수정")
     void successUpdateReply(){
-        //given
+        // given
         User user = User.builder()
             .id(1L)
             .build();
@@ -220,10 +218,10 @@ class ReplyServiceTest {
         given(replyRepository.findById(anyLong())).willReturn(Optional.of(replyBeforeUpdate));
         given(replyRepository.save(any())).willReturn(replyAfterUpdate);
 
-        //when
+        // when
         replyService.updateReply(1L, 1L, replyRequest);
 
-        //then
+        // then
         verify(replyRepository, times(1)).findById(anyLong());
         verify(replyRepository, times(1)).save(any());
     }
@@ -231,7 +229,7 @@ class ReplyServiceTest {
     @Test
     @DisplayName("댓글 수정 실패 - 제한 길이 1000자 초과.")
     void failedUpdateReplyContentLimitExceed(){
-        //given
+        // given
         StringBuilder sb = new StringBuilder();
         for(int i=1; i<=1001; i++){
             sb.append('c');
@@ -239,20 +237,20 @@ class ReplyServiceTest {
 
         ReplyRequest replyRequest = new ReplyRequest(sb.toString());
 
-        //when
+        // when
         BaseException exception = assertThrows(
             BaseException.class ,
             () -> replyService.updateReply(1L, 1L, replyRequest)
         );
 
-        //then
+        // then
         assertEquals(ErrorCode.CONTENT_LIMIT_EXCEED, exception.getErrorCode());
     }
 
     @Test
     @DisplayName("댓글 수정 실패 - 유저 정보 불일치")
     void failedUpdateReplyUserInfoNotMatch(){
-        //given
+        // given
         ReplyRequest replyRequest = new ReplyRequest("댓글 내용");
 
         User user = User.builder()
@@ -267,38 +265,38 @@ class ReplyServiceTest {
 
         given(replyRepository.findById(1L)).willReturn(Optional.of(reply));
 
-        //when
+        // when
         BaseException exception = assertThrows(
             BaseException.class ,
             () -> replyService.updateReply(1L, 1L, replyRequest)
         );
 
-        //then
+        // then
         assertEquals(ErrorCode.USER_INFO_NOT_MATCH, exception.getErrorCode());
     }
 
     @Test
     @DisplayName("댓글 수정 실패 - 수정 대상 댓글 찾지 못함.")
     void failedUpdateReplyReplyNotFound(){
-        //given
+        // given
         ReplyRequest replyRequest = new ReplyRequest("댓글 내용");
 
         given(replyRepository.findById(1L)).willReturn(Optional.empty());
 
-        //when
+        // when
         BaseException exception = assertThrows(
             BaseException.class ,
             () -> replyService.updateReply(1L, 1L, replyRequest)
         );
 
-        //then
+        // then
         assertEquals(ErrorCode.REPLY_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
     @DisplayName("댓글 1개 삭제")
     void deleteReply(){
-        //given
+        // given
         User user = User.builder()
             .id(1L)
             .build();
@@ -327,10 +325,10 @@ class ReplyServiceTest {
         given(replyRepository.findById(anyLong())).willReturn(Optional.of(reply));
         doNothing().when(rereplyRepository).deleteAllByIdIn(anyList());
 
-        //when
+        // when
         replyService.deleteReply(1L, 1L);
 
-        //then
+        // then
         verify(replyRepository, times(1)).findById(anyLong());
         verify(rereplyRepository, times(1)).deleteAllByIdIn(anyList());
         verify(replyRepository, times(1)).deleteById(anyLong());
@@ -339,23 +337,23 @@ class ReplyServiceTest {
     @Test
     @DisplayName("댓글 삭제 실패 - 수정 대상 댓글 찾지 못함.")
     void failedDeleteReplyReplyNotFound(){
-        //given
+        // given
         given(replyRepository.findById(1L)).willReturn(Optional.empty());
 
-        //when
+        // when
         BaseException exception = assertThrows(
             BaseException.class ,
             () -> replyService.deleteReply(1L, 1L)
         );
 
-        //then
+        // then
         assertEquals(ErrorCode.REPLY_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
     @DisplayName("댓글 삭제 실패 - 수정 대상 댓글 찾지 못함.")
     void failedDeleteUserInfoNotMatch(){
-        //given
+        // given
         User user = User.builder()
             .id(2L)
             .build();
@@ -368,13 +366,13 @@ class ReplyServiceTest {
 
         given(replyRepository.findById(1L)).willReturn(Optional.of(reply));
 
-        //when
+        // when
         BaseException exception = assertThrows(
             BaseException.class ,
             () -> replyService.deleteReply(1L, 1L)
         );
 
-        //then
+        // then
         assertEquals(ErrorCode.USER_INFO_NOT_MATCH, exception.getErrorCode());
     }
 

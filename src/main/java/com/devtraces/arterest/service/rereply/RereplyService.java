@@ -1,4 +1,4 @@
-package com.devtraces.arterest.service;
+package com.devtraces.arterest.service.rereply;
 
 import com.devtraces.arterest.common.CommonUtils;
 import com.devtraces.arterest.common.exception.BaseException;
@@ -8,8 +8,8 @@ import com.devtraces.arterest.domain.rereply.Rereply;
 import com.devtraces.arterest.domain.rereply.RereplyRepository;
 import com.devtraces.arterest.domain.user.User;
 import com.devtraces.arterest.domain.user.UserRepository;
-import com.devtraces.arterest.dto.rereply.RereplyRequest;
-import com.devtraces.arterest.dto.rereply.RereplyResponse;
+import com.devtraces.arterest.controller.rereply.dto.RereplyRequest;
+import com.devtraces.arterest.controller.rereply.dto.RereplyResponse;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;

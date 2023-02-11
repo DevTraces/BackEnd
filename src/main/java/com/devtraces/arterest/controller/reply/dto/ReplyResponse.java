@@ -1,4 +1,4 @@
-package com.devtraces.arterest.dto.reply;
+package com.devtraces.arterest.controller.reply.dto;
 
 import com.devtraces.arterest.domain.reply.Reply;
 import java.time.LocalDateTime;
@@ -8,7 +8,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.stereotype.Service;
 
 @Getter
 @Setter

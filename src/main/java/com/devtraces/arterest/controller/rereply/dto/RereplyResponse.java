@@ -1,4 +1,4 @@
-package com.devtraces.arterest.dto.rereply;
+package com.devtraces.arterest.controller.rereply.dto;
 
 import com.devtraces.arterest.domain.rereply.Rereply;
 import java.time.LocalDateTime;

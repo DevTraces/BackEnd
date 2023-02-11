@@ -1,4 +1,4 @@
-package com.devtraces.arterest.dto.rereply;
+package com.devtraces.arterest.controller.rereply.dto;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

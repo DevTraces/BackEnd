@@ -1,9 +1,9 @@
-package com.devtraces.arterest.controller;
+package com.devtraces.arterest.controller.rereply;
 
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
-import com.devtraces.arterest.dto.rereply.RereplyRequest;
-import com.devtraces.arterest.dto.rereply.RereplyResponse;
-import com.devtraces.arterest.service.RereplyService;
+import com.devtraces.arterest.controller.rereply.dto.RereplyRequest;
+import com.devtraces.arterest.controller.rereply.dto.RereplyResponse;
+import com.devtraces.arterest.service.rereply.RereplyService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
