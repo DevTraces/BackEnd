@@ -45,7 +45,7 @@ Content-Type: application/json
 }
 
 ### delete Reply OK
-DELETE http://localhost:8080/api/feeds/1/replies/1/1
+DELETE http://localhost:8080/api/feeds/1/replies/1
 
 
 
