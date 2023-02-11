@@ -1,8 +1,8 @@
 package com.devtraces.arterest.domain.user;
 
-import com.devtraces.arterest.common.domain.BaseEntity;
 import com.devtraces.arterest.common.UserSignUpType;
 import com.devtraces.arterest.common.UserStatusType;
+import com.devtraces.arterest.common.domain.BaseEntity;
 import com.devtraces.arterest.domain.feed.Feed;
 import com.devtraces.arterest.domain.reply.Reply;
 import com.devtraces.arterest.domain.rereply.Rereply;
@@ -43,7 +43,9 @@ public class User extends BaseEntity {
     private Long id;
 
     private String username;
+    @Column(unique = true)
     private String nickname;
+    @Column(unique = true)
     private String email;
     private String description;
 

@@ -38,9 +38,6 @@ public class Feed extends BaseEntity {
     @Column(name = "feed_id")
     private Long id;
 
-    // 작성자 유저의 주키 id가 있어야 피드 획득 쿼리 메서드를 실행하기에 유리하므로 다시 추가함.
-    private Long authorId;
-
     private String content;
     private String imageUrls;
     private String hashtags;
