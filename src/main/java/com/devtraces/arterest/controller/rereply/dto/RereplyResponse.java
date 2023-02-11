@@ -33,7 +33,7 @@ public class RereplyResponse {
             .feedId(feedId)
             .replyId(rereply.getReply().getId())
             .authorNickname(rereply.getUser().getNickname())
-            .authorProfileImageUrl(rereply.getUser().getProfileImageLink())
+            .authorProfileImageUrl(rereply.getUser().getProfileImageUrl())
             .content(rereply.getContent())
             .createdAt(rereply.getCreatedAt())
             .modifiedAt(rereply.getModifiedAt())
