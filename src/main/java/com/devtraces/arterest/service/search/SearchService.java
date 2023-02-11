@@ -3,6 +3,7 @@ package com.devtraces.arterest.service.search;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.redis.service.RedisService;
 import com.devtraces.arterest.controller.search.dto.GetHashtagsSearchResponse;
+import com.devtraces.arterest.controller.search.dto.GetNicknameSearchResponse;
 import com.devtraces.arterest.controller.search.dto.GetUsernameSearchResponse;
 import com.devtraces.arterest.domain.feed.FeedRepository;
 import com.devtraces.arterest.domain.feed.FeedVo;
@@ -60,10 +61,19 @@ public class SearchService {
 			.collect(Collectors.toList());
 	}
 
-	public List<GetUsernameSearchResponse> getSearchResultUsingUsername(String keyword, Integer page, Integer pageSize) {
+	public List<GetUsernameSearchResponse> getSearchResultUsingUsername(
+		String keyword, Integer page, Integer pageSize) {
 		Pageable pageable = PageRequest.of(page, pageSize);
 		return userRepository.findByUsername(keyword, pageable)
 			.stream().map(User -> GetUsernameSearchResponse.from(User))
+			.collect(Collectors.toList());
+	}
+
+	public List<GetNicknameSearchResponse> getSearchResultUsingNickname(
+		String keyword, Integer page, Integer pageSize) {
+		Pageable pageable = PageRequest.of(page, pageSize);
+		return userRepository.findByNickname(keyword, pageable)
+			.stream().map(User -> GetNicknameSearchResponse.from(User))
 			.collect(Collectors.toList());
 	}
 
@@ -94,7 +104,7 @@ public class SearchService {
 	}
 
 	// Redis 에 저장된 Trie 자료구조를 역직렬화하여 자동완성된 단어들을 가져옴.
-	public List<String> getAutoCompleteHashtags(String keyword, Integer numberOfWords){
+	public List<String> getAutoCompleteHashtags(String keyword, Integer numberOfWords) {
 		String output = redisService.getTrieValue(TRIE_KEY);
 
 		byte[] serializedTrie;

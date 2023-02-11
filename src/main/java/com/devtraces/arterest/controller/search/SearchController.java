@@ -2,6 +2,7 @@ package com.devtraces.arterest.controller.search;
 
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
 import com.devtraces.arterest.controller.search.dto.GetHashtagsSearchResponse;
+import com.devtraces.arterest.controller.search.dto.GetNicknameSearchResponse;
 import com.devtraces.arterest.controller.search.dto.GetUsernameSearchResponse;
 import com.devtraces.arterest.service.search.SearchService;
 import java.util.List;
@@ -46,6 +47,17 @@ public class SearchController {
 	){
 		List<GetUsernameSearchResponse> response =
 			searchService.getSearchResultUsingUsername(keyword, page, pageSize);
+		return ApiSuccessResponse.from(response);
+	}
+
+	@GetMapping("/nickname")
+	public ApiSuccessResponse<List<GetNicknameSearchResponse>> getSearchResultUsingNickname(
+		@RequestParam String keyword,
+		@RequestParam Integer page,
+		@RequestParam(required = false, defaultValue = "10") Integer pageSize
+	){
+		List<GetNicknameSearchResponse> response =
+			searchService.getSearchResultUsingNickname(keyword, page, pageSize);
 		return ApiSuccessResponse.from(response);
 	}
 }
