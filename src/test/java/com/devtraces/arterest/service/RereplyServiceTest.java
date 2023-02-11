@@ -9,6 +9,8 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.devtraces.arterest.common.exception.BaseException;
+import com.devtraces.arterest.common.exception.ErrorCode;
 import com.devtraces.arterest.domain.feed.Feed;
 import com.devtraces.arterest.domain.reply.Reply;
 import com.devtraces.arterest.domain.reply.ReplyRepository;
@@ -80,6 +82,67 @@ class RereplyServiceTest {
         verify(userRepository, times(1)).findById(anyLong());
         verify(replyRepository, times(1)).findById(anyLong());
         verify(rereplyRepository, times(1)).save(any());
+    }
+
+    @Test
+    @DisplayName("대댓글 생성 실패 - 제한 길이 초과")
+    void failedCreateRereplyContentLimitExceed(){
+        //given
+        StringBuilder sb = new StringBuilder();
+        for(int i=1; i<=1001; i++){
+            sb.append('c');
+        }
+
+        RereplyRequest rereplyRequest = new RereplyRequest(sb.toString());
+
+        //when
+        BaseException exception = assertThrows(
+            BaseException.class ,
+            () -> rereplyService.createRereply(1L, 1L, 1L, rereplyRequest)
+        );
+
+        //then
+        assertEquals(ErrorCode.CONTENT_LIMIT_EXCEED, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("대댓글 생성 실패 - 유저 정보 확인 불가")
+    void failedCreateRereplyUserNotFound(){
+        //given
+        RereplyRequest rereplyRequest = new RereplyRequest("댓글 내용");
+
+        given(userRepository.findById(1L)).willReturn(Optional.empty());
+
+        //when
+        BaseException exception = assertThrows(
+            BaseException.class ,
+            () -> rereplyService.createRereply(1L, 1L, 1L, rereplyRequest)
+        );
+
+        //then
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("대댓글 생성 실패 - 대댓글이 달리게 될 댓글 정보 찾지 못함.")
+    void failedCreateRereplyRereplyNotFound(){
+        //given
+        RereplyRequest rereplyRequest = new RereplyRequest("댓글 내용");
+
+        User user = User.builder()
+            .id(1L)
+            .build();
+
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+
+        //when
+        BaseException exception = assertThrows(
+            BaseException.class ,
+            () -> rereplyService.createRereply(1L, 1L, 1L, rereplyRequest)
+        );
+
+        //then
+        assertEquals(ErrorCode.REPLY_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
@@ -161,6 +224,70 @@ class RereplyServiceTest {
     }
 
     @Test
+    @DisplayName("대댓글 1개 수정 실패 - 입력 제한 길이 초과")
+    void failedUpdateRereplyContentLimitExceed(){
+        //given
+        StringBuilder sb = new StringBuilder();
+        for(int i=1; i<=1001; i++){
+            sb.append('c');
+        }
+
+        RereplyRequest rereplyRequest = new RereplyRequest(sb.toString());
+
+        //when
+        BaseException exception = assertThrows(
+            BaseException.class ,
+            () -> rereplyService.updateRereply(1L, 1L, 1L, rereplyRequest)
+        );
+
+        //then
+        assertEquals(ErrorCode.CONTENT_LIMIT_EXCEED, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("대댓글 1개 수정 실패 - 수정 대상 대댓글 찾지 못함.")
+    void failedUpdateRereplyRereplyNotFound(){
+        //given
+        RereplyRequest rereplyRequest = new RereplyRequest("수정 대댓글");
+
+        //when
+        BaseException exception = assertThrows(
+            BaseException.class ,
+            () -> rereplyService.updateRereply(1L, 1L, 1L, rereplyRequest)
+        );
+
+        //then
+        assertEquals(ErrorCode.REREPLY_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("대댓글 1개 수정 실패 - 유저 정보 불일치")
+    void failedUpdateRereplyUserInfoNotMatch(){
+        //given
+        RereplyRequest rereplyRequest = new RereplyRequest("수정 대댓글");
+
+        User user = User.builder()
+            .id(1L)
+            .build();
+
+        Rereply rereply = Rereply.builder()
+            .id(1L)
+            .user(user)
+            .build();
+
+        given(rereplyRepository.findById(1L)).willReturn(Optional.of(rereply));
+
+        //when
+        BaseException exception = assertThrows(
+            BaseException.class ,
+            () -> rereplyService.updateRereply(2L, 1L, 1L, rereplyRequest)
+        );
+
+        //then
+        assertEquals(ErrorCode.USER_INFO_NOT_MATCH, exception.getErrorCode());
+    }
+
+    @Test
     @DisplayName("대댓글 1개 삭제")
     void successDeleteRereply(){
         //given
@@ -182,6 +309,47 @@ class RereplyServiceTest {
         //then
         verify(rereplyRepository, times(1)).findById(anyLong());
         verify(rereplyRepository, times(1)).deleteById(anyLong());
+    }
+
+    @Test
+    @DisplayName("대댓글 삭제 실패 - 삭제 대상 대댓글 찾지 못함.")
+    void failedDeleteRereplyRereplyNotFound(){
+        //given
+        given(rereplyRepository.findById(1L)).willReturn(Optional.empty());
+
+        //when
+        BaseException exception = assertThrows(
+            BaseException.class ,
+            () -> rereplyService.deleteRereply(2L, 1L)
+        );
+
+        //then
+        assertEquals(ErrorCode.REREPLY_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("대댓글 삭제 실패 - 유저 정보 불일치.")
+    void failedDeleteRereplyUserInfoNotMatch(){
+        //given
+        User user = User.builder()
+            .id(1L)
+            .build();
+
+        Rereply rereply = Rereply.builder()
+            .id(1L)
+            .user(user)
+            .build();
+
+        given(rereplyRepository.findById(1L)).willReturn(Optional.of(rereply));
+
+        //when
+        BaseException exception = assertThrows(
+            BaseException.class ,
+            () -> rereplyService.deleteRereply(2L, 1L)
+        );
+
+        //then
+        assertEquals(ErrorCode.USER_INFO_NOT_MATCH, exception.getErrorCode());
     }
 
 }

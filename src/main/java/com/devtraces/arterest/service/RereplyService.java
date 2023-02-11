@@ -29,6 +29,9 @@ public class RereplyService {
     @Transactional
     public RereplyResponse createRereply(
         Long userId, Long feedId, Long replyId, RereplyRequest rereplyRequest) {
+        if(rereplyRequest.getContent().length() > CommonUtils.CONTENT_LENGTH_LIMIT){
+            throw BaseException.CONTENT_LIMIT_EXCEED;
+        }
         User authorUser = userRepository.findById(userId).orElseThrow(
             () -> BaseException.USER_NOT_FOUND
         );

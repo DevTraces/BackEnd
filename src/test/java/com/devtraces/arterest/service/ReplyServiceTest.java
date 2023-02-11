@@ -9,6 +9,8 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.devtraces.arterest.common.exception.BaseException;
+import com.devtraces.arterest.common.exception.ErrorCode;
 import com.devtraces.arterest.domain.feed.Feed;
 import com.devtraces.arterest.domain.feed.FeedRepository;
 import com.devtraces.arterest.domain.like.LikeRepository;
@@ -21,6 +23,7 @@ import com.devtraces.arterest.domain.user.UserRepository;
 import com.devtraces.arterest.dto.feed.FeedResponse;
 import com.devtraces.arterest.dto.reply.ReplyRequest;
 import com.devtraces.arterest.dto.reply.ReplyResponse;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -81,6 +84,65 @@ class ReplyServiceTest {
         verify(userRepository, times(1)).findById(anyLong());
         verify(feedRepository, times(1)).findById(anyLong());
         verify(replyRepository, times(1)).save(any());
+    }
+
+    @Test
+    @DisplayName("댓글 생성 실패 - 제한 길이 1000자 초과.")
+    void failedCreateReplyContentLimitExceed(){
+        //given
+        StringBuilder sb = new StringBuilder();
+        for(int i=1; i<=1001; i++){
+            sb.append('c');
+        }
+
+        ReplyRequest replyRequest = new ReplyRequest(sb.toString());
+
+        //when
+        BaseException exception = assertThrows(
+            BaseException.class ,
+            () -> replyService.createReply(1L, 1L, replyRequest)
+        );
+
+        //then
+        assertEquals(ErrorCode.CONTENT_LIMIT_EXCEED, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("댓글 생성 실패 - 유저 정보 확인 불가")
+    void failedCreateReplyUserNotFound(){
+        //given
+        ReplyRequest replyRequest = new ReplyRequest("댓글 내용");
+
+        //when
+        BaseException exception = assertThrows(
+            BaseException.class ,
+            () -> replyService.createReply(1L, 1L, replyRequest)
+        );
+
+        //then
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("댓글 생성 실패 - 댓글이 달리게 될 게시물의 정보 확인 불가")
+    void failedCreateReplyFeedNotFound(){
+        //given
+        ReplyRequest replyRequest = new ReplyRequest("댓글 내용");
+
+        User user = User.builder()
+            .id(1L)
+            .build();
+
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
+
+        //when
+        BaseException exception = assertThrows(
+            BaseException.class ,
+            () -> replyService.createReply(1L, 1L, replyRequest)
+        );
+
+        //then
+        assertEquals(ErrorCode.FEED_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
@@ -167,6 +229,73 @@ class ReplyServiceTest {
     }
 
     @Test
+    @DisplayName("댓글 수정 실패 - 제한 길이 1000자 초과.")
+    void failedUpdateReplyContentLimitExceed(){
+        //given
+        StringBuilder sb = new StringBuilder();
+        for(int i=1; i<=1001; i++){
+            sb.append('c');
+        }
+
+        ReplyRequest replyRequest = new ReplyRequest(sb.toString());
+
+        //when
+        BaseException exception = assertThrows(
+            BaseException.class ,
+            () -> replyService.updateReply(1L, 1L, replyRequest)
+        );
+
+        //then
+        assertEquals(ErrorCode.CONTENT_LIMIT_EXCEED, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("댓글 수정 실패 - 유저 정보 불일치")
+    void failedUpdateReplyUserInfoNotMatch(){
+        //given
+        ReplyRequest replyRequest = new ReplyRequest("댓글 내용");
+
+        User user = User.builder()
+            .id(2L)
+            .build();
+
+        Reply reply = Reply.builder()
+            .id(1L)
+            .user(user)
+            .content("원래 댓글 내용")
+            .build();
+
+        given(replyRepository.findById(1L)).willReturn(Optional.of(reply));
+
+        //when
+        BaseException exception = assertThrows(
+            BaseException.class ,
+            () -> replyService.updateReply(1L, 1L, replyRequest)
+        );
+
+        //then
+        assertEquals(ErrorCode.USER_INFO_NOT_MATCH, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("댓글 수정 실패 - 수정 대상 댓글 찾지 못함.")
+    void failedUpdateReplyReplyNotFound(){
+        //given
+        ReplyRequest replyRequest = new ReplyRequest("댓글 내용");
+
+        given(replyRepository.findById(1L)).willReturn(Optional.empty());
+
+        //when
+        BaseException exception = assertThrows(
+            BaseException.class ,
+            () -> replyService.updateReply(1L, 1L, replyRequest)
+        );
+
+        //then
+        assertEquals(ErrorCode.REPLY_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
     @DisplayName("댓글 1개 삭제")
     void deleteReply(){
         //given
@@ -205,6 +334,48 @@ class ReplyServiceTest {
         verify(replyRepository, times(1)).findById(anyLong());
         verify(rereplyRepository, times(1)).deleteAllByIdIn(anyList());
         verify(replyRepository, times(1)).deleteById(anyLong());
+    }
+
+    @Test
+    @DisplayName("댓글 삭제 실패 - 수정 대상 댓글 찾지 못함.")
+    void failedDeleteReplyReplyNotFound(){
+        //given
+        given(replyRepository.findById(1L)).willReturn(Optional.empty());
+
+        //when
+        BaseException exception = assertThrows(
+            BaseException.class ,
+            () -> replyService.deleteReply(1L, 1L)
+        );
+
+        //then
+        assertEquals(ErrorCode.REPLY_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("댓글 삭제 실패 - 수정 대상 댓글 찾지 못함.")
+    void failedDeleteUserInfoNotMatch(){
+        //given
+        User user = User.builder()
+            .id(2L)
+            .build();
+
+        Reply reply = Reply.builder()
+            .id(1L)
+            .user(user)
+            .content("원래 댓글 내용")
+            .build();
+
+        given(replyRepository.findById(1L)).willReturn(Optional.of(reply));
+
+        //when
+        BaseException exception = assertThrows(
+            BaseException.class ,
+            () -> replyService.deleteReply(1L, 1L)
+        );
+
+        //then
+        assertEquals(ErrorCode.USER_INFO_NOT_MATCH, exception.getErrorCode());
     }
 
 }
