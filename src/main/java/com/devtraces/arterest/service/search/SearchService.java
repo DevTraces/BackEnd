@@ -2,8 +2,10 @@ package com.devtraces.arterest.service.search;
 
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.redis.service.RedisService;
+import com.devtraces.arterest.controller.search.dto.GetHashtagsSearchResponse;
 import com.devtraces.arterest.domain.feed.FeedRepository;
 import com.devtraces.arterest.domain.feed.FeedVo;
+import com.devtraces.arterest.domain.hashtag.HashtagRepository;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -16,6 +18,8 @@ import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.Trie;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +29,7 @@ import org.springframework.stereotype.Service;
 public class SearchService {
 
 	private final FeedRepository feedRepository;
+	private final HashtagRepository hashtagRepository;
 	private final Trie trie;
 	private final RedisService redisService;
 	private final String HASHTAG_DELIMITER = ",";
@@ -42,6 +47,15 @@ public class SearchService {
 
 	public List<String> getAutoCompleteWords(String keyword, Integer numberOfWords) {
 		return getAutoCompleteHashtags(keyword, numberOfWords);
+	}
+
+	public List<GetHashtagsSearchResponse> getSearchResultUsingHashtags(
+		String keyword, Integer page, Integer pageSize) {
+		Pageable pageable = PageRequest.of(page, pageSize);
+
+		return hashtagRepository.findByHashtag(keyword, pageable)
+			.stream().map(Hashtag -> GetHashtagsSearchResponse.from(Hashtag))
+			.collect(Collectors.toList());
 	}
 
 	// 해시태그가 저장된 Trie 자료구조를 직렬화하여 Redis 에 저장.

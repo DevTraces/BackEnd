@@ -1,6 +1,7 @@
 package com.devtraces.arterest.controller.search;
 
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
+import com.devtraces.arterest.controller.search.dto.GetHashtagsSearchResponse;
 import com.devtraces.arterest.service.search.SearchService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,17 @@ public class SearchController {
 	){
 		List<String> response =
 			searchService.getAutoCompleteWords(keyword, numberOfWords);
+		return ApiSuccessResponse.from(response);
+	}
+
+	@GetMapping("/hashtags")
+	public ApiSuccessResponse<List<GetHashtagsSearchResponse>> getSearchResultUsingHashtags(
+		@RequestParam String keyword,
+		@RequestParam Integer page,
+		@RequestParam(required = false, defaultValue = "10") Integer pageSize
+	){
+		List<GetHashtagsSearchResponse> response =
+			searchService.getSearchResultUsingHashtags(keyword, page, pageSize);
 		return ApiSuccessResponse.from(response);
 	}
 }
