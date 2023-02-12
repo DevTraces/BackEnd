@@ -31,14 +31,14 @@ public class OauthService {
         OauthKakaoSignInDto oauthKakaoSignInDto = createKakaoUser(accessToken);
 
         // DB에 dto의 nickname이 없는 사람만 회원가입 진행
-        String nickname = oauthKakaoSignInDto.getNickname();
-        Optional<User> optionalUser = userRepository.findByNickname(nickname);
+        long kakaoUserId = oauthKakaoSignInDto.getKakaoUserId();
+        Optional<User> optionalUser = userRepository.findByKakaoUserId(kakaoUserId);
         if (!optionalUser.isPresent()) {
             User save = userRepository.save(User.builder()
                     .kakaoUserId(oauthKakaoSignInDto.getKakaoUserId())
                     .email(oauthKakaoSignInDto.getEmail())
                     .username(oauthKakaoSignInDto.getUsername())
-                    .nickname(nickname)
+                    .nickname(oauthKakaoSignInDto.getNickname())
                     .profileImageUrl(oauthKakaoSignInDto.getProfileImageUrl())
                     .description(oauthKakaoSignInDto.getDescription())
                     .userStatus(UserStatusType.ACTIVE)
