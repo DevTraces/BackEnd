@@ -5,17 +5,26 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
+import com.devtraces.arterest.common.UserSignUpType;
+import com.devtraces.arterest.common.UserStatusType;
 import com.devtraces.arterest.common.component.MailUtil;
+import com.devtraces.arterest.common.component.S3Uploader;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.jwt.JwtProvider;
 import com.devtraces.arterest.common.jwt.dto.TokenDto;
 import com.devtraces.arterest.common.redis.service.RedisService;
+import com.devtraces.arterest.controller.user.dto.UserRegistrationRequest;
+import com.devtraces.arterest.controller.user.dto.UserRegistrationResponse;
 import com.devtraces.arterest.domain.user.User;
 import com.devtraces.arterest.domain.user.UserRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -29,6 +38,8 @@ class AuthServiceTest {
 	@Mock
 	private JwtProvider jwtProvider;
 	@Mock
+	private S3Uploader s3Uploader;
+	@Mock
 	private MailUtil mailUtil;
 	@Mock
 	private RedisService redisService;
@@ -37,6 +48,88 @@ class AuthServiceTest {
 
 	@InjectMocks
 	private AuthService authService;
+
+	@Test
+	void testRegister() {
+		User mockUser = User.builder()
+			.email("test@gmail.com")
+			.password("encoding-password")
+			.nickname("test")
+			.username("김검사")
+			.signupType(UserSignUpType.EMAIL)
+			.userStatus(UserStatusType.ACTIVE)
+			.build();
+		given(redisService.notExistsAuthCompletedValue(anyString()))
+			.willReturn(false);
+		given(userRepository.existsByEmail(anyString()))
+			.willReturn(false);
+		given(userRepository.existsByNickname(anyString()))
+			.willReturn(false);
+		given(passwordEncoder.encode(anyString()))
+			.willReturn("encodingpassword");
+		given(userRepository.save(ArgumentMatchers.any(User.class)))
+			.willReturn(mockUser);
+		ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+
+		UserRegistrationRequest request = UserRegistrationRequest.builder()
+			.email("example@gmail.com")
+			.password("password")
+			.nickname("example")
+			.username("김공공")
+			.build();
+		UserRegistrationResponse response = authService.register(request);
+
+		verify(userRepository, times(1)).save(captor.capture());
+		User savedUser = captor.getValue();
+		assertEquals("example@gmail.com", savedUser.getEmail());
+		assertEquals("encodingpassword", savedUser.getPassword());
+		assertEquals("example", savedUser.getNickname());
+		assertEquals("김공공", savedUser.getUsername());
+		assertEquals(UserSignUpType.EMAIL, savedUser.getSignupType());
+		assertEquals(UserStatusType.ACTIVE, savedUser.getUserStatus());
+	}
+
+	// 이미 가입된 이메일의 경우
+	@Test
+	void testRegisterByRegisteredUser() {
+		given(redisService.notExistsAuthCompletedValue(anyString()))
+			.willReturn(false);
+		given(userRepository.existsByEmail(anyString()))
+			.willReturn(true);
+
+		UserRegistrationRequest request = UserRegistrationRequest.builder()
+			.email("example@gmail.com")
+			.password("password")
+			.nickname("example")
+			.username("김공공")
+			.build();
+		BaseException exception = assertThrows(BaseException.class,
+			() -> authService.register(request));
+
+		assertEquals(BaseException.ALREADY_EXIST_EMAIL, exception);
+	}
+
+	// 중복된 닉네임인 경우
+	@Test
+	void testRegisterByDuplicatedNickname() {
+		given(redisService.notExistsAuthCompletedValue(anyString()))
+			.willReturn(false);
+		given(userRepository.existsByEmail(anyString()))
+			.willReturn(false);
+		given(userRepository.existsByNickname(anyString()))
+			.willReturn(true);
+
+		UserRegistrationRequest request = UserRegistrationRequest.builder()
+			.email("example@gmail.com")
+			.password("password")
+			.nickname("example")
+			.username("김공공")
+			.build();
+		BaseException exception = assertThrows(BaseException.class,
+			() -> authService.register(request));
+
+		assertEquals(BaseException.ALREADY_EXIST_NICKNAME, exception);
+	}
 
 	@Test
 	void testSendMailWithAuthKey() {
