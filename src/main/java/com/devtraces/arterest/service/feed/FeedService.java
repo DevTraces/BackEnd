@@ -48,7 +48,7 @@ public class FeedService {
             )).collect(Collectors.toList());
     }
 
-    // 레디스 추가 후 수정 필요.
+    // 레디스 추가 후 좋아요 개수를 레디스에서 먼저 얻어오도록 수정하는 것 필요.
     @Transactional(readOnly = true)
     public FeedResponse getOneFeed(Long userId, Long feedId){
         Set<Long> likedFeedSet = likeRepository.findAllByUserId(userId)
