@@ -1,6 +1,7 @@
 package com.devtraces.arterest.domain.feed;
 
 import com.devtraces.arterest.common.domain.BaseEntity;
+import com.devtraces.arterest.domain.feedhashtagmap.FeedHashtagMap;
 import com.devtraces.arterest.domain.reply.Reply;
 import com.devtraces.arterest.domain.user.User;
 import java.util.ArrayList;
@@ -52,6 +53,11 @@ public class Feed extends BaseEntity {
     @OneToMany(mappedBy = "feed")
     @ToString.Exclude
     List<Reply> replyList = new ArrayList<>();
+
+    // 1:N mapping with FeedHashtagMap
+    @OneToMany(mappedBy = "feed")
+    @ToString.Exclude
+    List<FeedHashtagMap> feedHashtagMapList = new ArrayList<>();
 
     public void updateContent(String content){
         this.content = content;
