@@ -8,6 +8,10 @@ import com.devtraces.arterest.controller.feed.dto.FeedUpdateResponse;
 import com.devtraces.arterest.domain.bookmark.BookmarkRepository;
 import com.devtraces.arterest.domain.feed.Feed;
 import com.devtraces.arterest.domain.feed.FeedRepository;
+import com.devtraces.arterest.domain.feedhashtagmap.FeedHashtagMap;
+import com.devtraces.arterest.domain.feedhashtagmap.FeedHashtagMapRepository;
+import com.devtraces.arterest.domain.hashtag.Hashtag;
+import com.devtraces.arterest.domain.hashtag.HashtagRepository;
 import com.devtraces.arterest.domain.like.LikeRepository;
 import com.devtraces.arterest.domain.like.Likes;
 import com.devtraces.arterest.domain.likecache.LikeNumberCacheRepository;
@@ -17,7 +21,6 @@ import com.devtraces.arterest.domain.rereply.Rereply;
 import com.devtraces.arterest.domain.rereply.RereplyRepository;
 import com.devtraces.arterest.domain.user.User;
 import com.devtraces.arterest.domain.user.UserRepository;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -40,6 +43,8 @@ public class FeedService {
     private final BookmarkRepository bookmarkRepository;
     private final LikeNumberCacheRepository likeNumberCacheRepository;
     private final S3Uploader s3Uploader;
+    private final HashtagRepository hashtagRepository;
+    private final FeedHashtagMapRepository feedHashtagMapRepository;
 
     @Transactional
     public FeedResponse createFeed(
@@ -64,21 +69,34 @@ public class FeedService {
             imageUrlBuilder.append(',');
         }
 
-        StringBuilder hashtagBuilder = new StringBuilder();
-        for(String hashtag : hashtagList){
-            hashtagBuilder.append(hashtag);
-            hashtagBuilder.append(',');
-        }
-
         Feed newFeed = feedRepository.save(
             Feed.builder()
                 .content(content)
                 .imageUrls(imageUrlBuilder.toString())
-                .hashtags(hashtagBuilder.toString())
                 .user(authorUser)
                 .build()
         );
 
+        // 입력 받은 해시태그 값들을 순회하면서 새로 저장해야 하는 것은 저장하고, 이미 찾을 수 있는 것은 찾아내서
+        // FeedHashtagMap에 저장한다.
+        // FeedHashtagMap 엔티티를 빌드하기 위해서는 Feed 엔티티와 Hashtag 엔티티 모두가 필요하다.
+        for(String hashtagInputString : hashtagList){
+            Hashtag hashtagEntity = hashtagRepository.findByHashtagString(hashtagInputString).orElse(
+                hashtagRepository.save(
+                    Hashtag.builder()
+                        .hashtagString(hashtagInputString)
+                        .build()
+                )
+            );
+            feedHashtagMapRepository.save(
+                FeedHashtagMap.builder()
+                    .feed(newFeed)
+                    .hashtag(hashtagEntity)
+                    .build()
+            );
+        }
+
+        // 새로 만들어진 게시물이므로, 좋아요 개수를 레디스에 0으로 캐시 해둔다.
         likeNumberCacheRepository.setInitialLikeNumber(newFeed.getId());
 
         return FeedResponse.from(newFeed, null, 0L, null);
@@ -148,24 +166,37 @@ public class FeedService {
             throw BaseException.USER_INFO_NOT_MATCH;
         }
 
-        // TODO 기존에 S3에 저장돼 있던 사진들을 삭제하는 로직이 필요하다.
+        // TODO 기존에 S3에 저장돼 있던 사진들을 전부 삭제하는 로직이 필요하다.
 
-        // 기존 이미지들의 삭제가 진행되었다고 가정하고 새 이미지를 올린다.
+        // 기존 이미지들의 삭제가 위의 로직에서 진행되었다고 가정하고 새 이미지를 올린다.
         StringBuilder imageUrlBuilder = new StringBuilder();
         for(MultipartFile imageFile : imageFileList){
             imageUrlBuilder.append(s3Uploader.uploadImage(imageFile));
             imageUrlBuilder.append(',');
         }
 
-        StringBuilder hashtagBuilder = new StringBuilder();
-        for(String hashtag : hashtagList){
-            hashtagBuilder.append(hashtag);
-            hashtagBuilder.append(',');
+        // 기존에 FeedHashtagMap 엔티티들을 전부 삭제한다.
+        feedHashtagMapRepository.deleteAllByFeedId(feedId);
+
+        // 그 후 입력 받은 값에 따라서 새롭게 저장한다.
+        for(String hashtagInputString : hashtagList){
+            Hashtag hashtagEntity = hashtagRepository.findByHashtagString(hashtagInputString).orElse(
+                hashtagRepository.save(
+                    Hashtag.builder()
+                        .hashtagString(hashtagInputString)
+                        .build()
+                )
+            );
+            feedHashtagMapRepository.save(
+                FeedHashtagMap.builder()
+                    .feed(feed)
+                    .hashtag(hashtagEntity)
+                    .build()
+            );
         }
 
         feed.updateContent(content);
         feed.updateImageUrls(imageUrlBuilder.toString());
-        feed.updateHashtags(hashtagBuilder.toString());
 
         return FeedUpdateResponse.from( feedRepository.save(feed) );
     }
@@ -179,6 +210,9 @@ public class FeedService {
         if(!Objects.equals(feed.getUser().getId(), userId)){
             throw BaseException.USER_INFO_NOT_MATCH;
         }
+
+        // FeedHashtagMap 테이블에서 관련 정보 모두 삭제.
+        feedHashtagMapRepository.deleteAllByFeedId(feedId);
 
         // 레디스에서 좋아요 개수 기록한 키-밸류 쌍 삭제.
         likeNumberCacheRepository.deleteLikeNumberInfo(feedId);

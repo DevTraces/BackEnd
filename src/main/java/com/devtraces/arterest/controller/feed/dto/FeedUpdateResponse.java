@@ -30,7 +30,9 @@ public class FeedUpdateResponse {
                 Arrays.stream(feed.getImageUrls().split(",")).collect(Collectors.toList())
             )
             .hashtags(
-                Arrays.stream(feed.getHashtags().split(",")).collect(Collectors.toList())
+                feed.getFeedHashtagMapList().stream().map(
+                    feedHashtagMap -> feedHashtagMap.getHashtag().getHashtagString()
+                ).collect(Collectors.toList())
             )
             .build();
     }

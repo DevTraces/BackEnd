@@ -48,8 +48,11 @@ public class FeedResponse {
             .content(feed.getContent())
             .imageUrls(Arrays.stream(feed.getImageUrls().split(","))
                 .collect(Collectors.toList()))
-            .hashtags(Arrays.stream(feed.getHashtags().split(","))
-                .collect(Collectors.toList()))
+            .hashtags(
+                feed.getFeedHashtagMapList().stream().map(
+                    feedHashtagMap -> feedHashtagMap.getHashtag().getHashtagString()
+                ).collect(Collectors.toList())
+            )
             .numberOfLike(numberOfLike)
             .numberOfReply(feed.getReplyList() == null ? 0 : feed.getReplyList().size())
             .isLiked(likedFeedSet == null ? false : likedFeedSet.contains(feed.getId()))

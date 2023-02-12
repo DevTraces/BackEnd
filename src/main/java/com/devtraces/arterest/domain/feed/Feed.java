@@ -41,7 +41,6 @@ public class Feed extends BaseEntity {
 
     private String content;
     private String imageUrls;
-    private String hashtags;
 
     // 1:N mapping with User
     @ManyToOne(fetch = FetchType.LAZY)
@@ -64,11 +63,7 @@ public class Feed extends BaseEntity {
     }
 
     public void updateImageUrls(String imageUrls){
-        this.content = imageUrls;
-    }
-
-    public void updateHashtags(String hashtags){
-        this.content = hashtags;
+        this.imageUrls = imageUrls;
     }
 
 }
