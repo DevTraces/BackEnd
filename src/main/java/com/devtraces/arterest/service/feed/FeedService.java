@@ -1,5 +1,7 @@
 package com.devtraces.arterest.service.feed;
 
+import com.devtraces.arterest.common.CommonUtils;
+import com.devtraces.arterest.common.component.S3Uploader;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.controller.feed.dto.FeedResponse;
 import com.devtraces.arterest.domain.bookmark.BookmarkRepository;
@@ -12,6 +14,9 @@ import com.devtraces.arterest.domain.reply.Reply;
 import com.devtraces.arterest.domain.reply.ReplyRepository;
 import com.devtraces.arterest.domain.rereply.Rereply;
 import com.devtraces.arterest.domain.rereply.RereplyRepository;
+import com.devtraces.arterest.domain.user.User;
+import com.devtraces.arterest.domain.user.UserRepository;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -20,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -28,9 +34,54 @@ public class FeedService {
     private final FeedRepository feedRepository;
     private final ReplyRepository replyRepository;
     private final RereplyRepository rereplyRepository;
+    private final UserRepository userRepository;
     private final LikeRepository likeRepository;
     private final BookmarkRepository bookmarkRepository;
     private final LikeNumberCacheRepository likeNumberCacheRepository;
+    private final S3Uploader s3Uploader;
+
+    @Transactional
+    public FeedResponse createFeed(
+        Long userId, String content, List<MultipartFile> imageFileList, List<String> hashtagList
+    ) {
+        if(content.length() > CommonUtils.CONTENT_LENGTH_LIMIT){
+            throw BaseException.CONTENT_LIMIT_EXCEED;
+        }
+        if(hashtagList.size() > CommonUtils.HASHTAG_COUNT_LIMIT){
+            throw BaseException.HASHTAG_LIMIT_EXCEED;
+        }
+        if(imageFileList.size() > CommonUtils.IMAGE_FILE_COUNT_LIMIT){
+            throw BaseException.IMAGE_FILE_COUNT_LIMIT_EXCEED;
+        }
+        User authorUser = userRepository.findById(userId).orElseThrow(
+            () -> BaseException.USER_NOT_FOUND
+        );
+        
+        StringBuilder imageUrlBuilder = new StringBuilder();
+        for(MultipartFile imageFile : imageFileList){
+            imageUrlBuilder.append(s3Uploader.uploadImage(imageFile));
+            imageUrlBuilder.append(',');
+        }
+
+        StringBuilder hashtagBuilder = new StringBuilder();
+        for(String hashtag : hashtagList){
+            hashtagBuilder.append(hashtag);
+            hashtagBuilder.append(',');
+        }
+
+        Feed newFeed = feedRepository.save(
+            Feed.builder()
+                .content(content)
+                .imageUrls(imageUrlBuilder.toString())
+                .hashtags(hashtagBuilder.toString())
+                .user(authorUser)
+                .build()
+        );
+
+        likeNumberCacheRepository.setInitialLikeNumber(newFeed.getId());
+
+        return FeedResponse.from(newFeed, null, 0L, null);
+    }
 
     @Transactional(readOnly = true)
     public List<FeedResponse> getFeedResponseList(Long userId, PageRequest pageRequest){

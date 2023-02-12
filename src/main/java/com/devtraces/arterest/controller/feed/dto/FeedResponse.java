@@ -52,8 +52,10 @@ public class FeedResponse {
                 .collect(Collectors.toList()))
             .numberOfLike(numberOfLike)
             .numberOfReply(feed.getReplyList() == null ? 0 : feed.getReplyList().size())
-            .isLiked(likedFeedSet.contains(feed.getId()))
-            .isBookMarked(bookmarkedFeedSet.contains(feed.getId())) // 현재 게시물이 예전에 북마크 했던 게시물인지 여부
+            .isLiked(likedFeedSet == null ? false : likedFeedSet.contains(feed.getId()))
+            .isBookMarked(
+                bookmarkedFeedSet == null? false : bookmarkedFeedSet.contains(feed.getId())
+            ) // 현재 게시물이 예전에 북마크 했던 게시물인지 여부
             .createdAt(feed.getCreatedAt())
             .modifiedAt(feed.getModifiedAt())
             .build();
