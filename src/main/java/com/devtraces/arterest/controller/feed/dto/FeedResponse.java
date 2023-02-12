@@ -28,16 +28,19 @@ public class FeedResponse {
 
     private String content;
     private List<String> imageUrls;
-    private List<String> hashtags; // ["#감자", "#potato", "#이얍이얍"]
+    private List<String> hashtags; // ["#감자", "#potato" ...]
 
     private Long numberOfLike;
     private Integer numberOfReply;
     private boolean isLiked; // 트루이면 좋아요 눌렀던 게시물인 것.
+    private boolean isBookMarked;
 
     private LocalDateTime createdAt; // 프런트엔드 측에서는 "2023-02-07T09:59:23.653281"라는 문자열 받음.
     private LocalDateTime modifiedAt;
 
-    public static FeedResponse from(Feed feed, Set<Long> likedFeedSet, Long numberOfLike){
+    public static FeedResponse from(
+        Feed feed, Set<Long> likedFeedSet, Long numberOfLike, Set<Long> bookmarkedFeedSet
+    ){
         return FeedResponse.builder()
             .feedId(feed.getId())
             .authorProfileImageUrl(feed.getUser().getProfileImageUrl())
@@ -50,6 +53,7 @@ public class FeedResponse {
             .numberOfLike(numberOfLike)
             .numberOfReply(feed.getReplyList() == null ? 0 : feed.getReplyList().size())
             .isLiked(likedFeedSet.contains(feed.getId()))
+            .isBookMarked(bookmarkedFeedSet.contains(feed.getId())) // 현재 게시물이 예전에 북마크 했던 게시물인지 여부
             .createdAt(feed.getCreatedAt())
             .modifiedAt(feed.getModifiedAt())
             .build();
