@@ -4,6 +4,7 @@ import com.devtraces.arterest.common.CommonUtils;
 import com.devtraces.arterest.common.component.S3Uploader;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.controller.feed.dto.FeedResponse;
+import com.devtraces.arterest.controller.feed.dto.FeedUpdateResponse;
 import com.devtraces.arterest.domain.bookmark.BookmarkRepository;
 import com.devtraces.arterest.domain.feed.Feed;
 import com.devtraces.arterest.domain.feed.FeedRepository;
@@ -56,7 +57,7 @@ public class FeedService {
         User authorUser = userRepository.findById(userId).orElseThrow(
             () -> BaseException.USER_NOT_FOUND
         );
-        
+
         StringBuilder imageUrlBuilder = new StringBuilder();
         for(MultipartFile imageFile : imageFileList){
             imageUrlBuilder.append(s3Uploader.uploadImage(imageFile));
@@ -123,6 +124,52 @@ public class FeedService {
         );
     }
 
+    @Transactional
+    public FeedUpdateResponse updateFeed(
+        Long userId, String content,
+        List<MultipartFile> imageFileList, List<String> hashtagList,
+        Long feedId
+    ) {
+        if(content.length() > CommonUtils.CONTENT_LENGTH_LIMIT){
+            throw BaseException.CONTENT_LIMIT_EXCEED;
+        }
+        if(hashtagList.size() > CommonUtils.HASHTAG_COUNT_LIMIT){
+            throw BaseException.HASHTAG_LIMIT_EXCEED;
+        }
+        if(imageFileList.size() > CommonUtils.IMAGE_FILE_COUNT_LIMIT){
+            throw BaseException.IMAGE_FILE_COUNT_LIMIT_EXCEED;
+        }
+
+        Feed feed = feedRepository.findById(feedId).orElseThrow(
+            () -> BaseException.FEED_NOT_FOUND
+        );
+
+        if(!Objects.equals(feed.getUser().getId(), userId)){
+            throw BaseException.USER_INFO_NOT_MATCH;
+        }
+
+        // TODO 기존에 S3에 저장돼 있던 사진들을 삭제하는 로직이 필요하다.
+
+        // 기존 이미지들의 삭제가 진행되었다고 가정하고 새 이미지를 올린다.
+        StringBuilder imageUrlBuilder = new StringBuilder();
+        for(MultipartFile imageFile : imageFileList){
+            imageUrlBuilder.append(s3Uploader.uploadImage(imageFile));
+            imageUrlBuilder.append(',');
+        }
+
+        StringBuilder hashtagBuilder = new StringBuilder();
+        for(String hashtag : hashtagList){
+            hashtagBuilder.append(hashtag);
+            hashtagBuilder.append(',');
+        }
+
+        feed.updateContent(content);
+        feed.updateImageUrls(imageUrlBuilder.toString());
+        feed.updateHashtags(hashtagBuilder.toString());
+
+        return FeedUpdateResponse.from( feedRepository.save(feed) );
+    }
+
     // TODO 스프링 @Async를 사용해서 비동기 멀티 스레딩으로 처리하면 응답지연시간 최소화 가능.
     @Transactional
     public void deleteFeed(Long userId, Long feedId){
@@ -160,5 +207,4 @@ public class FeedService {
         // 피드 삭제.
         feedRepository.deleteById(feedId);
     }
-
 }

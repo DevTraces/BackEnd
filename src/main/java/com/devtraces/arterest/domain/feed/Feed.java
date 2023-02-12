@@ -53,4 +53,16 @@ public class Feed extends BaseEntity {
     @ToString.Exclude
     List<Reply> replyList = new ArrayList<>();
 
+    public void updateContent(String content){
+        this.content = content;
+    }
+
+    public void updateImageUrls(String imageUrls){
+        this.content = imageUrls;
+    }
+
+    public void updateHashtags(String hashtags){
+        this.content = hashtags;
+    }
+
 }
