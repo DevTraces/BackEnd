@@ -23,6 +23,7 @@ public class BaseException extends RuntimeException {
 	public static final BaseException FAILED_CACHE_GET_OPERATION = new BaseException(ErrorCode.FAILED_CACHE_GET_OPERATION);
 	public static final BaseException HASHTAG_LIMIT_EXCEED = new BaseException(ErrorCode.HASHTAG_LIMIT_EXCEED);
 	public static final BaseException IMAGE_FILE_COUNT_LIMIT_EXCEED = new BaseException(ErrorCode.IMAGE_FILE_COUNT_LIMIT_EXCEED);
+	public static final BaseException FAILED_CACHE_PUT_OPERATION = new BaseException(ErrorCode.FAILED_CACHE_PUT_OPERATION);
 
 	private final ErrorCode errorCode;
 
