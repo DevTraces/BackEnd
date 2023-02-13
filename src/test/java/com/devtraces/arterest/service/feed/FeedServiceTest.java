@@ -16,6 +16,7 @@ import com.devtraces.arterest.controller.feed.dto.FeedResponse;
 import com.devtraces.arterest.domain.bookmark.BookmarkRepository;
 import com.devtraces.arterest.domain.feed.Feed;
 import com.devtraces.arterest.domain.feed.FeedRepository;
+import com.devtraces.arterest.domain.feedhashtagmap.FeedHashtagMap;
 import com.devtraces.arterest.domain.feedhashtagmap.FeedHashtagMapRepository;
 import com.devtraces.arterest.domain.hashtag.Hashtag;
 import com.devtraces.arterest.domain.hashtag.HashtagRepository;
@@ -77,7 +78,7 @@ class FeedServiceTest {
         List<String> hashtagList = new ArrayList<>();
         hashtagList.add("#potato");
 
-        MultipartFile multipartFile = new MockMultipartFile("file", "filecotent".getBytes());
+        MultipartFile multipartFile = new MockMultipartFile("file", "fileContent".getBytes());
 
         List<MultipartFile> imageFileList = new ArrayList<>();
         imageFileList.add(multipartFile);
@@ -123,7 +124,7 @@ class FeedServiceTest {
         List<String> hashtagList = new ArrayList<>();
         hashtagList.add("#potato");
 
-        MultipartFile multipartFile = new MockMultipartFile("file", "filecotent".getBytes());
+        MultipartFile multipartFile = new MockMultipartFile("file", "fileContent".getBytes());
 
         List<MultipartFile> imageFileList = new ArrayList<>();
         imageFileList.add(multipartFile);
@@ -175,7 +176,7 @@ class FeedServiceTest {
         List<String> hashtagList = new ArrayList<>();
         hashtagList.add("#potato");
 
-        MultipartFile multipartFile = new MockMultipartFile("file", "filecotent".getBytes());
+        MultipartFile multipartFile = new MockMultipartFile("file", "fileContent".getBytes());
 
         List<MultipartFile> imageFileList = new ArrayList<>();
         imageFileList.add(multipartFile);
@@ -201,7 +202,7 @@ class FeedServiceTest {
             hashtagList.add("#potato");
         }
 
-        MultipartFile multipartFile = new MockMultipartFile("file", "filecotent".getBytes());
+        MultipartFile multipartFile = new MockMultipartFile("file", "fileContent".getBytes());
 
         List<MultipartFile> imageFileList = new ArrayList<>();
         imageFileList.add(multipartFile);
@@ -225,7 +226,7 @@ class FeedServiceTest {
         List<String> hashtagList = new ArrayList<>();
             hashtagList.add("#potato");
 
-        MultipartFile multipartFile = new MockMultipartFile("file", "filecotent".getBytes());
+        MultipartFile multipartFile = new MockMultipartFile("file", "fileContent".getBytes());
 
         List<MultipartFile> imageFileList = new ArrayList<>();
         for(int i=1; i<= 16; i++){
@@ -251,7 +252,7 @@ class FeedServiceTest {
         List<String> hashtagList = new ArrayList<>();
         hashtagList.add("#potato");
 
-        MultipartFile multipartFile = new MockMultipartFile("file", "filecotent".getBytes());
+        MultipartFile multipartFile = new MockMultipartFile("file", "fileContent".getBytes());
 
         List<MultipartFile> imageFileList = new ArrayList<>();
         imageFileList.add(multipartFile);
@@ -437,7 +438,263 @@ class FeedServiceTest {
         assertEquals(feedResponse.getFeedId(), 1L);
     }
 
-    
+    @Test
+    @DisplayName("기존 해시태그 찾아내면서 게시물 1개 수정 성공.")
+    void successUpdateFeedFoundAlreadySavedHashTag(){
+        // given
+        String content = "수정 된 게시물 내용";
+
+        List<String> hashtagList = new ArrayList<>();
+        hashtagList.add("#potato");
+
+        MultipartFile multipartFile = new MockMultipartFile("file", "fileContent".getBytes());
+
+        List<MultipartFile> imageFileList = new ArrayList<>();
+        imageFileList.add(multipartFile);
+
+        User user = User.builder()
+            .id(1L)
+            .build();
+
+        Hashtag hashtagEntity = Hashtag.builder()
+            .id(1L)
+            .hashtagString("#potato")
+            .build();
+
+        Feed feed = Feed.builder()
+            .id(1L)
+            .user(user)
+            .content(content)
+            .imageUrls("urlString,")
+            .build();
+
+        FeedHashtagMap feedHashtagMap = FeedHashtagMap.builder()
+            .id(1L)
+            .feed(feed)
+            .hashtag(hashtagEntity)
+            .build();
+
+        given(feedRepository.findById(1L)).willReturn(Optional.of(feed));
+        doNothing().when(s3Util).deleteImage("urlString");
+        given(s3Util.uploadImage(multipartFile)).willReturn("urlString");
+        doNothing().when(feedHashtagMapRepository).deleteAllByFeedId(1L);
+        given(hashtagRepository.findByHashtagString("#potato")).willReturn(Optional.of(hashtagEntity));
+        given(feedHashtagMapRepository.save(any())).willReturn(feedHashtagMap);
+        given(feedRepository.save(any())).willReturn(feed);
+
+        // when
+        feedService.updateFeed(1L, content, imageFileList, hashtagList, 1L);
+
+        // then
+        verify(feedRepository, times(1)).findById(1L);
+        verify(s3Util, times(1)).deleteImage(any());
+        verify(s3Util, times(1)).uploadImage(any());
+        verify(feedHashtagMapRepository, times(1)).deleteAllByFeedId(1L);
+        verify(hashtagRepository, times(1)).findByHashtagString(anyString());
+        verify(hashtagRepository, times(1)).findByHashtagString(anyString());
+        verify(feedRepository, times(1)).save(any());
+    }
+
+    @Test
+    @DisplayName("새로운 해시태그 저장하면서 게시물 1개 수정 성공.")
+    void successUpdateFeedSaveNewHashTag(){
+        // given
+        String content = "수정 된 게시물 내용";
+
+        List<String> hashtagList = new ArrayList<>();
+        hashtagList.add("#potato");
+
+        MultipartFile multipartFile = new MockMultipartFile("file", "fileContent".getBytes());
+
+        List<MultipartFile> imageFileList = new ArrayList<>();
+        imageFileList.add(multipartFile);
+
+        User user = User.builder()
+            .id(1L)
+            .build();
+
+        Hashtag hashtagEntity = Hashtag.builder()
+            .id(1L)
+            .hashtagString("#potato")
+            .build();
+
+        Feed feed = Feed.builder()
+            .id(1L)
+            .user(user)
+            .content(content)
+            .imageUrls("urlString,")
+            .build();
+
+        FeedHashtagMap feedHashtagMap = FeedHashtagMap.builder()
+            .id(1L)
+            .feed(feed)
+            .hashtag(hashtagEntity)
+            .build();
+
+        given(feedRepository.findById(1L)).willReturn(Optional.of(feed));
+        doNothing().when(s3Util).deleteImage("urlString");
+        given(s3Util.uploadImage(multipartFile)).willReturn("urlString");
+        doNothing().when(feedHashtagMapRepository).deleteAllByFeedId(1L);
+        given(hashtagRepository.findByHashtagString("#potato")).willReturn(Optional.empty());
+        given(hashtagRepository.save(any())).willReturn(hashtagEntity);
+        given(feedHashtagMapRepository.save(any())).willReturn(feedHashtagMap);
+        given(feedRepository.save(any())).willReturn(feed);
+
+        // when
+        feedService.updateFeed(1L, content, imageFileList, hashtagList, 1L);
+
+        // then
+        verify(feedRepository, times(1)).findById(1L);
+        verify(s3Util, times(1)).deleteImage(any());
+        verify(s3Util, times(1)).uploadImage(any());
+        verify(feedHashtagMapRepository, times(1)).deleteAllByFeedId(1L);
+        verify(hashtagRepository, times(1)).findByHashtagString(anyString());
+        verify(hashtagRepository, times(1)).save(any());
+        verify(feedHashtagMapRepository, times(1)).save(any());
+        verify(feedRepository, times(1)).save(any());
+    }
+
+    @Test
+    @DisplayName("게시물 수정 실패 - 내용물 텍스트 길이 제한 초과")
+    void failedUpdateFeedContentLimitExceed(){
+        // given
+        StringBuilder sb = new StringBuilder();
+        for(int i=1; i<=1001; i++){
+            sb.append('c');
+        }
+
+        String content = sb.toString();
+
+        List<String> hashtagList = new ArrayList<>();
+        hashtagList.add("#potato");
+
+        MultipartFile multipartFile = new MockMultipartFile("file", "fileContent".getBytes());
+
+        List<MultipartFile> imageFileList = new ArrayList<>();
+        imageFileList.add(multipartFile);
+
+        // when
+        BaseException exception = assertThrows(
+            BaseException.class ,
+            () -> feedService.updateFeed(1L, content, imageFileList, hashtagList, 1L)
+        );
+
+        // then
+        assertEquals(ErrorCode.CONTENT_LIMIT_EXCEED, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("게시물 수정 실패 - 해시태그 개수 초과")
+    void failedUpdateFeedHashtagCountLimitExceed(){
+        // given
+        String content = "게시물 내용";
+
+        List<String> hashtagList = new ArrayList<>();
+        for(int i=1; i<=11; i++){
+            hashtagList.add("#potato");
+        }
+
+        MultipartFile multipartFile = new MockMultipartFile("file", "fileContent".getBytes());
+
+        List<MultipartFile> imageFileList = new ArrayList<>();
+        imageFileList.add(multipartFile);
+
+        // when
+        BaseException exception = assertThrows(
+            BaseException.class ,
+            () -> feedService.updateFeed(1L, content, imageFileList, hashtagList, 1L)
+        );
+
+        // then
+        assertEquals(ErrorCode.HASHTAG_LIMIT_EXCEED, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("게시물 수정 실패 - 이미지파일 개수 초과")
+    void failedUpdateFeedImagefileCountLimitExceed(){
+        // given
+        String content = "게시물 내용";
+
+        List<String> hashtagList = new ArrayList<>();
+        hashtagList.add("#potato");
+
+        MultipartFile multipartFile = new MockMultipartFile("file", "fileContent".getBytes());
+
+        List<MultipartFile> imageFileList = new ArrayList<>();
+        for(int i=1; i<= 16; i++){
+            imageFileList.add(multipartFile);
+        }
+
+        // when
+        BaseException exception = assertThrows(
+            BaseException.class ,
+            () -> feedService.updateFeed(1L, content, imageFileList, hashtagList, 1L)
+        );
+
+        // then
+        assertEquals(ErrorCode.IMAGE_FILE_COUNT_LIMIT_EXCEED, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("게시물 수정 실패 - 수정 대상 게시물을 찾을 수 없음.")
+    void failedUpdateFeedFeedNotFound(){
+        // given
+        String content = "게시물 내용";
+
+        List<String> hashtagList = new ArrayList<>();
+        hashtagList.add("#potato");
+
+        MultipartFile multipartFile = new MockMultipartFile("file", "fileContent".getBytes());
+
+        List<MultipartFile> imageFileList = new ArrayList<>();
+        imageFileList.add(multipartFile);
+
+        given(feedRepository.findById(1L)).willReturn(Optional.empty());
+
+        // when
+        BaseException exception = assertThrows(
+            BaseException.class ,
+            () -> feedService.updateFeed(1L, content, imageFileList, hashtagList, 1L)
+        );
+
+        // then
+        assertEquals(ErrorCode.FEED_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("게시물 수정 실패 - 유저 정보와 게시물 작성자 정보가 일치하지 않음.")
+    void failedUpdateFeedUserInfoNotMatch(){
+        // given
+        String content = "게시물 내용";
+
+        List<String> hashtagList = new ArrayList<>();
+        hashtagList.add("#potato");
+
+        MultipartFile multipartFile = new MockMultipartFile("file", "fileContent".getBytes());
+
+        List<MultipartFile> imageFileList = new ArrayList<>();
+        imageFileList.add(multipartFile);
+
+        User user = User.builder()
+            .id(2L)
+            .build();
+
+        Feed feed = Feed.builder()
+            .id(1L)
+            .user(user)
+            .build();
+
+        given(feedRepository.findById(1L)).willReturn(Optional.of(feed));
+
+        // when
+        BaseException exception = assertThrows(
+            BaseException.class ,
+            () -> feedService.updateFeed(1L, content, imageFileList, hashtagList, 1L)
+        );
+
+        // then
+        assertEquals(ErrorCode.USER_INFO_NOT_MATCH, exception.getErrorCode());
+    }
 
 }
 
