@@ -26,7 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Component
 public class S3Util {
 
-	private static final Set<String> AVAILABLE_IMAGE_EXTENSION = new HashSet<>(Arrays.asList("gif", "png", "jpeg", "bmp", "webp"));
+	private static final Set<String> AVAILABLE_IMAGE_EXTENSION = new HashSet<>(Arrays.asList("gif", "png", "jpg", "jpeg", "bmp", "webp"));
 
 	private final AmazonS3 amazonS3;
 
