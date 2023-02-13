@@ -6,7 +6,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
-public class OauthKakaoSignInDto {
+public class UserInfoFromKakaoDto {
 
     private long kakaoUserId;
     private String email;

@@ -6,7 +6,7 @@ import com.devtraces.arterest.common.jwt.JwtProvider;
 import com.devtraces.arterest.common.jwt.dto.TokenDto;
 import com.devtraces.arterest.domain.user.User;
 import com.devtraces.arterest.domain.user.UserRepository;
-import com.devtraces.arterest.service.user.dto.OauthKakaoSignInDto;
+import com.devtraces.arterest.service.user.dto.UserInfoFromKakaoDto;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import lombok.RequiredArgsConstructor;
@@ -28,19 +28,19 @@ public class OauthService {
 
     public TokenDto oauthKakaoSignIn(String accessToken) {
         // kakao 서버에 액세스 토큰 보낸 뒤 사용자 정보 가져오기
-        OauthKakaoSignInDto oauthKakaoSignInDto = createKakaoUser(accessToken);
+        UserInfoFromKakaoDto userInfoFromKakaoDto = createKakaoUser(accessToken);
 
-        // DB에 dto의 nickname이 없는 사람만 회원가입 진행
-        long kakaoUserId = oauthKakaoSignInDto.getKakaoUserId();
+        // DB에 dto에서 kakaoUserId가 없는 사람만 회원가입 진행
+        long kakaoUserId = userInfoFromKakaoDto.getKakaoUserId();
         Optional<User> optionalUser = userRepository.findByKakaoUserId(kakaoUserId);
         if (!optionalUser.isPresent()) {
             User save = userRepository.save(User.builder()
-                    .kakaoUserId(oauthKakaoSignInDto.getKakaoUserId())
-                    .email(oauthKakaoSignInDto.getEmail())
-                    .username(oauthKakaoSignInDto.getUsername())
-                    .nickname(oauthKakaoSignInDto.getNickname())
-                    .profileImageUrl(oauthKakaoSignInDto.getProfileImageUrl())
-                    .description(oauthKakaoSignInDto.getDescription())
+                    .kakaoUserId(userInfoFromKakaoDto.getKakaoUserId())
+                    .email(userInfoFromKakaoDto.getEmail())
+                    .username(userInfoFromKakaoDto.getUsername())
+                    .nickname(userInfoFromKakaoDto.getNickname())
+                    .profileImageUrl(userInfoFromKakaoDto.getProfileImageUrl())
+                    .description(userInfoFromKakaoDto.getDescription())
                     .userStatus(UserStatusType.ACTIVE)
                     .signupType(UserSignUpType.KAKAO_TALK)
                     .build());
@@ -55,7 +55,7 @@ public class OauthService {
     }
 
     // 카카오 서버로 요청하는 함수
-    private OauthKakaoSignInDto createKakaoUser(String accessToken) {
+    private UserInfoFromKakaoDto createKakaoUser(String accessToken) {
 
         String requestURL = "https://kapi.kakao.com/v2/user/me";
 
@@ -80,11 +80,11 @@ public class OauthService {
             }
 
             // 카카오 서버로부터 받은 사용자 정보를 담은 DTO
-            OauthKakaoSignInDto oauthKakaoSignInDto = parseResponseToJson(result);
+            UserInfoFromKakaoDto userInfoFromKakaoDto = parseResponseToJson(result);
 
             br.close();
 
-            return oauthKakaoSignInDto;
+            return userInfoFromKakaoDto;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -92,7 +92,7 @@ public class OauthService {
     }
 
     // 카카오 서버로부터 받은 정보 파싱
-    private static OauthKakaoSignInDto parseResponseToJson(String result
+    private static UserInfoFromKakaoDto parseResponseToJson(String result
     ) throws IOException {
         System.out.println("response body : " + result);
 
@@ -118,7 +118,7 @@ public class OauthService {
             email = jsonEmailElement.getAsString();
         }
 
-        return OauthKakaoSignInDto.builder()
+        return UserInfoFromKakaoDto.builder()
                 .kakaoUserId(kakaoUserId)
                 .email(email)
                 .username("사용자 이름")
