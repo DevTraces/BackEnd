@@ -3,6 +3,7 @@ package com.devtraces.arterest.service.feed;
 import com.devtraces.arterest.common.CommonUtils;
 import com.devtraces.arterest.common.component.S3Uploader;
 import com.devtraces.arterest.common.exception.BaseException;
+import com.devtraces.arterest.controller.feed.dto.FeedCreateResponse;
 import com.devtraces.arterest.controller.feed.dto.FeedResponse;
 import com.devtraces.arterest.controller.feed.dto.FeedUpdateResponse;
 import com.devtraces.arterest.domain.bookmark.BookmarkRepository;
@@ -23,6 +24,7 @@ import com.devtraces.arterest.domain.user.User;
 import com.devtraces.arterest.domain.user.UserRepository;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -47,28 +49,35 @@ public class FeedService {
     private final FeedHashtagMapRepository feedHashtagMapRepository;
 
     @Transactional
-    public FeedResponse createFeed(
+    public FeedCreateResponse createFeed(
         Long userId, String content, List<MultipartFile> imageFileList, List<String> hashtagList
     ) {
+        // 게시물 텍스트 없이 사진 또는 해시태그만 게시물로서 올리고 싶은 유저가 분명 있을 것이므로,
+        // content가 빈 스트링인 것에 대해서도 받아들인다.
         if(content.length() > CommonUtils.CONTENT_LENGTH_LIMIT){
             throw BaseException.CONTENT_LIMIT_EXCEED;
         }
-        if(hashtagList.size() > CommonUtils.HASHTAG_COUNT_LIMIT){
+        if(hashtagList != null && hashtagList.size() > CommonUtils.HASHTAG_COUNT_LIMIT){
             throw BaseException.HASHTAG_LIMIT_EXCEED;
         }
-        if(imageFileList.size() > CommonUtils.IMAGE_FILE_COUNT_LIMIT){
+        if(imageFileList != null && imageFileList.size() > CommonUtils.IMAGE_FILE_COUNT_LIMIT){
             throw BaseException.IMAGE_FILE_COUNT_LIMIT_EXCEED;
         }
         User authorUser = userRepository.findById(userId).orElseThrow(
             () -> BaseException.USER_NOT_FOUND
         );
 
+        // 유저가 올린 이미지가 없을 경우, imageUrlBuilder는 toString하면 "" 이렇게 빈 문자열 된다.
         StringBuilder imageUrlBuilder = new StringBuilder();
-        for(MultipartFile imageFile : imageFileList){
-            imageUrlBuilder.append(s3Uploader.uploadImage(imageFile));
-            imageUrlBuilder.append(',');
+        if(imageFileList != null){
+            for(MultipartFile imageFile : imageFileList){
+                imageUrlBuilder.append(s3Uploader.uploadImage(imageFile));
+                imageUrlBuilder.append(',');
+            }
         }
 
+        // 유저가 올린 이미지가 없을 경우, 최종적으로 프런트엔드가 받는 JSON에서는
+        // "imageUrls" : [ "" ] 와 같은 빈 문자열이 1개 담긴 리스트가 리턴된다.
         Feed newFeed = feedRepository.save(
             Feed.builder()
                 .content(content)
@@ -80,26 +89,28 @@ public class FeedService {
         // 입력 받은 해시태그 값들을 순회하면서 새로 저장해야 하는 것은 저장하고, 이미 찾을 수 있는 것은 찾아내서
         // FeedHashtagMap에 저장한다.
         // FeedHashtagMap 엔티티를 빌드하기 위해서는 Feed 엔티티와 Hashtag 엔티티 모두가 필요하다.
-        for(String hashtagInputString : hashtagList){
-            Hashtag hashtagEntity = hashtagRepository.findByHashtagString(hashtagInputString).orElse(
-                hashtagRepository.save(
-                    Hashtag.builder()
-                        .hashtagString(hashtagInputString)
+        if(hashtagList != null){
+            for(String hashtagInputString : hashtagList){
+                Hashtag hashtagEntity = hashtagRepository.findByHashtagString(hashtagInputString).orElse(
+                    hashtagRepository.save(
+                        Hashtag.builder()
+                            .hashtagString(hashtagInputString)
+                            .build()
+                    )
+                );
+                feedHashtagMapRepository.save(
+                    FeedHashtagMap.builder()
+                        .feed(newFeed)
+                        .hashtag(hashtagEntity)
                         .build()
-                )
-            );
-            feedHashtagMapRepository.save(
-                FeedHashtagMap.builder()
-                    .feed(newFeed)
-                    .hashtag(hashtagEntity)
-                    .build()
-            );
+                );
+            }
         }
 
         // 새로 만들어진 게시물이므로, 좋아요 개수를 레디스에 0으로 캐시 해둔다.
         likeNumberCacheRepository.setInitialLikeNumber(newFeed.getId());
 
-        return FeedResponse.from(newFeed, null, 0L, null);
+        return FeedCreateResponse.from(newFeed, 0L, hashtagList);
     }
 
     @Transactional(readOnly = true)
@@ -151,10 +162,10 @@ public class FeedService {
         if(content.length() > CommonUtils.CONTENT_LENGTH_LIMIT){
             throw BaseException.CONTENT_LIMIT_EXCEED;
         }
-        if(hashtagList.size() > CommonUtils.HASHTAG_COUNT_LIMIT){
+        if(hashtagList != null && hashtagList.size() > CommonUtils.HASHTAG_COUNT_LIMIT){
             throw BaseException.HASHTAG_LIMIT_EXCEED;
         }
-        if(imageFileList.size() > CommonUtils.IMAGE_FILE_COUNT_LIMIT){
+        if(imageFileList != null && imageFileList.size() > CommonUtils.IMAGE_FILE_COUNT_LIMIT){
             throw BaseException.IMAGE_FILE_COUNT_LIMIT_EXCEED;
         }
 
@@ -170,35 +181,51 @@ public class FeedService {
 
         // 기존 이미지들의 삭제가 위의 로직에서 진행되었다고 가정하고 새 이미지를 올린다.
         StringBuilder imageUrlBuilder = new StringBuilder();
-        for(MultipartFile imageFile : imageFileList){
-            imageUrlBuilder.append(s3Uploader.uploadImage(imageFile));
-            imageUrlBuilder.append(',');
+        if(imageFileList != null){
+            for(MultipartFile imageFile : imageFileList){
+                imageUrlBuilder.append(s3Uploader.uploadImage(imageFile));
+                imageUrlBuilder.append(',');
+            }
         }
 
         // 기존에 FeedHashtagMap 엔티티들을 전부 삭제한다.
         feedHashtagMapRepository.deleteAllByFeedId(feedId);
 
         // 그 후 입력 받은 값에 따라서 새롭게 저장한다.
-        for(String hashtagInputString : hashtagList){
-            Hashtag hashtagEntity = hashtagRepository.findByHashtagString(hashtagInputString).orElse(
-                hashtagRepository.save(
-                    Hashtag.builder()
-                        .hashtagString(hashtagInputString)
-                        .build()
-                )
-            );
-            feedHashtagMapRepository.save(
-                FeedHashtagMap.builder()
-                    .feed(feed)
-                    .hashtag(hashtagEntity)
-                    .build()
-            );
+        if(hashtagList != null){
+            for(String hashtagInputString : hashtagList){
+                Optional<Hashtag> optionalHashtag = hashtagRepository
+                    .findByHashtagString(hashtagInputString);
+                if(optionalHashtag.isPresent()){
+                    // 해시태그 엔티티를 찾을 수 있는 경우.
+                    feedHashtagMapRepository.save(
+                        FeedHashtagMap.builder()
+                            .feed(feed)
+                            .hashtag(optionalHashtag.get())
+                            .build()
+                    );
+                } else { // 해시태그 엔티티를 찾을 수 없는 경우.
+                    Hashtag newHashtag = hashtagRepository.save(
+                        Hashtag.builder()
+                            .hashtagString(hashtagInputString)
+                            .build()
+                    );
+                    feedHashtagMapRepository.save(
+                        FeedHashtagMap.builder()
+                            .feed(feed)
+                            .hashtag(newHashtag)
+                            .build()
+                    );
+                }
+            }
         }
 
         feed.updateContent(content);
-        feed.updateImageUrls(imageUrlBuilder.toString());
+        feed.updateImageUrls(
+            imageUrlBuilder.toString().equals("") ? null : imageUrlBuilder.toString()
+        );
 
-        return FeedUpdateResponse.from( feedRepository.save(feed) );
+        return FeedUpdateResponse.from( feedRepository.save(feed), hashtagList );
     }
 
     // TODO 스프링 @Async를 사용해서 비동기 멀티 스레딩으로 처리하면 응답지연시간 최소화 가능.

@@ -40,6 +40,8 @@ public class Feed extends BaseEntity {
     private Long id;
 
     private String content;
+
+    @Column(length = 6000) // S3에서 전달하는 이미지 url 길이가 255 바이트보다 길어서 저장가능 제한을 확장해줘야 함.
     private String imageUrls;
 
     // 1:N mapping with User

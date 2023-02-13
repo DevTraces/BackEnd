@@ -1,6 +1,7 @@
 package com.devtraces.arterest.controller.feed;
 
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
+import com.devtraces.arterest.controller.feed.dto.FeedCreateResponse;
 import com.devtraces.arterest.controller.feed.dto.FeedResponse;
 import com.devtraces.arterest.controller.feed.dto.FeedUpdateResponse;
 import com.devtraces.arterest.service.feed.FeedService;
@@ -26,11 +27,11 @@ public class FeedController {
     private final FeedService feedService;
 
     @PostMapping
-    public ApiSuccessResponse<FeedResponse> createFeed(
+    public ApiSuccessResponse<FeedCreateResponse> createFeed(
         @AuthenticationPrincipal Long userId,
         @RequestParam("content") String content,
-        @RequestParam("imageFiles") List<MultipartFile> imageFileList,
-        @RequestParam("hashtags") List<String> hashtagList
+        @RequestParam(value = "imageFiles", required = false) List<MultipartFile> imageFileList,
+        @RequestParam(value = "hashtags", required = false) List<String> hashtagList
     ){
         return ApiSuccessResponse.from(
             feedService.createFeed(userId, content, imageFileList, hashtagList)
@@ -58,8 +59,8 @@ public class FeedController {
     public ApiSuccessResponse<FeedUpdateResponse> updateFeed(
         @AuthenticationPrincipal Long userId,
         @RequestParam("content") String content,
-        @RequestParam("imageFiles") List<MultipartFile> imageFileList,
-        @RequestParam("hashtags") List<String> hashtagList,
+        @RequestParam(value = "imageFiles", required = false) List<MultipartFile> imageFileList,
+        @RequestParam(value = "hashtags", required = false) List<String> hashtagList,
         @PathVariable Long feedId
     ){
         return ApiSuccessResponse.from(

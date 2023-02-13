@@ -22,18 +22,15 @@ public class FeedUpdateResponse {
     private List<String> imageUrls;
     private List<String> hashtags;
 
-    public static FeedUpdateResponse from(Feed feed){
+    public static FeedUpdateResponse from(Feed feed, List<String> hashtagStringList){
         return FeedUpdateResponse.builder()
             .feedId(feed.getId())
             .content(feed.getContent() == null ? "" : feed.getContent())
             .imageUrls(
+                feed.getImageUrls() == null ? null :
                 Arrays.stream(feed.getImageUrls().split(",")).collect(Collectors.toList())
             )
-            .hashtags(
-                feed.getFeedHashtagMapList().stream().map(
-                    feedHashtagMap -> feedHashtagMap.getHashtag().getHashtagString()
-                ).collect(Collectors.toList())
-            )
+            .hashtags(hashtagStringList)
             .build();
     }
 }

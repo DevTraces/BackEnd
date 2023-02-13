@@ -18,7 +18,7 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class FeedResponse {
+public class FeedCreateResponse {
 
     private Long feedId;
 
@@ -27,7 +27,7 @@ public class FeedResponse {
 
     private String content;
     private List<String> imageUrls;
-    private List<String> hashtags; // ["#감자", "#potato" ...]
+    private List<String> hashtags; // ["#감자", "#potato" ...] 없다면 null
 
     private Long numberOfLike;
     private Integer numberOfReply;
@@ -37,30 +37,23 @@ public class FeedResponse {
     private LocalDateTime createdAt; // 프런트엔드 측에서는 "2023-02-07T09:59:23.653281"라는 문자열 받음.
     private LocalDateTime modifiedAt;
 
-    public static FeedResponse from(
-        Feed feed, Set<Long> likedFeedSet, Long numberOfLike, Set<Long> bookmarkedFeedSet
+    public static FeedCreateResponse from(
+        Feed feed, Long numberOfLike, List<String> hashtagList
     ){
-        return FeedResponse.builder()
+        return FeedCreateResponse.builder()
             .feedId(feed.getId())
             .authorProfileImageUrl(feed.getUser().getProfileImageUrl())
             .authorNickname(feed.getUser().getNickname())
             .content(feed.getContent())
             .imageUrls(
                 feed.getImageUrls().equals("") ? null :
-                Arrays.stream(feed.getImageUrls().split(",")).collect(Collectors.toList())
+                    Arrays.stream(feed.getImageUrls().split(",")).collect(Collectors.toList())
             )
-            .hashtags(
-                feed.getFeedHashtagMapList() == null ? null :
-                feed.getFeedHashtagMapList().stream().map(
-                    feedHashtagMap -> feedHashtagMap.getHashtag().getHashtagString()
-                ).collect(Collectors.toList())
-            )
+            .hashtags(hashtagList)
             .numberOfLike(numberOfLike)
             .numberOfReply(feed.getReplyList() == null ? 0 : feed.getReplyList().size())
-            .isLiked(likedFeedSet == null ? false : likedFeedSet.contains(feed.getId()))
-            .isBookMarked(
-                bookmarkedFeedSet == null? false : bookmarkedFeedSet.contains(feed.getId())
-            ) // 현재 게시물이 예전에 북마크 했던 게시물인지 여부
+            .isLiked(false)
+            .isBookMarked(false) // 현재 게시물이 예전에 북마크 했던 게시물인지 여부
             .createdAt(feed.getCreatedAt())
             .modifiedAt(feed.getModifiedAt())
             .build();
