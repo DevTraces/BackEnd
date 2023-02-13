@@ -164,4 +164,51 @@ class AuthServiceTest {
 
 		assertEquals(BaseException.WRONG_EMAIL_OR_PASSWORD, exception);
 	}
+
+	@Test
+	void testCheckPasswordByCorrectPassword() {
+		User mockUser = User.builder()
+			.id(1L)
+			.email("email@gmail.com")
+			.password("encodingPassword")
+			.build();
+		given(userRepository.findById(anyLong()))
+			.willReturn(Optional.of(mockUser));
+		given(passwordEncoder.matches(anyString(), anyString()))
+			.willReturn(true);
+
+		boolean isCorrect = authService.checkPassword(1L, "password");
+
+		assertTrue(isCorrect);
+	}
+
+	@Test
+	void testCheckPasswordByWrongPassword() {
+		User mockUser = User.builder()
+			.id(1L)
+			.email("email@gmail.com")
+			.password("encodingPassword")
+			.build();
+		given(userRepository.findById(anyLong()))
+			.willReturn(Optional.of(mockUser));
+		given(passwordEncoder.matches(anyString(), anyString()))
+			.willReturn(false);
+
+		boolean isCorrect = authService.checkPassword(1L, "wrong-password");
+
+		assertFalse(isCorrect);
+	}
+
+	// Optional이므로 null인 경우에 대한 예외를 처리했지만,
+	// userId는 인증인가를 하여 얻은 값이므로 이 예외가 발생할 가능성은 0%다.
+	@Test
+	void testCheckPasswordByWrongUserId() {
+		given(userRepository.findById(anyLong()))
+			.willReturn(Optional.empty());
+
+		BaseException exception = assertThrows(BaseException.class,
+			() -> authService.checkPassword(0L, "password"));
+
+		assertEquals(BaseException.USER_NOT_FOUND, exception);
+	}
 }
