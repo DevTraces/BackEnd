@@ -1,7 +1,7 @@
 package com.devtraces.arterest.service.feed;
 
 import com.devtraces.arterest.common.CommonUtils;
-import com.devtraces.arterest.common.component.S3Uploader;
+import com.devtraces.arterest.common.component.S3Util;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.controller.feed.dto.FeedCreateResponse;
 import com.devtraces.arterest.controller.feed.dto.FeedResponse;
@@ -44,7 +44,7 @@ public class FeedService {
     private final LikeRepository likeRepository;
     private final BookmarkRepository bookmarkRepository;
     private final LikeNumberCacheRepository likeNumberCacheRepository;
-    private final S3Uploader s3Uploader;
+    private final S3Util s3Util;
     private final HashtagRepository hashtagRepository;
     private final FeedHashtagMapRepository feedHashtagMapRepository;
 
@@ -71,13 +71,13 @@ public class FeedService {
         StringBuilder imageUrlBuilder = new StringBuilder();
         if(imageFileList != null){
             for(MultipartFile imageFile : imageFileList){
-                imageUrlBuilder.append(s3Uploader.uploadImage(imageFile));
+                imageUrlBuilder.append(s3Util.uploadImage(imageFile));
                 imageUrlBuilder.append(',');
             }
         }
 
         // 유저가 올린 이미지가 없을 경우, 최종적으로 프런트엔드가 받는 JSON에서는
-        // "imageUrls" : [ "" ] 와 같은 빈 문자열이 1개 담긴 리스트가 리턴된다.
+        // "imageUrls" : null이 리턴된다.
         Feed newFeed = feedRepository.save(
             Feed.builder()
                 .content(content)
@@ -177,13 +177,18 @@ public class FeedService {
             throw BaseException.USER_INFO_NOT_MATCH;
         }
 
-        // TODO 기존에 S3에 저장돼 있던 사진들을 전부 삭제하는 로직이 필요하다.
+        // 기존에 S3에 저장돼 있던 사진들을 전부 삭제한다.
+        if(!feed.getImageUrls().equals("")){
+            for(String deleteTargetUrl : feed.getImageUrls().split(",")){
+                s3Util.deleteImage(deleteTargetUrl);
+            }
+        }
 
         // 기존 이미지들의 삭제가 위의 로직에서 진행되었다고 가정하고 새 이미지를 올린다.
         StringBuilder imageUrlBuilder = new StringBuilder();
         if(imageFileList != null){
             for(MultipartFile imageFile : imageFileList){
-                imageUrlBuilder.append(s3Uploader.uploadImage(imageFile));
+                imageUrlBuilder.append(s3Util.uploadImage(imageFile));
                 imageUrlBuilder.append(',');
             }
         }
@@ -236,6 +241,13 @@ public class FeedService {
         );
         if(!Objects.equals(feed.getUser().getId(), userId)){
             throw BaseException.USER_INFO_NOT_MATCH;
+        }
+
+        // S3에 올려놨던 사진들을 전부 삭제한다.
+        if(!feed.getImageUrls().equals("")){
+            for(String deleteTargetUrl : feed.getImageUrls().split(",")){
+                s3Util.deleteImage(deleteTargetUrl);
+            }
         }
 
         // FeedHashtagMap 테이블에서 관련 정보 모두 삭제.

@@ -1,4 +1,4 @@
-package com.devtraces.arterest.service;
+package com.devtraces.arterest.service.rereply;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
