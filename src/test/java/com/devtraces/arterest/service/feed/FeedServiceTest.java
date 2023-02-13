@@ -2,6 +2,7 @@ package com.devtraces.arterest.service.feed;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -49,7 +50,7 @@ class FeedServiceTest {
     @Mock
     private FeedRepository feedRepository;
     @Mock
-    private ReplyRepository replyrepository;
+    private ReplyRepository replyRepository;
     @Mock
     private RereplyRepository rereplyRepository;
     @Mock
@@ -696,23 +697,99 @@ class FeedServiceTest {
         assertEquals(ErrorCode.USER_INFO_NOT_MATCH, exception.getErrorCode());
     }
 
+    @Test
+    @DisplayName("피드 1개 제거")
+    void successDeleteFeed(){
+        // given
+        User user = User.builder()
+            .id(1L)
+            .build();
+
+        Rereply rereply = Rereply.builder()
+            .id(1L)
+            .build();
+
+        Reply reply = Reply.builder()
+            .id(1L)
+            .rereplyList(new ArrayList<>())
+            .build();
+        reply.getRereplyList().add(rereply);
+
+        Feed feed = Feed.builder()
+            .id(1L)
+            .replyList(new ArrayList<>())
+            .user(user)
+            .imageUrls("imageUrl,")
+            .build();
+        feed.getReplyList().add(reply);
+
+        given(feedRepository.findById(anyLong())).willReturn(Optional.of(feed));
+
+        doNothing().when(s3Util).deleteImage(anyString());
+        doNothing().when(feedHashtagMapRepository).deleteAllByFeedId(anyLong());
+        doNothing().when(likeNumberCacheRepository).deleteLikeNumberInfo(anyLong());
+        doNothing().when(likeRepository).deleteAllByFeedId(anyLong());
+        doNothing().when(bookmarkRepository).deleteAllByFeedId(anyLong());
+        doNothing().when(rereplyRepository).deleteAllByIdIn(anyList());
+        doNothing().when(replyRepository).deleteAllByIdIn(anyList());
+        doNothing().when(feedRepository).deleteById(anyLong());
+
+        // when
+        feedService.deleteFeed(1L, 1L);
+
+        List<Long> longList = new ArrayList<>();
+        longList.add(1L);
+
+        // then
+        verify(s3Util, times(1)).deleteImage("imageUrl");
+        verify(feedHashtagMapRepository, times(1)).deleteAllByFeedId(1L);
+        verify(likeNumberCacheRepository, times(1)).deleteLikeNumberInfo(1L);
+        verify(likeRepository, times(1)).deleteAllByFeedId(1L);
+        verify(bookmarkRepository, times(1)).deleteAllByFeedId(1L);
+        verify(rereplyRepository, times(1)).deleteAllByIdIn(longList);
+        verify(replyRepository, times(1)).deleteAllByIdIn(longList);
+        verify(feedRepository).deleteById(anyLong());
+    }
+
+    @Test
+    @DisplayName("게시물 삭제 실패 - 삭제 대상 게시물을 찾을 수 없음.")
+    void failedDeleteFeedFeedNotFound(){
+        // given
+        given(feedRepository.findById(anyLong())).willReturn(Optional.empty());
+
+        // when
+        BaseException exception = assertThrows(
+            BaseException.class ,
+            () -> feedService.deleteFeed(1L, 1L)
+        );
+
+        // then
+        assertEquals(ErrorCode.FEED_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("게시물 삭제 실패 - 유저 정보가 게시물 작성자 정보와 일치하지 않음.")
+    void failedDeleteFeedUserInfoNotMatch(){
+        // given
+        User user = User.builder()
+            .id(2L)
+            .build();
+
+        Feed feed = Feed.builder()
+            .id(1L)
+            .user(user)
+            .build();
+
+        given(feedRepository.findById(anyLong())).willReturn(Optional.of(feed));
+
+        // when
+        BaseException exception = assertThrows(
+            BaseException.class ,
+            () -> feedService.deleteFeed(1L, 1L)
+        );
+
+        // then
+        assertEquals(ErrorCode.USER_INFO_NOT_MATCH, exception.getErrorCode());
+    }
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
