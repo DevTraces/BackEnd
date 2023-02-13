@@ -7,6 +7,7 @@ import com.devtraces.arterest.controller.search.dto.GetNicknameSearchResponse;
 import com.devtraces.arterest.controller.search.dto.GetUsernameSearchResponse;
 import com.devtraces.arterest.domain.feed.FeedRepository;
 import com.devtraces.arterest.domain.feed.FeedVo;
+import com.devtraces.arterest.domain.hashtag.Hashtag;
 import com.devtraces.arterest.domain.hashtag.HashtagRepository;
 import com.devtraces.arterest.domain.user.UserRepository;
 import java.io.ByteArrayInputStream;
@@ -21,6 +22,7 @@ import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.Trie;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -56,8 +58,9 @@ public class SearchService {
 	public List<GetHashtagsSearchResponse> getSearchResultUsingHashtags(
 		String keyword, Integer page, Integer pageSize) {
 		Pageable pageable = PageRequest.of(page, pageSize);
-		return hashtagRepository.findByHashtag(keyword, pageable)
-			.stream().map(Hashtag -> GetHashtagsSearchResponse.from(Hashtag))
+		Page<Hashtag> hashtagPage = hashtagRepository.findByHashtag(keyword, pageable);
+		return hashtagPage.stream()
+			.map(Hashtag -> GetHashtagsSearchResponse.from(Hashtag, hashtagPage.getTotalElements()))
 			.collect(Collectors.toList());
 	}
 

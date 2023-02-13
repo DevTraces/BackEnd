@@ -34,9 +34,7 @@ public class SearchController {
 		@RequestParam Integer page,
 		@RequestParam(required = false, defaultValue = "10") Integer pageSize
 	){
-		List<GetHashtagsSearchResponse> response =
-			searchService.getSearchResultUsingHashtags(keyword, page, pageSize);
-		return ApiSuccessResponse.from(response);
+		return ApiSuccessResponse.from(searchService.getSearchResultUsingHashtags(keyword, page, pageSize));
 	}
 
 	@GetMapping("/username")

@@ -1,6 +1,7 @@
 package com.devtraces.arterest.domain.feed;
 
 import com.devtraces.arterest.common.domain.BaseEntity;
+import com.devtraces.arterest.domain.feedhashtagmap.FeedHashtagMap;
 import com.devtraces.arterest.domain.reply.Reply;
 import com.devtraces.arterest.domain.user.User;
 import java.util.ArrayList;
@@ -39,8 +40,9 @@ public class Feed extends BaseEntity {
     private Long id;
 
     private String content;
+
+    @Column(length = 6000) // S3에서 전달하는 이미지 url 길이가 255 바이트보다 길어서 저장가능 제한을 확장해줘야 함.
     private String imageUrls;
-    private String hashtags;
 
     // 1:N mapping with User
     @ManyToOne(fetch = FetchType.LAZY)
@@ -52,5 +54,18 @@ public class Feed extends BaseEntity {
     @OneToMany(mappedBy = "feed")
     @ToString.Exclude
     List<Reply> replyList = new ArrayList<>();
+
+    // 1:N mapping with FeedHashtagMap
+    @OneToMany(mappedBy = "feed")
+    @ToString.Exclude
+    List<FeedHashtagMap> feedHashtagMapList = new ArrayList<>();
+
+    public void updateContent(String content){
+        this.content = content;
+    }
+
+    public void updateImageUrls(String imageUrls){
+        this.imageUrls = imageUrls;
+    }
 
 }
