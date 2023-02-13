@@ -17,6 +17,7 @@ public enum ErrorCode {
   	USER_INFO_NOT_MATCH(HttpStatus.BAD_REQUEST,"USER_INFO_NOT_MATCH","작성자만 내용을 수정할 수 있습니다."),
 	HASHTAG_LIMIT_EXCEED(HttpStatus.BAD_REQUEST, "HASHTAG_LIMIT_EXCEED", "해시태그는 10개를 초과하여 입력할 수 없습니다."),
 	IMAGE_FILE_COUNT_LIMIT_EXCEED(HttpStatus.BAD_REQUEST, "IMAGE_FILE_COUNT_LIMIT_EXCEED", "이미지 파일의 개수는 15개를 초과할 수 없습니다."),
+	NULL_AND_EMPTY_STRING_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "NULL_AND_EMPTY_STRING_NOT_ALLOWED", "빈 문자열 입력은 불가능합니다."),
   
 	/* 401 */
 	ACCESS_DENIED(HttpStatus.UNAUTHORIZED, "ACCESS_DENIED", "유효한 인증 정보가 부족합니다."),
