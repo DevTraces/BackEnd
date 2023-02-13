@@ -1,9 +1,8 @@
 package com.devtraces.arterest.domain.hashtag;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface HashtagRepository extends JpaRepository<Hashtag, Long> {
-	Page<Hashtag> findByHashtag(String hashtag, Pageable pageable);
+	Optional<Hashtag> findByHashtag(String hashtag);
 }

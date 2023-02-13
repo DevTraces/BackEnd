@@ -29,12 +29,14 @@ public class SearchController {
 	}
 
 	@GetMapping("/hashtags")
-	public ApiSuccessResponse<List<GetHashtagsSearchResponse>> getSearchResultUsingHashtags(
+	public ApiSuccessResponse<GetHashtagsSearchResponse> getSearchResultUsingHashtags(
 		@RequestParam String keyword,
 		@RequestParam Integer page,
 		@RequestParam(required = false, defaultValue = "10") Integer pageSize
 	){
-		return ApiSuccessResponse.from(searchService.getSearchResultUsingHashtags(keyword, page, pageSize));
+		GetHashtagsSearchResponse response =
+			searchService.getSearchResultUsingHashtags(keyword, page, pageSize);
+		return ApiSuccessResponse.from(response);
 	}
 
 	@GetMapping("/username")

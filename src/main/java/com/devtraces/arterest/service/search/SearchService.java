@@ -17,6 +17,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -55,13 +56,20 @@ public class SearchService {
 		return getAutoCompleteHashtags(keyword, numberOfWords);
 	}
 
-	public List<GetHashtagsSearchResponse> getSearchResultUsingHashtags(
+	public GetHashtagsSearchResponse getSearchResultUsingHashtags(
 		String keyword, Integer page, Integer pageSize) {
 		Pageable pageable = PageRequest.of(page, pageSize);
-		Page<Hashtag> hashtagPage = hashtagRepository.findByHashtag(keyword, pageable);
-		return hashtagPage.stream()
-			.map(Hashtag -> GetHashtagsSearchResponse.from(Hashtag, hashtagPage.getTotalElements()))
-			.collect(Collectors.toList());
+		Optional<Hashtag> hashtag = hashtagRepository.findByHashtag(keyword);
+
+		if(hashtag.isPresent()){
+			return GetHashtagsSearchResponse.from(
+				hashtag.get(), pageable);
+		}
+
+		return GetHashtagsSearchResponse.builder()
+			.totalNumberOfSearches(0L)
+			.feedList(null)
+			.build();
 	}
 
 	public List<GetUsernameSearchResponse> getSearchResultUsingUsername(
