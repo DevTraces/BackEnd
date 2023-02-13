@@ -14,6 +14,7 @@ import com.devtraces.arterest.controller.search.dto.GetUsernameSearchResponse;
 import com.devtraces.arterest.domain.feed.Feed;
 import com.devtraces.arterest.domain.feed.FeedHashtagsInterface;
 import com.devtraces.arterest.domain.feed.FeedRepository;
+import com.devtraces.arterest.domain.feedhashtagmap.FeedHashtagMap;
 import com.devtraces.arterest.domain.hashtag.Hashtag;
 import com.devtraces.arterest.domain.hashtag.HashtagRepository;
 import com.devtraces.arterest.domain.user.User;
@@ -21,6 +22,7 @@ import com.devtraces.arterest.domain.user.UserRepository;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import org.apache.commons.collections4.Trie;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -90,26 +92,46 @@ class SearchServiceTest {
 	@Test
 	void TestGetSearchResultUsingHashtags() throws Exception{
 		//given
-		List<Hashtag> responseList = Arrays.asList(Hashtag.builder()
-			.feed(Feed.builder()
-				.id(1L)
-				.imageUrls("imageUrl")
-				.build())
-			.build());
+		List<FeedHashtagMap> feedHashtagMapList = new ArrayList<>(
+			Arrays.asList(
+			FeedHashtagMap.builder()
+				.feed(Feed.builder()
+					.id(1L)
+					.imageUrls("imageUrl1,imageUrl2")
+					.build())
+				.hashtag(Hashtag.builder()
+					.id(11L)
+					.hashtagString("keyword")
+					.build())
+				.build(),
+			FeedHashtagMap.builder()
+				.feed(Feed.builder()
+					.id(2L)
+					.imageUrls("imageUrl3,imageUrl4")
+					.build())
+				.hashtag(Hashtag.builder()
+					.id(12L)
+					.hashtagString("keyword")
+					.build())
+				.build()));
 
-		Pageable pageable = PageRequest.of(0, 10);
+		Hashtag hashtag = Hashtag.builder()
+			.feedHashtagMapList(feedHashtagMapList)
+			.hashtagString("keyword")
+			.build();
 
-		Page<Hashtag> bookmarkPage = new PageImpl<>(responseList, pageable, 1);
-
-		given(hashtagRepository.findByHashtag(anyString(), any()))
-			.willReturn(bookmarkPage);
+		given(hashtagRepository.findByHashtag(anyString()))
+			.willReturn(Optional.ofNullable(hashtag));
 
 		//when
-		List<GetHashtagsSearchResponse> response = searchService.getSearchResultUsingHashtags("keyword", 0, 10);
+		GetHashtagsSearchResponse response = searchService.getSearchResultUsingHashtags("keyword", 0, 10);
 
 		//then
-		assertEquals(1L, response.get(0).getFeedId());
-		assertEquals("imageUrl", response.get(0).getImageUrl());
+		assertEquals(2L, response.getTotalNumberOfSearches());
+		assertEquals(1L, response.getFeedList().get(0).getFeedId());
+		assertEquals("imageUrl1", response.getFeedList().get(0).getImageUrl());
+		assertEquals(2L, response.getFeedList().get(1).getFeedId());
+		assertEquals("imageUrl3", response.getFeedList().get(1).getImageUrl());
 	}
 
 	@Test
