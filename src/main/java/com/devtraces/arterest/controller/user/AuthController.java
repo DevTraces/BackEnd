@@ -5,6 +5,11 @@ import static com.devtraces.arterest.common.jwt.JwtProperties.TOKEN_PREFIX;
 
 import com.devtraces.arterest.common.jwt.dto.TokenDto;
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
+import com.devtraces.arterest.controller.user.dto.MailAuthKeyCheckRequest;
+import com.devtraces.arterest.controller.user.dto.MailAuthKeyCheckResponse;
+import com.devtraces.arterest.controller.user.dto.MailAuthKeyRequest;
+import com.devtraces.arterest.controller.user.dto.PasswordCheckRequest;
+import com.devtraces.arterest.controller.user.dto.PasswordCheckResponse;
 import com.devtraces.arterest.controller.user.dto.SignInRequest;
 import com.devtraces.arterest.service.user.AuthService;
 import javax.validation.Valid;
@@ -24,6 +29,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
 	private final AuthService authService;
+
+	@PostMapping("/email/auth-key")
+	public ApiSuccessResponse<?> sendMailWithAuthKey(@RequestBody @Valid MailAuthKeyRequest request) {
+		authService.sendMailWithAuthKey(request.getEmail());
+		return ApiSuccessResponse.NO_DATA_RESPONSE;
+	}
+
+	@PostMapping("/email/auth-key/check")
+	public ApiSuccessResponse<MailAuthKeyCheckResponse> checkAuthKey(@RequestBody @Valid MailAuthKeyCheckRequest request) {
+		boolean isCorrect = authService.checkAuthKey(request.getEmail(), request.getAuthKey());
+		return ApiSuccessResponse.from(new MailAuthKeyCheckResponse(isCorrect));
+	}
 
 	@PostMapping("/sign-in")
 	public ResponseEntity<ApiSuccessResponse<?>> signIn(@RequestBody @Valid SignInRequest request) {
@@ -46,5 +63,11 @@ public class AuthController {
 		String accessToken = bearerToken.substring(TOKEN_PREFIX.length() + 1);
 		authService.signOut(userId, accessToken);
 		return ApiSuccessResponse.NO_DATA_RESPONSE;
+	}
+
+	@PostMapping("/password/check")
+	public ApiSuccessResponse<PasswordCheckResponse> checkPassword(@AuthenticationPrincipal long userId, @RequestBody @Valid PasswordCheckRequest request) {
+		boolean isCorrect = authService.checkPassword(userId, request.getPassword());
+		return ApiSuccessResponse.from(PasswordCheckResponse.builder().isCorrect(isCorrect).build());
 	}
 }
