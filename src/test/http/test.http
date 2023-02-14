@@ -93,11 +93,11 @@ POST http://localhost:8080/make-testuser
 
 
 ### 피드 1개 읽기 - OK
-GET http://localhost:8080/api/feeds/1/1/oneFeed
+GET http://localhost:8080/api/feeds/1/ondFeed?userId=1
 Content-Type: application/json
 
 ### 피드 리스트로 읽기 - OK
-GET http://localhost:8080/api/feeds/1/1?page=0
+GET http://localhost:8080/api/feeds/dongvin99?userId=1&page=0
 Content-Type: application/json
 
 

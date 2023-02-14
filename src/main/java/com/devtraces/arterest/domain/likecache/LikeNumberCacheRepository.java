@@ -21,7 +21,8 @@ public class LikeNumberCacheRepository {
             String value = template.opsForValue().get(key);
             return value == null ? null : Long.parseLong(value);
         } catch (Exception e){
-            throw BaseException.FAILED_CACHE_GET_OPERATION;
+            log.error("캐시서버에서 좋아요 개수 획득 실패.");
+            return null;
         }
     }
 
@@ -31,7 +32,7 @@ public class LikeNumberCacheRepository {
             String key = getKey(feedId);
             template.opsForValue().set(key, "0");
         } catch (Exception e){
-            throw BaseException.FAILED_CACHE_PUT_OPERATION;
+            log.error("캐시서버에서 좋아요 개수 저장 실패.");
         }
     }
 

@@ -348,6 +348,7 @@ class FeedServiceTest {
         given(feedRepository.findAllByUserId(1L, PageRequest.of(0, 10))).willReturn(slice);
         given(likeNumberCacheRepository.getFeedLikeNumber(1L)).willReturn(null);
         given(likeRepository.countByFeedId(1L)).willReturn(0L);
+        doNothing().when(likeNumberCacheRepository).setInitialLikeNumber(0L);
 
         //when
         List<FeedResponse> feedResponseList = feedService.getFeedResponseList(1L, 0, 10);
@@ -355,6 +356,7 @@ class FeedServiceTest {
         //then
         verify(likeNumberCacheRepository, times(1)).getFeedLikeNumber(1L);
         verify(likeRepository, times(1)).countByFeedId(1L);
+        verify(likeNumberCacheRepository, times(1)).setInitialLikeNumber(0L);
         verify(feedRepository, times(1)).findAllByUserId(1L, PageRequest.of(0, 10));
         assertEquals(feedResponseList.size(), 1);
     }
@@ -428,6 +430,7 @@ class FeedServiceTest {
         given(feedRepository.findById(1L)).willReturn(Optional.of(feed));
         given(likeNumberCacheRepository.getFeedLikeNumber(1L)).willReturn(null);
         given(likeRepository.countByFeedId(1L)).willReturn(0L);
+        doNothing().when(likeNumberCacheRepository).setInitialLikeNumber(0L);
 
         //when
         FeedResponse feedResponse = feedService.getOneFeed(2L, 1L);
@@ -435,6 +438,7 @@ class FeedServiceTest {
         //then
         verify(likeNumberCacheRepository, times(1)).getFeedLikeNumber(1L);
         verify(likeRepository, times(1)).countByFeedId(1L);
+        verify(likeNumberCacheRepository, times(1)).setInitialLikeNumber(0L);
         verify(feedRepository, times(1)).findById(1L);
         assertEquals(feedResponse.getFeedId(), 1L);
     }

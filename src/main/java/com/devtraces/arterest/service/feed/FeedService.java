@@ -108,6 +108,7 @@ public class FeedService {
         }
 
         // 새로 만들어진 게시물이므로, 좋아요 개수를 레디스에 0으로 캐시 해둔다.
+        // 레디스가 다운되어도 게시물 저장 로직 전체가 취소 및 롤백되지 않고 그대로 완료 된다.
         likeNumberCacheRepository.setInitialLikeNumber(newFeed.getId());
 
         return FeedCreateResponse.from(newFeed, 0L, hashtagList);
@@ -127,7 +128,11 @@ public class FeedService {
         return feedRepository.findAllByUserId(userId, PageRequest.of(page, pageSize)).stream().map(
             feed -> {
                 Long likeNumber = likeNumberCacheRepository.getFeedLikeNumber(feed.getId());
-                if(likeNumber == null) likeNumber = likeRepository.countByFeedId(feed.getId());
+                if(likeNumber == null) {
+                    likeNumber = likeRepository.countByFeedId(feed.getId());
+                    // 현재 캐시서버에 좋아요 개수가 기록돼 있지 않으므로 다음 read 요쳥을 위해서 캐시해 둠.
+                    likeNumberCacheRepository.setInitialLikeNumber(likeNumber);
+                }
                 return FeedResponse.from(feed, likedFeedSet, likeNumber, bookmarkedFeedSet);
             }
         ).collect(Collectors.toList());
@@ -146,6 +151,7 @@ public class FeedService {
         Long likeNumber = likeNumberCacheRepository.getFeedLikeNumber(feedId);
         if(likeNumber == null) {
             likeNumber = likeRepository.countByFeedId(feedId);
+            likeNumberCacheRepository.setInitialLikeNumber(likeNumber);
         }
 
         return FeedResponse.from(
