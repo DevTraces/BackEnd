@@ -158,9 +158,7 @@ class ReplyServiceTest {
 
         Feed feed = Feed.builder()
             .id(1L)
-            .authorId(2L)
             .imageUrls("url2,url3")
-            .hashtags("#h1,#h2,#h3")
             .user(user)
             .build();
 
