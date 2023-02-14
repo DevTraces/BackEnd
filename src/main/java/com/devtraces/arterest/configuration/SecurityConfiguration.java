@@ -31,6 +31,7 @@ public class SecurityConfiguration {
 		http
 			.httpBasic().disable()
 			.csrf().disable()
+			.cors().configurationSource(corsConfigurationSource()).and()
 			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
 		http
@@ -46,7 +47,6 @@ public class SecurityConfiguration {
 			.exceptionHandling()
 			.authenticationEntryPoint(new JwtAuthenticationEntryPoint());
 
-		http.cors();
 		return http.build();
 	}
 
