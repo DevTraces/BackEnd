@@ -72,6 +72,7 @@ public class SearchService {
 	public List<GetUsernameSearchResponse> getSearchResultUsingUsername(
 		String keyword, Integer page, Integer pageSize) {
 		Pageable pageable = PageRequest.of(page, pageSize);
+
 		return userRepository.findByUsername(keyword, pageable)
 			.stream().map(User -> GetUsernameSearchResponse.from(User))
 			.collect(Collectors.toList());
@@ -80,6 +81,9 @@ public class SearchService {
 	public List<GetNicknameSearchResponse> getSearchResultUsingNickname(
 		String keyword, Integer page, Integer pageSize) {
 		Pageable pageable = PageRequest.of(page, pageSize);
+
+		if(keyword.charAt(0) == '@') keyword = keyword.substring(1);
+
 		return userRepository.findByNickname(keyword, pageable)
 			.stream().map(User -> GetNicknameSearchResponse.from(User))
 			.collect(Collectors.toList());
