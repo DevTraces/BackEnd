@@ -30,7 +30,7 @@ public class FeedController {
     public ApiSuccessResponse<FeedCreateResponse> createFeed(
         @AuthenticationPrincipal Long userId,
         @RequestParam("content") String content,
-        @RequestParam(value = "imageFiles", required = false) List<MultipartFile> imageFileList,
+        @RequestParam(value = "imageFiles") List<MultipartFile> imageFileList,
         @RequestParam(value = "hashtags", required = false) List<String> hashtagList
     ){
         return ApiSuccessResponse.from(
@@ -44,8 +44,7 @@ public class FeedController {
         @RequestParam int page,
         @RequestParam(required = false, defaultValue = "10") int pageSize
     ){
-        PageRequest pageRequest = PageRequest.of(page, pageSize);
-        return ApiSuccessResponse.from(feedService.getFeedResponseList(userId, pageRequest));
+        return ApiSuccessResponse.from(feedService.getFeedResponseList(userId, page, pageSize));
     }
 
     @GetMapping("/{feedId}")
@@ -59,7 +58,7 @@ public class FeedController {
     public ApiSuccessResponse<FeedUpdateResponse> updateFeed(
         @AuthenticationPrincipal Long userId,
         @RequestParam("content") String content,
-        @RequestParam(value = "imageFiles", required = false) List<MultipartFile> imageFileList,
+        @RequestParam(value = "imageFiles") List<MultipartFile> imageFileList,
         @RequestParam(value = "hashtags", required = false) List<String> hashtagList,
         @PathVariable Long feedId
     ){

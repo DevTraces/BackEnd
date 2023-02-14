@@ -114,7 +114,7 @@ public class FeedService {
     }
 
     @Transactional(readOnly = true)
-    public List<FeedResponse> getFeedResponseList(Long userId, PageRequest pageRequest){
+    public List<FeedResponse> getFeedResponseList(Long userId, int page, int pageSize){
         // 요청한 사용자가 좋아요를 누른 피드들의 주키 아이디 번호들을 먼저 불러온다.
         Set<Long> likedFeedSet = likeRepository.findAllByUserId(userId)
             .stream().map(Likes::getFeedId).collect(Collectors.toSet());
@@ -124,7 +124,7 @@ public class FeedService {
             .stream().map(bookmark -> bookmark.getFeed().getId()).collect(Collectors.toSet());
 
         // 피드 별 좋아요 개수는 레디스를 먼저 보게 만들고, 그게 불가능 할때만 Like 테이블에서 찾도록 한다.
-        return feedRepository.findAllByUserId(userId, pageRequest).stream().map(
+        return feedRepository.findAllByUserId(userId, PageRequest.of(page, pageSize)).stream().map(
             feed -> {
                 Long likeNumber = likeNumberCacheRepository.getFeedLikeNumber(feed.getId());
                 if(likeNumber == null) likeNumber = likeRepository.countByFeedId(feed.getId());

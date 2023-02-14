@@ -33,7 +33,7 @@ public class FeedHashtagMap extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "heed_hashtag_map_id")
+    @Column(name = "feed_hashtag_map_id")
     private Long id;
 
     // 1:N mapping with Feed

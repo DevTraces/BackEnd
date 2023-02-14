@@ -306,7 +306,7 @@ class FeedServiceTest {
         //given(likeRepository.countByFeedId(1L)).willReturn(0L);
 
         //when
-        List<FeedResponse> feedResponseList = feedService.getFeedResponseList(1L, PageRequest.of(0, 10));
+        List<FeedResponse> feedResponseList = feedService.getFeedResponseList(1L, 0, 10);
 
         //then
         verify(likeNumberCacheRepository, times(1)).getFeedLikeNumber(1L);
@@ -350,7 +350,7 @@ class FeedServiceTest {
         given(likeRepository.countByFeedId(1L)).willReturn(0L);
 
         //when
-        List<FeedResponse> feedResponseList = feedService.getFeedResponseList(1L, PageRequest.of(0, 10));
+        List<FeedResponse> feedResponseList = feedService.getFeedResponseList(1L, 0, 10);
 
         //then
         verify(likeNumberCacheRepository, times(1)).getFeedLikeNumber(1L);
