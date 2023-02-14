@@ -17,6 +17,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.AccessLevel;
@@ -33,7 +34,10 @@ import org.hibernate.envers.AuditOverride;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AuditOverride(forClass = BaseEntity.class)
-@Table(name = "user")
+@Table(name = "user", indexes = {
+    @Index(name = "username_index", columnList = "username"),
+    @Index(name = "nickname_index", columnList = "nickname")
+})
 @Entity
 public class User extends BaseEntity {
 
@@ -43,9 +47,9 @@ public class User extends BaseEntity {
     private Long id;
 
     private Long kakaoUserId;
-
+    @Column(name = "username")
     private String username;
-    @Column(unique = true)
+    @Column(name = "nickname", unique = true)
     private String nickname;
     @Column(unique = true)
     private String email;
