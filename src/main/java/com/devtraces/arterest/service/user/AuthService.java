@@ -1,12 +1,16 @@
 package com.devtraces.arterest.service.user;
 
+import com.devtraces.arterest.common.component.MailUtil;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.jwt.JwtProvider;
 import com.devtraces.arterest.common.jwt.dto.TokenDto;
 import com.devtraces.arterest.common.redis.service.RedisService;
 import com.devtraces.arterest.domain.user.User;
 import com.devtraces.arterest.domain.user.UserRepository;
+
 import java.util.Date;
+
+import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,10 +20,55 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class AuthService {
 
+	private static final int AUTH_KEY_DIGIT = 6;
+
 	private final PasswordEncoder passwordEncoder;
 	private final JwtProvider jwtProvider;
+	private final MailUtil mailUtil;
 	private final RedisService redisService;
 	private final UserRepository userRepository;
+
+	@Transactional(readOnly = true)
+	public void sendMailWithAuthKey(String email) {
+		if (userRepository.existsByEmail(email)) {
+			throw BaseException.ALREADY_EXIST_EMAIL;
+		}
+		String authKey = generateAuthKey();
+		sendAuthenticationEmail(email, authKey);
+		redisService.setAuthKeyValue(email, authKey);
+	}
+
+	protected String generateAuthKey() {
+		Random random = new Random();
+		StringBuilder resultNumber = new StringBuilder();
+
+		for (int i = 0; i < AUTH_KEY_DIGIT; i++) {
+			resultNumber.append(random.nextInt(9));	// 0~9 사이의 랜덤 숫자 생성
+		}
+		return resultNumber.toString();
+	}
+
+	private void sendAuthenticationEmail(String email, String authKey) {
+		String subject = "Arterest 인증 코드";
+		String text = "<h2>이메일 인증코드</h2>\n"
+			+ "<p>Arterest에 가입하신 것을 환영합니다.<br>아래의 인증코드를 입력하시면 가입이 정상적으로 완료됩니다.</p>\n"
+			+ "<p style=\"background: #EFEFEF; font-size: 30px;padding: 10px\">" + authKey + "</p>";
+		mailUtil.sendMail(email, subject, text);
+	}
+
+	public boolean checkAuthKey(String email, String authKey) {
+		if (userRepository.existsByEmail(email)) {
+			throw BaseException.ALREADY_EXIST_EMAIL;
+		}
+		String authKeyInRedis = redisService.getAuthKeyValue(email);
+		if (!authKey.equals(authKeyInRedis)) {
+			return false;
+		}
+		// 인증 완료했으므로 Redis 정보 변경
+		redisService.deleteAuthKeyValue(email);
+		redisService.setAuthCompletedValue(email);
+		return true;
+	}
 
 	@Transactional(readOnly = true)
 	public TokenDto signInAndGenerateJwtToken(String email, String password) {
@@ -43,5 +92,11 @@ public class AuthService {
 		// Access Token을 무효화시킬 수 없으므로 Redis에 블랙리스트 작성
 		Date expiredDate = jwtProvider.getExpiredDate(accessToken);
 		redisService.setAccessTokenBlackListValue(accessToken, userId, expiredDate);
+	}
+
+	public boolean checkPassword(long userId, String password) {
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> BaseException.USER_NOT_FOUND);
+		return passwordEncoder.matches(password, user.getPassword());
 	}
 }

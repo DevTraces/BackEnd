@@ -12,7 +12,6 @@ import com.devtraces.arterest.controller.search.dto.GetHashtagsSearchResponse;
 import com.devtraces.arterest.controller.search.dto.GetNicknameSearchResponse;
 import com.devtraces.arterest.controller.search.dto.GetUsernameSearchResponse;
 import com.devtraces.arterest.domain.feed.Feed;
-import com.devtraces.arterest.domain.feed.FeedHashtagsInterface;
 import com.devtraces.arterest.domain.feed.FeedRepository;
 import com.devtraces.arterest.domain.feedhashtagmap.FeedHashtagMap;
 import com.devtraces.arterest.domain.hashtag.Hashtag;
@@ -41,8 +40,6 @@ class SearchServiceTest {
 	@Mock
 	private UserRepository userRepository;
 	@Mock
-	private FeedRepository feedRepository;
-	@Mock
 	private HashtagRepository hashtagRepository;
 	@Mock
 	private Trie trie;
@@ -52,19 +49,11 @@ class SearchServiceTest {
 	@Test
 	void testInternalServerErrorInCreateAutoCompleteWords() throws Exception{
 
-		// given
-		FeedHashtagsInterface feedHashtagsInterface = new FeedHashtagsInterface() {
-			@Override
-			public String getHashtags() {
-				return "hashtags";
-			}
-		};
+		given(hashtagRepository.findAll())
+			.willReturn(Arrays.asList(Hashtag.builder()
+				.hashtagString("hashtag")
+				.build()));
 
-		List<FeedHashtagsInterface> feedHashtagsInterfaceList
-			= new ArrayList<>(Arrays.asList(feedHashtagsInterface));
-
-		given(feedRepository.findAllFeedHashtags())
-			.willReturn(feedHashtagsInterfaceList);
 		given(trie.put(any(),any())).willReturn(null);
 
 		// when
@@ -120,7 +109,7 @@ class SearchServiceTest {
 			.hashtagString("keyword")
 			.build();
 
-		given(hashtagRepository.findByHashtag(anyString()))
+		given(hashtagRepository.findByHashtagString(anyString()))
 			.willReturn(Optional.ofNullable(hashtag));
 
 		//when

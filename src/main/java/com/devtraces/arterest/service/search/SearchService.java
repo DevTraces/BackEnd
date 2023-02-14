@@ -6,10 +6,10 @@ import com.devtraces.arterest.controller.search.dto.GetHashtagsSearchResponse;
 import com.devtraces.arterest.controller.search.dto.GetNicknameSearchResponse;
 import com.devtraces.arterest.controller.search.dto.GetUsernameSearchResponse;
 import com.devtraces.arterest.domain.feed.FeedRepository;
-import com.devtraces.arterest.domain.feed.FeedVo;
 import com.devtraces.arterest.domain.hashtag.Hashtag;
 import com.devtraces.arterest.domain.hashtag.HashtagRepository;
 import com.devtraces.arterest.domain.user.UserRepository;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -23,7 +23,6 @@ import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.Trie;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -39,16 +38,14 @@ public class SearchService {
 	private final HashtagRepository hashtagRepository;
 	private final Trie trie;
 	private final RedisService redisService;
-	private final String HASHTAG_DELIMITER = ",";
 	private final String TRIE_KEY = "trie";
 
 
 	// 1분 간격으로 게시물 테이블의 모든 해시태그를 파싱하여, Trie 구조로 redis 에 저장함.
 	@Transactional
-	@Scheduled(cron = "* 0/1 * * * *")
+	@Scheduled(cron = "0 * * * * *")
 	public void createAutoCompleteWords() {
-		List<FeedVo> feedList = feedRepository.findAllFeedHashtags()
-			.stream().map(FeedVo::new).collect(Collectors.toList());
+		List<Hashtag> feedList = hashtagRepository.findAll();
 		saveAllHashtags(feedList);
 	}
 
@@ -89,12 +86,9 @@ public class SearchService {
 	}
 
 	// 해시태그가 저장된 Trie 자료구조를 직렬화하여 Redis 에 저장.
-	private void saveAllHashtags(List<FeedVo> feedList) {
+	private void saveAllHashtags(List<Hashtag> feedList) {
 		for (int i = 0; i < feedList.size(); i++) {
-			String[] hashTagList = feedList.get(i).getHashtags().split(HASHTAG_DELIMITER);
-			for (int j = 0; j < hashTagList.length; j++) {
-				trie.put(hashTagList[j], null);
-			}
+			trie.put(feedList.get(i).getHashtagString(), null);
 		}
 
 		byte[] serializedTrie;

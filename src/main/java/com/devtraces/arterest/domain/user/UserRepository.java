@@ -7,8 +7,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
+	Boolean existsByEmail(String email);
 	Optional<User> findByEmail(String email);
 	Optional<User> findByNickname(String nickname);
 	Page<User> findByUsername(String username, Pageable pageable);
 	Page<User> findByNickname(String nickname, Pageable pageable);
+	Optional<User> findByKakaoUserId(long kakaoUserId);
 }

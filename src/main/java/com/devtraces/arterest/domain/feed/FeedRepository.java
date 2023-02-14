@@ -1,11 +1,13 @@
 package com.devtraces.arterest.domain.feed;
 
-import java.util.List;
+import com.devtraces.arterest.domain.user.User;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 
 public interface FeedRepository extends JpaRepository<Feed, Long> {
-	@Query(value = "SELECT f.hashtags" +
-	"FROM FEED f", nativeQuery = true)
-	List<FeedHashtagsInterface> findAllFeedHashtags();
+
+    // 이걸로 찾는게 되나??
+    Slice<Feed> findAllByUserId(Long authorId, PageRequest pageRequest);
+
 }
