@@ -5,11 +5,9 @@ import com.devtraces.arterest.common.redis.service.RedisService;
 import com.devtraces.arterest.controller.search.dto.GetHashtagsSearchResponse;
 import com.devtraces.arterest.controller.search.dto.GetNicknameSearchResponse;
 import com.devtraces.arterest.controller.search.dto.GetUsernameSearchResponse;
-import com.devtraces.arterest.domain.feed.FeedRepository;
 import com.devtraces.arterest.domain.hashtag.Hashtag;
 import com.devtraces.arterest.domain.hashtag.HashtagRepository;
 import com.devtraces.arterest.domain.user.UserRepository;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
