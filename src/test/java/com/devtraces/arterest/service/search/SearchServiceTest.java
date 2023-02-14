@@ -9,6 +9,7 @@ import static org.mockito.BDDMockito.given;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.redis.service.RedisService;
 import com.devtraces.arterest.controller.search.dto.GetHashtagsSearchResponse;
+import com.devtraces.arterest.controller.search.dto.GetHashtagsSearchResponse.FeedInfo;
 import com.devtraces.arterest.controller.search.dto.GetNicknameSearchResponse;
 import com.devtraces.arterest.controller.search.dto.GetUsernameSearchResponse;
 import com.devtraces.arterest.domain.feed.Feed;
@@ -134,7 +135,12 @@ class SearchServiceTest {
 
 		Pageable pageable = PageRequest.of(0, 10);
 
-		Page<User> userPage = new PageImpl<>(responseList, pageable, 1);
+		int start = (int) pageable.getOffset();
+		int end = (start + pageable.getPageSize()) > responseList.size() ?
+			responseList.size() : (start + pageable.getPageSize());
+
+		Page<User> userPage = new PageImpl<>(
+			responseList.subList(start, end), pageable, responseList.size());
 
 		given(userRepository.findByUsername(anyString(), any()))
 			.willReturn(userPage);
@@ -161,7 +167,12 @@ class SearchServiceTest {
 
 		Pageable pageable = PageRequest.of(0, 10);
 
-		Page<User> userPage = new PageImpl<>(responseList, pageable, 1);
+		int start = (int) pageable.getOffset();
+		int end = (start + pageable.getPageSize()) > responseList.size() ?
+			responseList.size() : (start + pageable.getPageSize());
+
+		Page<User> userPage = new PageImpl<>(
+			responseList.subList(start, end), pageable, responseList.size());
 
 		given(userRepository.findByNickname(anyString(), any()))
 			.willReturn(userPage);
