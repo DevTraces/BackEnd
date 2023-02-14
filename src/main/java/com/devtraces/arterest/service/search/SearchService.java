@@ -42,8 +42,8 @@ public class SearchService {
 	@Transactional
 	@Scheduled(cron = "0 * * * * *")
 	public void createAutoCompleteWords() {
-		List<Hashtag> feedList = hashtagRepository.findAll();
-		saveAllHashtags(feedList);
+		List<Hashtag> hashtagList = hashtagRepository.findAll();
+		saveAllHashtags(hashtagList);
 	}
 
 	public List<String> getAutoCompleteWords(String keyword, Integer numberOfWords) {
