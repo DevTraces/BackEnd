@@ -34,7 +34,6 @@ import org.springframework.stereotype.Service;
 public class SearchService {
 
 	private final UserRepository userRepository;
-	private final FeedRepository feedRepository;
 	private final HashtagRepository hashtagRepository;
 	private final Trie trie;
 	private final RedisService redisService;
