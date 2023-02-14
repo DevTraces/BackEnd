@@ -59,7 +59,7 @@ public class SearchService {
 	public GetHashtagsSearchResponse getSearchResultUsingHashtags(
 		String keyword, Integer page, Integer pageSize) {
 		Pageable pageable = PageRequest.of(page, pageSize);
-		Optional<Hashtag> hashtag = hashtagRepository.findByHashtag(keyword);
+		Optional<Hashtag> hashtag = hashtagRepository.findByHashtagString(keyword);
 
 		if(hashtag.isPresent()){
 			return GetHashtagsSearchResponse.from(
