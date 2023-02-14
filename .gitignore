@@ -36,7 +36,5 @@ out/
 ### VS Code ###
 .vscode/
 
-application-prod.properties
-application-jwt.properties
-application-secret.properties
-
+application-local.yml
+application-prod.yml
