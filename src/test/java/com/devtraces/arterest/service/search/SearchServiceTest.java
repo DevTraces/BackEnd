@@ -8,10 +8,9 @@ import static org.mockito.BDDMockito.given;
 
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.redis.service.RedisService;
-import com.devtraces.arterest.domain.feed.FeedRepository;
-import java.util.ArrayList;
+import com.devtraces.arterest.domain.hashtag.Hashtag;
+import com.devtraces.arterest.domain.hashtag.HashtagRepository;
 import java.util.Arrays;
-import java.util.List;
 import org.apache.commons.collections4.Trie;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +23,7 @@ class SearchServiceTest {
 	@InjectMocks
 	private SearchService searchService;
 	@Mock
-	private FeedRepository feedRepository;
+	private HashtagRepository hashtagRepository;
 	@Mock
 	private Trie trie;
 	@Mock
@@ -33,19 +32,11 @@ class SearchServiceTest {
 	@Test
 	void testInternalServerErrorInCreateAutoCompleteWords() throws Exception{
 
-		// given
-		FeedHashtagsInterface feedHashtagsInterface = new FeedHashtagsInterface() {
-			@Override
-			public String getHashtags() {
-				return "hashtags";
-			}
-		};
+		given(hashtagRepository.findAll())
+			.willReturn(Arrays.asList(Hashtag.builder()
+				.hashtagString("hashtag")
+				.build()));
 
-		List<FeedHashtagsInterface> feedHashtagsInterfaceList
-			= new ArrayList<>(Arrays.asList(feedHashtagsInterface));
-
-		given(feedRepository.findAllFeedHashtags())
-			.willReturn(feedHashtagsInterfaceList);
 		given(trie.put(any(),any())).willReturn(null);
 
 		// when
