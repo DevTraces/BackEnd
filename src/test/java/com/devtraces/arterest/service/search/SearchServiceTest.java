@@ -12,7 +12,6 @@ import com.devtraces.arterest.controller.search.dto.GetHashtagsSearchResponse;
 import com.devtraces.arterest.controller.search.dto.GetNicknameSearchResponse;
 import com.devtraces.arterest.controller.search.dto.GetUsernameSearchResponse;
 import com.devtraces.arterest.domain.feed.Feed;
-import com.devtraces.arterest.domain.feed.FeedRepository;
 import com.devtraces.arterest.domain.feedhashtagmap.FeedHashtagMap;
 import com.devtraces.arterest.domain.hashtag.Hashtag;
 import com.devtraces.arterest.domain.hashtag.HashtagRepository;
