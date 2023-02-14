@@ -8,7 +8,6 @@ import static org.mockito.BDDMockito.given;
 
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.redis.service.RedisService;
-import com.devtraces.arterest.domain.feed.FeedHashtagsInterface;
 import com.devtraces.arterest.domain.feed.FeedRepository;
 import java.util.ArrayList;
 import java.util.Arrays;
