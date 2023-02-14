@@ -94,7 +94,6 @@ public class OauthService {
     // 카카오 서버로부터 받은 정보 파싱
     private static UserInfoFromKakaoDto parseResponseToJson(String result
     ) throws IOException {
-        System.out.println("response body : " + result);
 
         // Gson 라이브러리로 JSON 파싱
         JsonParser parser = new JsonParser();
