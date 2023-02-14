@@ -17,7 +17,7 @@ cp $PROJECT_ROOT/build/libs/*.jar $JAR_FILE
 echo "$TIME_NOW > $JAR_FILE 파일 실행" >> $DEPLOY_LOG
 nohup java -jar \
       -Dspring.config.location=classpath:/application.yml,/home/ubuntu/deploy/application-prod.yml \
-      -Dspring.config.activate.on-profile=prod \
+      -Dspring.profiles.active=prod \
       $JAR_FILE > $APP_LOG 2> $ERROR_LOG &
 
 CURRENT_PID=$(pgrep -f $JAR_FILE)
