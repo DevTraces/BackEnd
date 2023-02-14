@@ -26,7 +26,7 @@ public class LikeNumberCacheRepository {
         }
     }
 
-    // 게시물이 처음 만들어졌을 때 기록을 위한 키밸류 썅을 최초로 같이 기록한다.
+    // 게시물이 처음 만들어졌을 때 기록을 위한 키밸류 쌍을 최초로 같이 기록한다.
     public void setInitialLikeNumber(Long feedId){
         try{
             String key = getKey(feedId);
