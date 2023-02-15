@@ -23,6 +23,7 @@ public class BaseException extends RuntimeException {
 	public static final BaseException INTERNAL_SERVER_ERROR = new BaseException(ErrorCode.INTERNAL_SERVER_ERROR);
 	public static final BaseException FAILED_FILE_UPLOAD = new BaseException(ErrorCode.FAILED_FILE_UPLOAD);
 	public static final BaseException FAILED_SEND_EMAIL = new BaseException(ErrorCode.FAILED_SEND_EMAIL);
+	public static final BaseException FOLLOW_LIMIT_EXCEED = new BaseException(ErrorCode.FOLLOW_LIMIT_EXCEED);
 
 	private final ErrorCode errorCode;
 

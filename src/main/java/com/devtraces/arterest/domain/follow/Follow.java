@@ -28,7 +28,7 @@ import org.hibernate.envers.AuditOverride;
 @AuditOverride(forClass = BaseEntity.class)
 @Table(name = "follow", indexes = @Index(name = "following_id_index", columnList = "following_id"))
 @Entity
-public class Follows extends BaseEntity {
+public class Follow extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
