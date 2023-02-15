@@ -4,6 +4,7 @@ import com.devtraces.arterest.common.UserSignUpType;
 import com.devtraces.arterest.common.UserStatusType;
 import com.devtraces.arterest.common.domain.BaseEntity;
 import com.devtraces.arterest.domain.feed.Feed;
+import com.devtraces.arterest.domain.follow.Follows;
 import com.devtraces.arterest.domain.reply.Reply;
 import com.devtraces.arterest.domain.rereply.Rereply;
 import java.time.LocalDateTime;
@@ -76,4 +77,7 @@ public class User extends BaseEntity {
     @ToString.Exclude
     private List<Rereply> rereplyList = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private List<Follows> followsList = new ArrayList<>();
 }
