@@ -64,12 +64,12 @@ public class FollowService {
         Long userId, String nickname, Integer page, Integer pageSize
     ) {
         // 타깃 유저가 팔로우 하고 있는 사람들이 누구인지를 체크한다.
-        // 타깃 유저 엔티티의 팔로우 엔티티 리스트를 보면 된다.
+        // 타깃 유저 엔티티의 팔로우 엔티티 내의 followingId 필드를 보면 된다.
         User targetUser = userRepository.findByNickname(nickname).orElseThrow(
             () -> BaseException.USER_NOT_FOUND
         );
         List<Long> followingUserIdListOfTargetUser = targetUser.getFollowList()
-            .stream().map( follow -> follow.getUser().getId() ).collect(Collectors.toList());
+            .stream().map(Follow::getFollowingId).collect(Collectors.toList());
 
         // 그 사람들 중에서 내가 팔로우를 하고 있는지 그렇지 않은지를 일일이 판단해야 한다.
         // 따라서 내가 팔로우 하고 있는 사람들도 봐야 한다.
@@ -77,7 +77,7 @@ public class FollowService {
             () -> BaseException.USER_NOT_FOUND
         );
         Set<Long> followingUserIdSetOfRequestUser = requestedUser.getFollowList()
-            .stream().map( follow -> follow.getUser().getId() ).collect(Collectors.toSet());
+            .stream().map(Follow::getFollowingId).collect(Collectors.toSet());
 
         return userRepository.findAllByIdIn(
             followingUserIdListOfTargetUser, PageRequest.of(page, pageSize)
@@ -104,7 +104,7 @@ public class FollowService {
             () -> BaseException.USER_NOT_FOUND
         );
         Set<Long> followingUserIdSetOfRequestUser = requestedUser.getFollowList()
-            .stream().map( follow -> follow.getUser().getId() ).collect(Collectors.toSet());
+            .stream().map(Follow::getFollowingId).collect(Collectors.toSet());
 
         // 팔로우 리포지토리에서 팔로우를 보낸 유저 엔티티의 정보를 얻을 수 있으므로, 팔로우 리포지토리에서 바로
         // 응답을 구성해 낼 수 있다.
