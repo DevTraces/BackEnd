@@ -38,7 +38,7 @@ public class FeedController {
         );
     }
 
-    @GetMapping("/{nickname}")
+    @GetMapping("/list/{nickname}")
     public ApiSuccessResponse<List<FeedResponse>> getFeedList(
         @AuthenticationPrincipal Long userId,
         @RequestParam int page,
