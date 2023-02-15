@@ -1,7 +1,9 @@
 package com.devtraces.arterest.controller.follow.dto;
 
 import com.devtraces.arterest.common.UserSignUpType;
+import com.devtraces.arterest.domain.user.User;
 import java.time.LocalDateTime;
+import java.util.Set;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,5 +27,19 @@ public class FollowResponse {
 		private LocalDateTime createdAt;
 		private LocalDateTime modifiedAt;
 		private UserSignUpType signupType;
+
+		public static FollowResponse from(User user, Set<Long> followingUserIdSet){
+			return FollowResponse.builder()
+				.userId(user.getId())
+				.profileImageUrl(user.getProfileImageUrl())
+				.username(user.getUsername())
+				.nickname(user.getNickname())
+				.description(user.getDescription())
+				.isFollowing(
+					followingUserIdSet == null ? false :
+					followingUserIdSet.contains(user.getId())
+					)
+				.build();
+		}
 
 }

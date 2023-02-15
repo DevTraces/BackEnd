@@ -2,11 +2,17 @@ package com.devtraces.arterest.service.follow;
 
 import com.devtraces.arterest.common.CommonUtils;
 import com.devtraces.arterest.common.exception.BaseException;
+import com.devtraces.arterest.controller.follow.dto.FollowResponse;
 import com.devtraces.arterest.domain.follow.Follow;
 import com.devtraces.arterest.domain.follow.FollowRepository;
 import com.devtraces.arterest.domain.user.User;
 import com.devtraces.arterest.domain.user.UserRepository;
+import com.fasterxml.jackson.databind.ser.Serializers.Base;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +46,38 @@ public class FollowService {
                 .followingId(followingUser.getId())
                 .build()
         );
+    }
+
+    /*
+    * nickname 이라는 닉네임을 가지고 있는 타깃 유저가 팔로우 하고 있는 다른 유저들의 리스트를
+    * 반환하되, "내" 입장에서 이 유저들을 현재 팔로우를 하고 있는 지의 여부가 전부 boolean 필드로
+    * 표시되어야 한다.
+    * */
+    @Transactional(readOnly = true)
+    public List<FollowResponse> getFollowingUserList(
+        Long userId, String nickname, Integer page, Integer pageSize
+    ) {
+        // 타깃 유저가 팔로우 하고 있는 사람들이 누구인지를 체크한다.
+        // 타깃 유저 엔티티의 팔로우 엔티티 리스트를 보면 된다.
+        User targetUser = userRepository.findByNickname(nickname).orElseThrow(
+            () -> BaseException.USER_NOT_FOUND
+        );
+        List<Long> followingUserIdListOfTargetUser = targetUser.getFollowList()
+            .stream().map( follow -> follow.getUser().getId() ).collect(Collectors.toList());
+
+        // 그 사람들 중에서 내가 팔로우를 하고 있는지 그렇지 않은지를 일일이 판단해야 한다.
+        // 따라서 내가 팔로우 하고 있는 사람들도 봐야 한다.
+        User requestedUser = userRepository.findById(userId).orElseThrow(
+            () -> BaseException.USER_NOT_FOUND
+        );
+        Set<Long> followingUserIdSetOfRequestUser = requestedUser.getFollowList()
+            .stream().map( follow -> follow.getUser().getId() ).collect(Collectors.toSet());
+
+        return userRepository.findAllByIdIn(
+            followingUserIdListOfTargetUser, PageRequest.of(page, pageSize)
+        ).getContent().stream().map(
+            user -> FollowResponse.from(user, followingUserIdSetOfRequestUser)
+        ).collect(Collectors.toList());
     }
 
     @Transactional
