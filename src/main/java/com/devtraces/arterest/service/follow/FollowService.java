@@ -8,6 +8,7 @@ import com.devtraces.arterest.domain.user.User;
 import com.devtraces.arterest.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -16,6 +17,7 @@ public class FollowService {
     private final FollowRepository followRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public void createFollowRelation(Long userId, String nickname) {
         User followerUser = userRepository.findById(userId).orElseThrow(
             () -> BaseException.USER_NOT_FOUND
@@ -38,6 +40,14 @@ public class FollowService {
                 .followingId(followingUser.getId())
                 .build()
         );
+    }
+
+    @Transactional
+    public void deleteFollowRelation(Long userId, String nickname) {
+        User followingUser = userRepository.findByNickname(nickname).orElseThrow(
+            () -> BaseException.USER_NOT_FOUND
+        );
+        followRepository.deleteByUserIdAndFollowingId(userId, followingUser.getId());
     }
 
 }
