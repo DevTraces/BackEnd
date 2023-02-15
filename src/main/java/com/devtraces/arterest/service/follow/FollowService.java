@@ -8,7 +8,9 @@ import com.devtraces.arterest.domain.follow.FollowRepository;
 import com.devtraces.arterest.domain.user.User;
 import com.devtraces.arterest.domain.user.UserRepository;
 import com.fasterxml.jackson.databind.ser.Serializers.Base;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +38,10 @@ public class FollowService {
         User followingUser = userRepository.findByNickname(nickname).orElseThrow(
             () -> BaseException.USER_NOT_FOUND
         );
+
+        if(Objects.equals(followingUser.getId(), userId)){
+            throw BaseException.FOLLOWING_SELF_NOT_ALLOWED;
+        }
 
         // 유저 엔티티와 팔로우 엔티티는 1:N 관계이므로,
         // 유저 엔티티에는 [그 유저가 팔로우한 다른 유저의 주키 아이디 값을 저장하고 있는 팔로우 엔티티] 리스트가 저장됨.

@@ -17,6 +17,7 @@ public enum ErrorCode {
   	CONTENT_LIMIT_EXCEED(HttpStatus.BAD_REQUEST,"CONTENT_LIMIT_EXCEED","1000자를 초과하여 입력할 수 없습니다."),
   	USER_INFO_NOT_MATCH(HttpStatus.BAD_REQUEST,"USER_INFO_NOT_MATCH","작성자만 내용을 수정할 수 있습니다."),
 	FOLLOW_LIMIT_EXCEED(HttpStatus.BAD_REQUEST, "FOLLOW_LIMIT_EXCEED", "5000명을 초과하여 팔로우 할 수 없습니다."),
+	FOLLOWING_SELF_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "FOLLOWING_SELF_NOT_ALLOWED", "자기자신을 팔로우 하는 것은 불가능합니다."),
   
 	/* 401 */
 	ACCESS_DENIED(HttpStatus.UNAUTHORIZED, "ACCESS_DENIED", "유효한 인증 정보가 부족합니다."),
