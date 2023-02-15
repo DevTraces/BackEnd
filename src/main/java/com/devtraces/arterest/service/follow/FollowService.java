@@ -31,7 +31,10 @@ public class FollowService {
             () -> BaseException.USER_NOT_FOUND
         );
 
-        if(followerUser.getFollowList().size() >= CommonUtils.FOLLOW_COUNT_LIMIT){
+        if(
+            followerUser.getFollowList() != null
+                && followerUser.getFollowList().size() >= CommonUtils.FOLLOW_COUNT_LIMIT
+        ){
             throw BaseException.FOLLOW_LIMIT_EXCEED;
         }
 
