@@ -1,10 +1,5 @@
 name: Deploy to Amazon EC2
 
-on:
-  push:
-    branches:
-      - main
-
 env:
   AWS_REGION: ap-northeast-2
   S3_BUCKET_NAME: arterest
