@@ -40,6 +40,17 @@ public class FollowController {
         );
     }
 
+    @GetMapping("/follower/{nickname}")
+    public ApiSuccessResponse<List<FollowResponse>> getFollowerUserList(
+        @AuthenticationPrincipal Long userId, @PathVariable String nickname,
+        @RequestParam Integer page,
+        @RequestParam(required = false, defaultValue = "10") Integer pageSize
+    ) {
+        return ApiSuccessResponse.from(
+            followService.getFollowerUserList(userId, nickname, page, pageSize)
+        );
+    }
+
     @DeleteMapping("/{nickname}")
     public ApiSuccessResponse<?> deleteFollowRelation(
         @AuthenticationPrincipal Long userId, @PathVariable String nickname

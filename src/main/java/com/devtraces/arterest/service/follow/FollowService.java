@@ -80,6 +80,35 @@ public class FollowService {
         ).collect(Collectors.toList());
     }
 
+    /*
+    * nickname 이라는 닉네임을 갖고 있는 타깃 유저를 팔로우 하고 있는 다른 유저들의 리스트를 반환하되,
+    * 그 유저들을 "내"가 현재 팔로우를 하고 있는지를 일일이 판별하고 boolean 필드로 기록하면서 응답을 구성해야 함.
+    * */
+    @Transactional(readOnly = true)
+    public List<FollowResponse> getFollowerUserList(
+        Long userId, String nickname, Integer page, Integer pageSize
+    ) {
+        // 타깃 유저를 찾아낸다.
+        User targetUser = userRepository.findByNickname(nickname).orElseThrow(
+            () -> BaseException.USER_NOT_FOUND
+        );
+
+        // 현재 '내'가 팔로우 하고 있는 사람들을 확인한다.
+        User requestedUser = userRepository.findById(userId).orElseThrow(
+            () -> BaseException.USER_NOT_FOUND
+        );
+        Set<Long> followingUserIdSetOfRequestUser = requestedUser.getFollowList()
+            .stream().map( follow -> follow.getUser().getId() ).collect(Collectors.toSet());
+
+        // 팔로우 리포지토리에서 팔로우를 보낸 유저 엔티티의 정보를 얻을 수 있으므로, 팔로우 리포지토리에서 바로
+        // 응답을 구성해 낼 수 있다.
+        return followRepository.findAllByFollowingId(
+            targetUser.getId(), PageRequest.of(page, pageSize)
+        ).getContent().stream().map(
+            follow -> FollowResponse.from(follow.getUser(), followingUserIdSetOfRequestUser)
+            ).collect(Collectors.toList());
+    }
+
     @Transactional
     public void deleteFollowRelation(Long userId, String nickname) {
         User followingUser = userRepository.findByNickname(nickname).orElseThrow(
@@ -87,5 +116,4 @@ public class FollowService {
         );
         followRepository.deleteByUserIdAndFollowingId(userId, followingUser.getId());
     }
-
 }
