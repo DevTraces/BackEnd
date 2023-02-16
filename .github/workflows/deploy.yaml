@@ -1,9 +1,6 @@
 name: Deploy to Amazon EC2
 
-on:
-  push:
-    branches:
-      - deploy/8-Config-2
+
 
 env:
   AWS_REGION: ap-northeast-2
