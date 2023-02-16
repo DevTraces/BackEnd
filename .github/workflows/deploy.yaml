@@ -36,10 +36,25 @@ jobs:
       - name: Create spring properties
         run: |
           touch src/main/resources/application-prod.properties
-          echo "$PROD_APPLICATION" > application-prod.properties.b64
-          base64 -d -i application-prod.properties.b64 > src/main/resources/application-prod.properties
+          echo "$PROD_APPLICATION_CLOUD" > application-prod-cloud.properties.b64
+          base64 -d -i application-prod-cloud.properties.b64 >> src/main/resources/application-prod.properties
+          echo "$PROD_APPLICATION_JPA" > application-prod-jpa.properties.b64
+          base64 -d -i application-prod-jpa.properties.b64 >> src/main/resources/application-prod.properties
+          echo "$PROD_APPLICATION_JWT" > application-prod-jwt.properties.b64
+          base64 -d -i application-prod-jwt.properties.b64 >> src/main/resources/application-prod.properties
+          echo "$PROD_APPLICATION_MAIL" > application-prod-mail.properties.b64
+          base64 -d -i application-prod-mail.properties.b64 >> src/main/resources/application-prod.properties
+          echo "$PROD_APPLICATION_RDS" > application-prod-rds.properties.b64
+          base64 -d -i application-prod-rds.properties.b64 >> src/main/resources/application-prod.properties
+          echo "$PROD_APPLICATION_REDIS" > application-prod-redis.properties.b64
+          base64 -d -i application-prod-redis.properties.b64 >> src/main/resources/application-prod.properties
         env:
-          PROD_APPLICATION: ${{ secrets.PROD_APPLICATION }}
+          PROD_APPLICATION_CLOUD: ${{ secrets.PROD_APPLICATION_CLOUD }}
+          PROD_APPLICATION_JPA: ${{ secrets.PROD_APPLICATION_JPA }}
+          PROD_APPLICATION_JWT: ${{ secrets.PROD_APPLICATION_JWT }}
+          PROD_APPLICATION_MAIL: ${{ secrets.PROD_APPLICATION_MAIL }}
+          PROD_APPLICATION_RDS: ${{ secrets.PROD_APPLICATION_RDS }}
+          PROD_APPLICATION_REDIS: ${{ secrets.PROD_APPLICATION_REDIS }}
 
       # (3) Gradle build (Test 제외)
       - name: Build with Gradle
