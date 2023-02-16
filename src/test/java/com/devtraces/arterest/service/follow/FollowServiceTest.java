@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -318,25 +319,35 @@ class FollowServiceTest {
     @DisplayName("팔로우 관계 제거 성공")
     void successDeleteFollowRelation(){
         // given
+        User targetUser = User.builder()
+            .id(1L)
+            .nickname("one")
+            .build();
 
+        given(userRepository.findByNickname("one")).willReturn(Optional.of(targetUser));
+
+        doNothing().when(followRepository).deleteByUserIdAndFollowingId(2L, 1L);
 
         // when
-
+        followService.deleteFollowRelation(2L, "one");
 
         // then
-
+        verify(followRepository, times(1)).deleteByUserIdAndFollowingId(2L, 1L);
     }
 
     @Test
     @DisplayName("팔로우 관계 제거 실패 - 팔로잉 했던 유저 찾지 못함.")
     void failedDeleteFollowRelationUserNotFound(){
         // given
-
+        given(userRepository.findByNickname(anyString())).willReturn(Optional.empty());
 
         // when
-
+        BaseException exception = assertThrows(
+            BaseException.class ,
+            () -> followService.deleteFollowRelation(1L, "two")
+        );
 
         // then
-
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
     }
 }
