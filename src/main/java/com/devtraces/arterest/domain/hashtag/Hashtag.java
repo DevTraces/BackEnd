@@ -29,16 +29,16 @@ import org.hibernate.envers.AuditOverride;
 @Entity
 public class Hashtag extends BaseEntity {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "hashtag_id")
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "hashtag_id")
+    private Long id;
 
-	private String hashtagString;
+    private String hashtagString;
 
-	// 1:N mapping with FeedHashtagMap
-	@OneToMany(mappedBy = "hashtag")
-	@ToString.Exclude
-	List<FeedHashtagMap> feedHashtagMapList = new ArrayList<>();
+    // 1:N mapping with FeedHashtagMap
+    @OneToMany(mappedBy = "hashtag")
+    @ToString.Exclude
+    List<FeedHashtagMap> feedHashtagMapList = new ArrayList<>();
 
 }

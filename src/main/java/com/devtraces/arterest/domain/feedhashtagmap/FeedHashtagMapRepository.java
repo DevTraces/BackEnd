@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface FeedHashtagMapRepository extends JpaRepository<FeedHashtagMap, Long> {
 	void deleteAllByFeedId(Long feed_id);
-
 }
+
