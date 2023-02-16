@@ -32,6 +32,28 @@ jobs:
           distribution: 'temurin'
           java-version: '8'
 
+      # Git Secret 을 이용한 application-xxx.properties 생성
+      - name: Create spring properties
+        run: |
+          touch src/main/resources/application-prod.properties
+          echo "$PROD_PROPERTIES" > application-prod.properties.b64
+          base64 -d -i application-prod.properties.b64 > src/main/resources/application-prod.properties
+          touch src/main/resources/application-jwt.properties
+          echo "$JWT_PROPERTIES" > application-jwt.properties.b64
+          base64 -d -i application-jwt.properties.b64 > src/main/resources/application-jwt.properties
+          touch src/main/resources/application-secret.properties
+          echo "$SECRET_PROPERTIES" > application-secret.properties.b64
+          base64 -d -i application-secret.properties.b64 > src/main/resources/application-secret.properties
+        env:
+          PROD_PROPERTIES: ${{ secrets.PROD_PROPERTIES }}
+          JWT_PROPERTIES: ${{ secrets.JWT_PROPERTIES }}
+          SECRET_PROPERTIES: ${{ secrets.SECRET_PROPERTIES }}
+
+      # 애플리케이션 설정을 local 에서 prod 상태로 변경
+      - name: Change application level in properties (local -> prod)
+        run: |
+          sed -i 's/spring.profiles.active=local/spring.profiles.active=prod/g' src/main/resources/application.properties
+
       # (3) Gradle build (Test 제외)
       - name: Build with Gradle
         uses: gradle/gradle-build-action@0d13054264b0bb894ded474f08ebb30921341cee
