@@ -45,6 +45,7 @@ jobs:
           echo "$SECRET_PROPERTIES" > application-secret.properties.b64
           base64 -d -i application-secret.properties.b64 > src/main/resources/application-secret.properties
           pwd
+          ls
         env:
           PROD_PROPERTIES: ${{ secrets.PROD_PROPERTIES }}
           JWT_PROPERTIES: ${{ secrets.JWT_PROPERTIES }}
@@ -54,6 +55,7 @@ jobs:
       - name: Change application level in properties (local -> prod)
         run: |
           pwd
+          ls
           sed -i 's/spring.profiles.active=local/spring.profiles.active=prod/g' src/main/resources/application.properties
 
       # (3) Gradle build (Test 제외)
