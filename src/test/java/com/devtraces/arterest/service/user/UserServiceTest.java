@@ -1,6 +1,7 @@
 package com.devtraces.arterest.service.user;
 
 import com.devtraces.arterest.controller.user.dto.EmailCheckResponse;
+import com.devtraces.arterest.controller.user.dto.NicknameCheckResponse;
 import com.devtraces.arterest.domain.user.User;
 import com.devtraces.arterest.domain.user.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -44,5 +45,27 @@ class UserServiceTest {
         EmailCheckResponse response = userService.checkEmail(email);
 
         assertEquals(false, response.isDuplicatedEmail());
+    }
+
+    @Test
+    void success_checkNickname_닉네임_중복_O() {
+        String nickname = "duplicatedNickname";
+        User user = User.builder().nickname(nickname).build();
+        given(userRepository.findByNickname(anyString())).willReturn(Optional.of(user));
+
+        NicknameCheckResponse response = userService.checkNickname(nickname);
+
+        assertEquals(true, response.isDuplicatedNickname());
+    }
+
+    @Test
+    void success_checkNickname_닉네임_중복_X() {
+        String nickname = "notDuplicatedNickname";
+        User user = User.builder().nickname(nickname).build();
+        given(userRepository.findByNickname(anyString())).willReturn(Optional.empty());
+
+        NicknameCheckResponse response = userService.checkNickname(nickname);
+
+        assertEquals(false, response.isDuplicatedNickname());
     }
 }
