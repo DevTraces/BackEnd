@@ -190,26 +190,47 @@ class FollowServiceTest {
     @DisplayName("타깃 유저의 팔로잉 리스틓 획득 실패 - 타깃 유저 찾지 못함")
     void failedGetFollowingUserListTargetUserNotFound(){
         // given
-
+        given(userRepository.findByNickname(anyString())).willReturn(Optional.empty());
 
         // when
-
+        BaseException exception = assertThrows(
+            BaseException.class ,
+            () -> followService.getFollowingUserList(1L, "two", 0, 10)
+        );
 
         // then
-
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
     @DisplayName("타깃 유저의 팔로잉 리스트 획득 실패 - 요청한 유저 찾지 못함")
     void failedGetFollowingUserListRequestedUserNotFound(){
         // given
+        User targetUser = User.builder()
+            .id(1L)
+            .nickname("two")
+            .followList(new ArrayList<>())
+            .build();
 
+        Follow followEntityOfTargetUser = Follow.builder()
+            .id(1L)
+            .user(targetUser)
+            .followingId(2L)
+            .build();
+
+        targetUser.getFollowList().add(followEntityOfTargetUser);
+
+        given(userRepository.findByNickname(anyString())).willReturn(Optional.of(targetUser));
+        given(userRepository.findById(anyLong())).willReturn(Optional.empty());
 
         // when
-
+        BaseException exception = assertThrows(
+            BaseException.class ,
+            () -> followService.getFollowingUserList(1L, "two", 0, 10)
+        );
 
         // then
-
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
