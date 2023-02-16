@@ -33,7 +33,7 @@ jobs:
           java-version: '8'
 
       # Git Secret 을 이용한 application-xxx.properties 생성
-      - name: Create spring yml
+      - name: Create spring properties
         run: |
           touch src/main/resources/application-prod.properties
           echo "$PROD_APPLICATION" > application-prod.properties.b64
