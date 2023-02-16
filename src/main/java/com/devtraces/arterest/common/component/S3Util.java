@@ -26,7 +26,9 @@ import org.springframework.web.multipart.MultipartFile;
 @Component
 public class S3Util {
 
-	private static final Set<String> AVAILABLE_IMAGE_EXTENSION = new HashSet<>(Arrays.asList("gif", "png", "jpeg", "bmp", "webp", "jpg"));
+
+	private static final Set<String> AVAILABLE_IMAGE_EXTENSION = new HashSet<>(Arrays.asList("gif", "png", "jpg", "jpeg", "bmp", "webp"));
+
 
 	private final AmazonS3 amazonS3;
 
@@ -44,9 +46,11 @@ public class S3Util {
 			objectMetadata.setContentLength(inputStream.available());
 			objectMetadata.setContentType(multipartFile.getContentType());
 
-			amazonS3.putObject(new PutObjectRequest(bucket, s3FileName, inputStream, objectMetadata)
-				.withCannedAcl(CannedAccessControlList.PublicRead));
+			amazonS3.putObject(
+				new PutObjectRequest(bucket, s3FileName, inputStream, objectMetadata)
+					.withCannedAcl(CannedAccessControlList.PublicRead));
 		} catch (IOException e) {
+			log.error(e.getMessage());
 			throw BaseException.FAILED_FILE_UPLOAD;
 		}
 
