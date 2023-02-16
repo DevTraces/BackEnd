@@ -80,4 +80,7 @@ public class User extends BaseEntity {
     @ToString.Exclude
     private List<Rereply> rereplyList = new ArrayList<>();
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }
