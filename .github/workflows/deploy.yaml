@@ -52,7 +52,7 @@ jobs:
       # 애플리케이션 설정을 local 에서 prod 상태로 변경
       - name: Change application level in properties (local -> prod)
         run: |
-          sed -i 's/spring.profiles.active=local/spring.profiles.active=prod/g' ./src/main/resources/application.properties
+          sed -i 's/spring.profiles.active=local/spring.profiles.active=prod/g' ./src/main/resources/application.yml
 
       # (3) Gradle build (Test 제외)
       - name: Build with Gradle
