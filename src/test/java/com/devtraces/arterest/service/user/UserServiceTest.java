@@ -42,9 +42,7 @@ class UserServiceTest {
         given(userRepository.findByEmail(anyString())).willReturn(Optional.empty());
 
         EmailCheckResponse response = userService.checkEmail(email);
-        
+
         assertEquals(false, response.isDuplicatedEmail());
     }
-
-
 }
