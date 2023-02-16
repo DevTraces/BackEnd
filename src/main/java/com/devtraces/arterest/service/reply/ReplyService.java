@@ -31,6 +31,9 @@ public class ReplyService {
 
     @Transactional
     public ReplyResponse createReply(Long userId, Long feedId, ReplyRequest replyRequest) {
+        if(replyRequest.getContent() == null || replyRequest.getContent().equals("")){
+            throw BaseException.NULL_AND_EMPTY_STRING_NOT_ALLOWED;
+        }
         if(replyRequest.getContent().length() > CommonUtils.CONTENT_LENGTH_LIMIT){
             throw BaseException.CONTENT_LIMIT_EXCEED;
         }
@@ -58,6 +61,9 @@ public class ReplyService {
 
     @Transactional
     public ReplyResponse updateReply(Long userId, Long replyId, ReplyRequest replyRequest) {
+        if(replyRequest.getContent() == null || replyRequest.getContent().equals("")){
+            throw BaseException.NULL_AND_EMPTY_STRING_NOT_ALLOWED;
+        }
         if(replyRequest.getContent().length() > CommonUtils.CONTENT_LENGTH_LIMIT){
             throw BaseException.CONTENT_LIMIT_EXCEED;
         }
