@@ -32,19 +32,14 @@ jobs:
           distribution: 'temurin'
           java-version: '8'
 
-      # Git Secret 을 이용한 application-xxx.yml 생성
+      # Git Secret 을 이용한 application-xxx.properties 생성
       - name: Create spring yml
         run: |
-          touch src/main/resources/application-prod.yaml
-          echo "$PROD_APPLICATION" > application-prod.yaml.b64
-          base64 -d -i application-prod.yaml.b64 > src/main/resources/application-prod.yml
+          touch src/main/resources/application-prod.properties
+          echo "$PROD_APPLICATION" > application-prod.properties.b64
+          base64 -d -i application-prod.properties.b64 > src/main/resources/application-prod.properties
         env:
           PROD_APPLICATION: ${{ secrets.PROD_APPLICATION }}
-
-      # 애플리케이션 설정을 local 에서 prod 상태로 변경
-      - name: Change application level in yml (local -> prod)
-        run: |
-          sed -i 's/spring.profiles.active=local/spring.profiles.active=prod/g' ./src/main/resources/application.yml
 
       # (3) Gradle build (Test 제외)
       - name: Build with Gradle
