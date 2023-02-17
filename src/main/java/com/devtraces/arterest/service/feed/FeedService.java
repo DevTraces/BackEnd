@@ -5,6 +5,8 @@ import com.devtraces.arterest.common.component.S3Util;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.controller.feed.dto.create.FeedCreateResponse;
 import com.devtraces.arterest.controller.feed.dto.FeedResponse;
+import com.devtraces.arterest.controller.feed.dto.update.ExistingImageUrlDto;
+import com.devtraces.arterest.controller.feed.dto.update.FeedUpdateRequest;
 import com.devtraces.arterest.controller.feed.dto.update.FeedUpdateResponse;
 import com.devtraces.arterest.domain.bookmark.BookmarkRepository;
 import com.devtraces.arterest.domain.feed.Feed;
@@ -22,6 +24,8 @@ import com.devtraces.arterest.domain.rereply.Rereply;
 import com.devtraces.arterest.domain.rereply.RereplyRepository;
 import com.devtraces.arterest.domain.user.User;
 import com.devtraces.arterest.domain.user.UserRepository;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -161,14 +165,21 @@ public class FeedService {
 
     @Transactional
     public FeedUpdateResponse updateFeed(
-        Long userId, String content,
-        List<MultipartFile> imageFileList, List<String> hashtagList,
+        Long userId,
+        List<MultipartFile> imageFileList,
+        FeedUpdateRequest feedUpdateRequest,
         Long feedId
     ) {
-        if(content.length() > CommonUtils.CONTENT_LENGTH_LIMIT){
+        if(
+            feedUpdateRequest.getContent() != null &&
+            feedUpdateRequest.getContent().length() > CommonUtils.CONTENT_LENGTH_LIMIT
+        ){
             throw BaseException.CONTENT_LIMIT_EXCEED;
         }
-        if(hashtagList != null && hashtagList.size() > CommonUtils.HASHTAG_COUNT_LIMIT){
+        if(
+            feedUpdateRequest.getHashtags() != null &&
+            feedUpdateRequest.getHashtags().size() > CommonUtils.HASHTAG_COUNT_LIMIT
+        ){
             throw BaseException.HASHTAG_LIMIT_EXCEED;
         }
         if(imageFileList != null && imageFileList.size() > CommonUtils.IMAGE_FILE_COUNT_LIMIT){
@@ -183,18 +194,60 @@ public class FeedService {
             throw BaseException.USER_INFO_NOT_MATCH;
         }
 
-        // 기존에 S3에 저장돼 있던 사진들을 전부 삭제한다.
+        // 기존 사진들 중 유지해야 하는 사진들을 찾아낸다.
+        Set<String> imagesToKeepSet = new HashSet<>();
+        if(feedUpdateRequest.getExistingImageUrls() != null){
+            for(ExistingImageUrlDto dto : feedUpdateRequest.getExistingImageUrls()){
+                imagesToKeepSet.add(dto.getImageUrl());
+            }
+        }
+
+        // 기존에 S3에 저장돼 있던 사진들 중 위에서 정의한 셋에 포함돼 있지 않는 이미지들을 삭제한다.
         if(!feed.getImageUrls().equals("")){
             for(String deleteTargetUrl : feed.getImageUrls().split(",")){
-                s3Util.deleteImage(deleteTargetUrl);
+                if(!imagesToKeepSet.contains(deleteTargetUrl)){
+                    s3Util.deleteImage(deleteTargetUrl);
+                }
+            }
+        }
+
+        // 새로운 이미지들을 S3에 업로드하면서 응답으로 받은 url 스트링들을 별도의 리스트에 저장해 둔다.
+        List<String> newImageUrlList = new ArrayList<>();
+        if(imageFileList != null){
+            for(MultipartFile imageFile : imageFileList){
+                newImageUrlList.add(s3Util.uploadImage(imageFile));
+            }
+        }
+
+        // String 배열을 만든 후, 기존 이미지 url들을 정해진 인덱스에 맞게 넣어 둔다.
+        int newImageFileCount = imageFileList == null ? 0 : imageFileList.size();
+        int existingImageUrlCount = feedUpdateRequest.getExistingImageUrls() == null ? 0 :
+            feedUpdateRequest.getExistingImageUrls().size();
+
+        String[] resultImageUrlArr = new String[newImageFileCount + existingImageUrlCount];
+
+        if(existingImageUrlCount != 0){
+            for(ExistingImageUrlDto dto : feedUpdateRequest.getExistingImageUrls()){
+                resultImageUrlArr[dto.getIndex()] = dto.getImageUrl();
+            }
+        }
+
+        // 새로운 이미지들을 resultImageUrlArr의 null 인 칸들에 순서대로 넣어준다.
+        if(newImageFileCount != 0){
+            for(MultipartFile newImageFile : imageFileList){
+                for(int i=0; i< resultImageUrlArr.length; i++){
+                    if(resultImageUrlArr[i]!=null){
+                        resultImageUrlArr[i] = s3Util.uploadImage(newImageFile);
+                    }
+                }
             }
         }
 
         // 기존 이미지들의 삭제가 위의 로직에서 진행되었다고 가정하고 새 이미지를 올린다.
         StringBuilder imageUrlBuilder = new StringBuilder();
-        if(imageFileList != null){
-            for(MultipartFile imageFile : imageFileList){
-                imageUrlBuilder.append(s3Util.uploadImage(imageFile));
+        if(resultImageUrlArr.length != 0){
+            for(String resultImageUrl : resultImageUrlArr){
+                imageUrlBuilder.append(resultImageUrl);
                 imageUrlBuilder.append(',');
             }
         }
@@ -203,8 +256,8 @@ public class FeedService {
         feedHashtagMapRepository.deleteAllByFeedId(feedId);
 
         // 그 후 입력 받은 값에 따라서 새롭게 저장한다.
-        if(hashtagList != null){
-            for(String hashtagInputString : hashtagList){
+        if(feedUpdateRequest.getHashtags() != null){
+            for(String hashtagInputString : feedUpdateRequest.getHashtags()){
                 Optional<Hashtag> optionalHashtag = hashtagRepository
                     .findByHashtagString(hashtagInputString);
                 if(optionalHashtag.isPresent()){
@@ -231,12 +284,12 @@ public class FeedService {
             }
         }
 
-        feed.updateContent(content);
+        feed.updateContent(feedUpdateRequest.getContent());
         feed.updateImageUrls(
             imageUrlBuilder.toString().equals("") ? null : imageUrlBuilder.toString()
         );
 
-        return FeedUpdateResponse.from( feedRepository.save(feed), hashtagList );
+        return FeedUpdateResponse.from( feedRepository.save(feed), feedUpdateRequest.getHashtags() );
     }
 
     // TODO 스프링 @Async를 사용해서 비동기 멀티 스레딩으로 처리하면 응답지연시간 최소화 가능.

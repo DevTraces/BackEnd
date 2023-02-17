@@ -3,6 +3,7 @@ package com.devtraces.arterest.controller.feed;
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
 import com.devtraces.arterest.controller.feed.dto.create.FeedCreateResponse;
 import com.devtraces.arterest.controller.feed.dto.FeedResponse;
+import com.devtraces.arterest.controller.feed.dto.update.FeedUpdateRequest;
 import com.devtraces.arterest.controller.feed.dto.update.FeedUpdateResponse;
 import com.devtraces.arterest.service.feed.FeedService;
 import java.util.List;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -56,13 +58,12 @@ public class FeedController {
     @PutMapping("/{feedId}")
     public ApiSuccessResponse<FeedUpdateResponse> updateFeed(
         @AuthenticationPrincipal Long userId,
-        @RequestParam("content") String content,
         @RequestParam(value = "imageFiles") List<MultipartFile> imageFileList,
-        @RequestParam(value = "hashtags", required = false) List<String> hashtagList,
+        @RequestBody FeedUpdateRequest feedUpdateRequest,
         @PathVariable Long feedId
     ){
         return ApiSuccessResponse.from(
-            feedService.updateFeed(userId, content, imageFileList, hashtagList, feedId)
+            feedService.updateFeed(userId, imageFileList, feedUpdateRequest, feedId)
         );
     }
 
