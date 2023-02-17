@@ -1,13 +1,12 @@
 package com.devtraces.arterest.controller.feed;
 
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
-import com.devtraces.arterest.controller.feed.dto.FeedCreateResponse;
+import com.devtraces.arterest.controller.feed.dto.create.FeedCreateResponse;
 import com.devtraces.arterest.controller.feed.dto.FeedResponse;
-import com.devtraces.arterest.controller.feed.dto.FeedUpdateResponse;
+import com.devtraces.arterest.controller.feed.dto.update.FeedUpdateResponse;
 import com.devtraces.arterest.service.feed.FeedService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
