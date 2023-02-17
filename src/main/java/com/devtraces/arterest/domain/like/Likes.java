@@ -1,10 +1,12 @@
 package com.devtraces.arterest.domain.like;
 
 import com.devtraces.arterest.common.domain.BaseEntity;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -16,7 +18,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "likes")
+@Table(name = "likes", indexes = @Index(name = "user_id_index", columnList = "user_id"))
 @Entity
 public class Likes extends BaseEntity {
 
@@ -25,6 +27,8 @@ public class Likes extends BaseEntity {
     private Long id;
 
     private Long feedId;
+
+    @Column(name = "user_id")
     private Long userId;
 
 }
