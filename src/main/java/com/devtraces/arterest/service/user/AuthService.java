@@ -1,6 +1,6 @@
 package com.devtraces.arterest.service.user;
 
-import com.devtraces.arterest.common.component.S3Uploader;
+import com.devtraces.arterest.common.component.S3Util;
 import com.devtraces.arterest.common.component.MailUtil;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.jwt.JwtProvider;
@@ -29,7 +29,7 @@ public class AuthService {
 
 	private final PasswordEncoder passwordEncoder;
 	private final JwtProvider jwtProvider;
-	private final S3Uploader s3Uploader;
+	private final S3Util s3Util;
 	private final MailUtil mailUtil;
 	private final RedisService redisService;
 	private final UserRepository userRepository;
@@ -47,7 +47,7 @@ public class AuthService {
 
 	private void uploadAndUpdateImageUrl(UserRegistrationRequest request) {
 		if (request.getProfileImage() != null) {
-			String profileImageUrl = s3Uploader.uploadImage(request.getProfileImage());
+			String profileImageUrl = s3Util.uploadImage(request.getProfileImage());
 			request.setProfileImageLink(profileImageUrl);
 		}
 	}
