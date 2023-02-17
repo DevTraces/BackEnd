@@ -32,7 +32,7 @@ public class FeedController {
     public ApiSuccessResponse<FeedCreateResponse> createFeed(
         @AuthenticationPrincipal Long userId,
         @RequestParam("content") String content,
-        @RequestParam(value = "imageFiles") List<MultipartFile> imageFileList,
+        @RequestParam(value = "imageFiles", required = false) List<MultipartFile> imageFileList,
         @RequestParam(value = "hashtags", required = false) List<String> hashtagList
     ){
         return ApiSuccessResponse.from(
@@ -59,7 +59,7 @@ public class FeedController {
     @PutMapping("/{feedId}")
     public ApiSuccessResponse<FeedUpdateResponse> updateFeed(
         @AuthenticationPrincipal Long userId,
-        @RequestParam(value = "imageFiles") List<MultipartFile> imageFileList,
+        @RequestParam(value = "imageFiles", required = false) List<MultipartFile> imageFileList,
         @RequestPart(value = "feedUpdateRequest") FeedUpdateRequest feedUpdateRequest,
         @PathVariable Long feedId
     ){
