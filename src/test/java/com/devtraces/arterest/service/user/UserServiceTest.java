@@ -5,6 +5,7 @@ import com.devtraces.arterest.controller.user.dto.EmailCheckResponse;
 import com.devtraces.arterest.controller.user.dto.NicknameCheckResponse;
 import com.devtraces.arterest.domain.user.User;
 import com.devtraces.arterest.domain.user.UserRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -35,7 +36,8 @@ class UserServiceTest {
     private UserService userService;
 
     @Test
-    void success_checkEmail_이메일_중복_O() {
+    @DisplayName("이메일 중복 검사 성공 - 중복된 이메일인 경우 true 응답")
+    void success_checkEmail_DUPLICATED_EMAIL() {
         String email = "hello@abc.com";
         User user = User.builder().email(email).build();
         given(userRepository.findByEmail(anyString())).willReturn(Optional.of(user));
@@ -46,9 +48,9 @@ class UserServiceTest {
     }
 
     @Test
-    void success_checkEmail_이메일_중복_X() {
+    @DisplayName("이메일 중복 검사 성공 - 중복되지 않은 이메일인 경우 false 응답")
+    void success_checkEmail_NOT_DUPLICATED_EMAIL() {
         String email = "hello@abc.com";
-        User user = User.builder().email(email).build();
         given(userRepository.findByEmail(anyString())).willReturn(Optional.empty());
 
         EmailCheckResponse response = userService.checkEmail(email);
@@ -57,7 +59,8 @@ class UserServiceTest {
     }
 
     @Test
-    void success_checkNickname_닉네임_중복_O() {
+    @DisplayName("닉네임 중복 검사 성공 - 중복된 닉네임인 경우 true 응답")
+    void success_checkNickname_DUPLICATED_NICKNAME() {
         String nickname = "duplicatedNickname";
         User user = User.builder().nickname(nickname).build();
         given(userRepository.findByNickname(anyString())).willReturn(Optional.of(user));
@@ -68,9 +71,9 @@ class UserServiceTest {
     }
 
     @Test
-    void success_checkNickname_닉네임_중복_X() {
+    @DisplayName("닉네임 중복 검사 성공 - 중복이 아닌 닉네임인 경우 false 응답")
+    void success_checkNickname_NOT_DUPLICATED_NICKNAME() {
         String nickname = "notDuplicatedNickname";
-        User user = User.builder().nickname(nickname).build();
         given(userRepository.findByNickname(anyString())).willReturn(Optional.empty());
 
         NicknameCheckResponse response = userService.checkNickname(nickname);
@@ -79,6 +82,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("비밀번호 변경 성공")
     void success_updatePassword() {
         // given
         String beforePassword = "beforePassword";
@@ -99,6 +103,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("비밀번호 변경 실패 - 존재하지 않는 사용자")
     void fail_updatePassword_USER_NOT_FOUND() {
         // given
         String beforePassword = "beforePassword";
@@ -115,6 +120,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("비밀번호 변경 실패 - 잘못된 기존 비밀번호")
     void fail_updatePassword_WRONG_BEFORE_PASSWORD() {
         // given
         String beforePassword = "beforePassword";
