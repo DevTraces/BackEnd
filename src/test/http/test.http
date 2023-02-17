@@ -77,3 +77,22 @@ Content-Type: application/json
 ### delete Rereply OK
 DELETE http://localhost:8080/api/feeds/1/replies/1/rereplies/1/1
 
+
+### 테스트 유저 생성
+POST http://localhost:8080/make-testuser
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

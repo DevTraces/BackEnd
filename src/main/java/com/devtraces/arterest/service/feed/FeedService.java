@@ -227,9 +227,11 @@ public class FeedService {
         // 새로운 이미지들을 S3에 업로드 하면서 resultImageUrlArr의 null 인 칸들에 순서대로 넣어준다.
         if(newImageFileCount != 0){
             for(MultipartFile newImageFile : imageFileList){
+                innerFor:
                 for(int i=0; i< resultImageUrlArr.length; i++){
-                    if(resultImageUrlArr[i]!=null){
+                    if(resultImageUrlArr[i]==null){
                         resultImageUrlArr[i] = s3Util.uploadImage(newImageFile);
+                        break innerFor;
                     }
                 }
             }
