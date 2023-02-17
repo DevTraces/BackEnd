@@ -3,7 +3,7 @@ package com.devtraces.arterest.domain.feedhashtagmap;
 import com.devtraces.arterest.common.domain.BaseEntity;
 import com.devtraces.arterest.domain.feed.Feed;
 import com.devtraces.arterest.domain.hashtag.Hashtag;
-import com.devtraces.arterest.domain.user.User;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;

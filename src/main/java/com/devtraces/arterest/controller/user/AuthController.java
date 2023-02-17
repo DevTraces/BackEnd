@@ -11,12 +11,15 @@ import com.devtraces.arterest.controller.user.dto.MailAuthKeyRequest;
 import com.devtraces.arterest.controller.user.dto.PasswordCheckRequest;
 import com.devtraces.arterest.controller.user.dto.PasswordCheckResponse;
 import com.devtraces.arterest.controller.user.dto.SignInRequest;
+import com.devtraces.arterest.controller.user.dto.UserRegistrationRequest;
+import com.devtraces.arterest.controller.user.dto.UserRegistrationResponse;
 import com.devtraces.arterest.service.user.AuthService;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -27,8 +30,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-
 	private final AuthService authService;
+
+	@PostMapping("sign-up")
+	public ApiSuccessResponse<UserRegistrationResponse> signUp(@ModelAttribute @Valid UserRegistrationRequest request) {
+		UserRegistrationResponse response = authService.register(request);
+		return ApiSuccessResponse.from(response);
+	}
 
 	@PostMapping("/email/auth-key")
 	public ApiSuccessResponse<?> sendMailWithAuthKey(@RequestBody @Valid MailAuthKeyRequest request) {

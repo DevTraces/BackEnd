@@ -25,7 +25,7 @@ Content-Type: application/json
 
 
 ### create Reply OK
-POST http://localhost:8080/api/feeds/1/replies/1
+POST http://localhost:8080/api/feeds/1/1
 Content-Type: application/json
 
 {
@@ -45,7 +45,7 @@ Content-Type: application/json
 }
 
 ### delete Reply OK
-DELETE http://localhost:8080/api/feeds/1/replies/1
+DELETE http://localhost:8080/api/feeds/1/replies/1/1
 
 
 
@@ -77,32 +77,3 @@ Content-Type: application/json
 ### delete Rereply OK
 DELETE http://localhost:8080/api/feeds/1/replies/1/rereplies/1/1
 
-
-
-### redis Cache Repository test : 레디스에 존재하지 않는 키 값으로 get 요청을 한 경우 template이 널 리턴하는 것 확인 완료.
-GET http://localhost:8080/redis-test
-
-
-
-### 테스트용 1번 유저 만들기
-POST http://localhost:8080/make-testuser
-
-
-
-### 피드 1개 만들기 - OK 이 때는 만들어진 해시태그가 바로 뜨지는 않는다. 즉, 생성 직후의 응답과, 생성 후 읽기 요청했을 때의 응답이 다르다!!
-
-
-### 피드 1개 읽기 - OK
-GET http://localhost:8080/api/feeds/1/ondFeed?userId=1
-Content-Type: application/json
-
-### 피드 리스트로 읽기 - OK
-GET http://localhost:8080/api/feeds/dongvin99?userId=1&page=0
-Content-Type: application/json
-
-
-### 피드 1개 수정하기 - OK. 왜 해시태그가 제대로 삭제되지 않지?? 다시 읽으면 그 때 삭제되나?? >>> 이것도 생성 때와 마찬가지다. 수정 직후의 응답은 해시태그 수정 결과가 반영되지 않지만, 그 후에 읽기 요청을 했을 때는 결과가 정확하게 반영이 된다.
-
-### 피드 삭제 - OK 피드/댓글/대댓글/피드해시태그맵/레디스/좋아요/북마크 이 테이블에서 삭제 대상 피드와 관련된 레코드들이 전부 삭제되어야 한다. 테스트 해본 결과, 전부 삭제되는 것을 확인했다.
-DELETE http://localhost:8080/api/feeds/1/1
-Content-Type: application/json
