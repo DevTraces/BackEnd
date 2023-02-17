@@ -22,23 +22,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class JwtController {
 
 	private final JwtService jwtService;
+	public static final String SET_COOKIE = "Set-Cookie";
 
 	@PostMapping("/reissue")
-	public ResponseEntity<ApiSuccessResponse<?>> reissue(@RequestBody @Valid ReissueRequest request) {
+	public ResponseEntity<?> reissue(@RequestBody @Valid ReissueRequest request) {
 		TokenDto tokenDto = jwtService.reissue(
 			request.getNickname(),
 			request.getAccessToken(),
 			request.getRefreshToken());
 
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.add(AUTHORIZATION_HEADER,
-			TOKEN_PREFIX + " " + tokenDto.getAccessToken());
-		httpHeaders.add("X-REFRESH-TOKEN", tokenDto.getRefreshToken());
-
-		return ResponseEntity
-			.ok()
-			.headers(httpHeaders)
-			.body(ApiSuccessResponse.NO_DATA_RESPONSE);
+		return ResponseEntity.ok()
+			.header(SET_COOKIE, tokenDto.getResponseCookie().toString())
+			.body(tokenDto.getAccessToken());
 	}
 
 }

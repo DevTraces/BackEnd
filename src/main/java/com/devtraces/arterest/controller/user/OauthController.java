@@ -23,18 +23,14 @@ public class OauthController {
 
     private final OauthService oauthService;
 
+    public static final String SET_COOKIE = "Set-Cookie";
+
     @PostMapping("/kakao/callback")
-    public ResponseEntity<ApiSuccessResponse<?>> oauthKakaoSignIn(@RequestBody OauthKakaoSignInRequest request) {
+    public ResponseEntity<?> oauthKakaoSignIn(@RequestBody OauthKakaoSignInRequest request) {
         TokenDto tokenDto = oauthService.oauthKakaoSignIn(request.getAccessToken());
 
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add(AUTHORIZATION_HEADER,
-                TOKEN_PREFIX + " " + tokenDto.getAccessToken());
-        httpHeaders.add("X-REFRESH-TOKEN", tokenDto.getRefreshToken());
-
-        return ResponseEntity
-                .ok()
-                .headers(httpHeaders)
-                .body(ApiSuccessResponse.NO_DATA_RESPONSE);
+        return ResponseEntity.ok()
+            .header(SET_COOKIE, tokenDto.getResponseCookie().toString())
+            .body(tokenDto.getAccessToken());
     }
 }

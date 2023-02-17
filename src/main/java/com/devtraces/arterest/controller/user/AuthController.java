@@ -14,6 +14,7 @@ import com.devtraces.arterest.controller.user.dto.SignInRequest;
 import com.devtraces.arterest.controller.user.dto.UserRegistrationRequest;
 import com.devtraces.arterest.controller.user.dto.UserRegistrationResponse;
 import com.devtraces.arterest.service.user.AuthService;
+import javax.servlet.http.Cookie;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 public class AuthController {
 	private final AuthService authService;
+	public static final String SET_COOKIE = "Set-Cookie";
 
 	@PostMapping("sign-up")
 	public ApiSuccessResponse<UserRegistrationResponse> signUp(@ModelAttribute @Valid UserRegistrationRequest request) {
@@ -51,19 +53,13 @@ public class AuthController {
 	}
 
 	@PostMapping("/sign-in")
-	public ResponseEntity<ApiSuccessResponse<?>> signIn(@RequestBody @Valid SignInRequest request) {
+	public ResponseEntity<?> signIn(@RequestBody @Valid SignInRequest request) {
 		TokenDto tokenDto = authService.signInAndGenerateJwtToken(request.getEmail(),
 			request.getPassword());
 
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.add(AUTHORIZATION_HEADER,
-			TOKEN_PREFIX + " " + tokenDto.getAccessToken());
-		httpHeaders.add("X-REFRESH-TOKEN", tokenDto.getRefreshToken());
-
-		return ResponseEntity
-			.ok()
-			.headers(httpHeaders)
-			.body(ApiSuccessResponse.NO_DATA_RESPONSE);
+		return ResponseEntity.ok()
+			.header(SET_COOKIE, tokenDto.getResponseCookie().toString())
+			.body(tokenDto.getAccessToken());
 	}
 
 	@PostMapping("/sign-out")
