@@ -1,5 +1,5 @@
-PROJECT_ROOT="/home/ubuntu/app/deploy"		# 여기서는 배포할 프로젝트가 위치할 디렉토리
-JAR_FILE="$PROJECT_ROOT/spring-project.jar"	# 배포할 프로젝트가 빌드된 jar 파일
+
+JAR_FILE="arterest-0.0.1-SNAPSHOT.jar"	# jar 파일명
 
 DEPLOY_LOG="$PROJECT_ROOT/deploy.log"
 
