@@ -19,13 +19,13 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/email/check")
-    public ApiSuccessResponse<?> checkEmail(@RequestBody @Valid EmailCheckRequest request) {
-        return ApiSuccessResponse.from(userService.checkEmail(request.getEmail()));
+    public ApiSuccessResponse<?> checkEmail(@RequestParam String email) {
+        return ApiSuccessResponse.from(userService.checkEmail(email));
     }
 
     @GetMapping("/nickname/check")
-    public ApiSuccessResponse<?> checkNickname(@RequestBody @Valid NicknameCheckRequest request) {
-        return ApiSuccessResponse.from(userService.checkNickname(request.getNickname()));
+    public ApiSuccessResponse<?> checkNickname(@RequestParam String nickname) {
+        return ApiSuccessResponse.from(userService.checkNickname(nickname));
     }
 
     @PatchMapping("/password")
