@@ -8,6 +8,8 @@ import com.devtraces.arterest.common.response.ApiSuccessResponse;
 import com.devtraces.arterest.controller.user.dto.MailAuthKeyCheckRequest;
 import com.devtraces.arterest.controller.user.dto.MailAuthKeyCheckResponse;
 import com.devtraces.arterest.controller.user.dto.MailAuthKeyRequest;
+import com.devtraces.arterest.controller.user.dto.PasswordCheckRequest;
+import com.devtraces.arterest.controller.user.dto.PasswordCheckResponse;
 import com.devtraces.arterest.controller.user.dto.SignInRequest;
 import com.devtraces.arterest.controller.user.dto.UserRegistrationRequest;
 import com.devtraces.arterest.controller.user.dto.UserRegistrationResponse;
@@ -69,5 +71,11 @@ public class AuthController {
 		String accessToken = bearerToken.substring(TOKEN_PREFIX.length() + 1);
 		authService.signOut(userId, accessToken);
 		return ApiSuccessResponse.NO_DATA_RESPONSE;
+	}
+
+	@PostMapping("/password/check")
+	public ApiSuccessResponse<PasswordCheckResponse> checkPassword(@AuthenticationPrincipal long userId, @RequestBody @Valid PasswordCheckRequest request) {
+		boolean isCorrect = authService.checkPassword(userId, request.getPassword());
+		return ApiSuccessResponse.from(PasswordCheckResponse.builder().isCorrect(isCorrect).build());
 	}
 }

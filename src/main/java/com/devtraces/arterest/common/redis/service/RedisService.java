@@ -63,6 +63,16 @@ public class RedisService {
 		return values.get(ACCESS_TOKEN_BLACK_LIST_PREFIX + accessToken) == null;
 	}
 
+	public void setTrieValue(String key, String data) {
+		ValueOperations<String, String> values = redisTemplate.opsForValue();
+		values.set(key, data);
+	}
+
+	public String getTrieValue(String key) {
+		ValueOperations<String, String> values = redisTemplate.opsForValue();
+		return values.get(key);
+	}
+
 	public void setAuthKeyValue(String email, String authKey) {
 		ValueOperations<String, String> values = redisTemplate.opsForValue();
 		values.set(AUTH_KEY_PREFIX + email, authKey, Duration.ofMinutes(AUTH_KEY_VALID_MINUTE));
@@ -89,5 +99,6 @@ public class RedisService {
 
 	public void deleteAuthCompletedValue(String email) {
 		redisTemplate.delete(AUTH_COMPLETED_PREFIX + email);
+
 	}
 }

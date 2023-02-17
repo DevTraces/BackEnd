@@ -59,5 +59,8 @@ public class Reply extends BaseEntity {
     @ToString.Exclude
     private List<Rereply> rereplyList = new ArrayList<>();
 
+    public void updateContent(String content){
+        this.content = content;
+    }
 }
 

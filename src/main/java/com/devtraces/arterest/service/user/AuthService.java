@@ -6,11 +6,15 @@ import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.jwt.JwtProvider;
 import com.devtraces.arterest.common.jwt.dto.TokenDto;
 import com.devtraces.arterest.common.redis.service.RedisService;
+
 import com.devtraces.arterest.controller.user.dto.UserRegistrationRequest;
 import com.devtraces.arterest.controller.user.dto.UserRegistrationResponse;
+
 import com.devtraces.arterest.domain.user.User;
 import com.devtraces.arterest.domain.user.UserRepository;
+
 import java.util.Date;
+
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -125,5 +129,11 @@ public class AuthService {
 		// Access Token을 무효화시킬 수 없으므로 Redis에 블랙리스트 작성
 		Date expiredDate = jwtProvider.getExpiredDate(accessToken);
 		redisService.setAccessTokenBlackListValue(accessToken, userId, expiredDate);
+	}
+
+	public boolean checkPassword(long userId, String password) {
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> BaseException.USER_NOT_FOUND);
+		return passwordEncoder.matches(password, user.getPassword());
 	}
 }
