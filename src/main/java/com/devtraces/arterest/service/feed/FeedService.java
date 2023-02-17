@@ -211,14 +211,6 @@ public class FeedService {
             }
         }
 
-        // 새로운 이미지들을 S3에 업로드하면서 응답으로 받은 url 스트링들을 별도의 리스트에 저장해 둔다.
-        List<String> newImageUrlList = new ArrayList<>();
-        if(imageFileList != null){
-            for(MultipartFile imageFile : imageFileList){
-                newImageUrlList.add(s3Util.uploadImage(imageFile));
-            }
-        }
-
         // String 배열을 만든 후, 기존 이미지 url들을 정해진 인덱스에 맞게 넣어 둔다.
         int newImageFileCount = imageFileList == null ? 0 : imageFileList.size();
         int existingImageUrlCount = feedUpdateRequest.getExistingImageUrls() == null ? 0 :
@@ -232,7 +224,7 @@ public class FeedService {
             }
         }
 
-        // 새로운 이미지들을 resultImageUrlArr의 null 인 칸들에 순서대로 넣어준다.
+        // 새로운 이미지들을 S3에 업로드 하면서 resultImageUrlArr의 null 인 칸들에 순서대로 넣어준다.
         if(newImageFileCount != 0){
             for(MultipartFile newImageFile : imageFileList){
                 for(int i=0; i< resultImageUrlArr.length; i++){
@@ -240,15 +232,6 @@ public class FeedService {
                         resultImageUrlArr[i] = s3Util.uploadImage(newImageFile);
                     }
                 }
-            }
-        }
-
-        // 기존 이미지들의 삭제가 위의 로직에서 진행되었다고 가정하고 새 이미지를 올린다.
-        StringBuilder imageUrlBuilder = new StringBuilder();
-        if(resultImageUrlArr.length != 0){
-            for(String resultImageUrl : resultImageUrlArr){
-                imageUrlBuilder.append(resultImageUrl);
-                imageUrlBuilder.append(',');
             }
         }
 
@@ -285,6 +268,16 @@ public class FeedService {
         }
 
         feed.updateContent(feedUpdateRequest.getContent());
+
+        // Feed 엔티티의 imageUrls 필드의 내용물을 수정할 때 사용할 문자열을 만들어 준다.
+        StringBuilder imageUrlBuilder = new StringBuilder();
+        if(resultImageUrlArr.length != 0){
+            for(String resultImageUrl : resultImageUrlArr){
+                imageUrlBuilder.append(resultImageUrl);
+                imageUrlBuilder.append(',');
+            }
+        }
+
         feed.updateImageUrls(
             imageUrlBuilder.toString().equals("") ? null : imageUrlBuilder.toString()
         );
