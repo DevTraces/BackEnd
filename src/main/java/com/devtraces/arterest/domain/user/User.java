@@ -51,8 +51,10 @@ public class User extends BaseEntity {
     private String username;
     @Column(name = "nickname", unique = true)
     private String nickname;
+
     @Column(unique = true)
     private String email;
+
     private String description;
 
     private String password; // 암호화 필요.

@@ -2,7 +2,9 @@ package com.devtraces.arterest.domain.like;
 
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface LikeRepository extends JpaRepository<Likes, Long> {
 
     // 특정 유저가 좋아요를 누른 피드들의 주키 번호를 찾아내기 위한 쿼리

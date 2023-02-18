@@ -3,6 +3,7 @@ package com.devtraces.arterest.domain.feedhashtagmap;
 import com.devtraces.arterest.common.domain.BaseEntity;
 import com.devtraces.arterest.domain.feed.Feed;
 import com.devtraces.arterest.domain.hashtag.Hashtag;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -30,21 +31,21 @@ import org.hibernate.envers.AuditOverride;
 @Entity
 public class FeedHashtagMap extends BaseEntity {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "heed_hashtag_map_id")
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "feed_hashtag_map_id")
+    private Long id;
 
-	// 1:N mapping with Feed
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "feed_id")
-	@ToString.Exclude
-	private Feed feed;
+    // 1:N mapping with Feed
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "feed_id")
+    @ToString.Exclude
+    private Feed feed;
 
-	// 1:N mapping with Hashtag
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "hashtag_id")
-	@ToString.Exclude
-	private Hashtag hashtag;
+    // 1:N mapping with Hashtag
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hashtag_id")
+    @ToString.Exclude
+    private Hashtag hashtag;
 
 }
