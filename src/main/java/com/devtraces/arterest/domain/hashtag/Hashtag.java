@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.AccessLevel;
@@ -25,7 +26,7 @@ import org.hibernate.envers.AuditOverride;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AuditOverride(forClass = BaseEntity.class)
-@Table(name = "hashtag")
+@Table(name = "hashtag", indexes = {@Index(name = "hashtag_string_index",columnList = "hashtag_string")})
 @Entity
 public class Hashtag extends BaseEntity {
 
@@ -34,7 +35,9 @@ public class Hashtag extends BaseEntity {
     @Column(name = "hashtag_id")
     private Long id;
 
-    private String hashtagString;
+
+	  @Column(unique = true, name = "hashtag_string")
+	  private String hashtagString;
 
     // 1:N mapping with FeedHashtagMap
     @OneToMany(mappedBy = "hashtag")

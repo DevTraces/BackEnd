@@ -34,7 +34,10 @@ import org.hibernate.envers.AuditOverride;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AuditOverride(forClass = BaseEntity.class)
-@Table(name = "user", indexes = @Index(name = "nickname_index", columnList = "nickname"))
+@Table(name = "user", indexes = {
+    @Index(name = "username_index", columnList = "username"),
+    @Index(name = "nickname_index", columnList = "nickname")
+})
 @Entity
 public class User extends BaseEntity {
 
@@ -44,9 +47,8 @@ public class User extends BaseEntity {
     private Long id;
 
     private Long kakaoUserId;
-
+    @Column(name = "username")
     private String username;
-
     @Column(name = "nickname", unique = true)
     private String nickname;
 

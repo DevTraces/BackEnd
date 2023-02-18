@@ -31,6 +31,7 @@ public class BaseException extends RuntimeException {
 	public static final BaseException INTERNAL_SERVER_ERROR = new BaseException(ErrorCode.INTERNAL_SERVER_ERROR);
 	public static final BaseException FAILED_SEND_EMAIL = new BaseException(ErrorCode.FAILED_SEND_EMAIL);
 
+
 	private final ErrorCode errorCode;
 
 	// 의도적인 예외이므로 stack trace 제거 (불필요한 예외처리 비용 제거)

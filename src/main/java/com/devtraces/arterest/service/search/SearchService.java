@@ -2,8 +2,12 @@ package com.devtraces.arterest.service.search;
 
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.redis.service.RedisService;
+import com.devtraces.arterest.controller.search.dto.GetHashtagsSearchResponse;
+import com.devtraces.arterest.controller.search.dto.GetNicknameSearchResponse;
+import com.devtraces.arterest.controller.search.dto.GetUsernameSearchResponse;
 import com.devtraces.arterest.domain.hashtag.Hashtag;
 import com.devtraces.arterest.domain.hashtag.HashtagRepository;
+import com.devtraces.arterest.domain.user.UserRepository;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -11,11 +15,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.Trie;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +30,8 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @RequiredArgsConstructor
 public class SearchService {
+
+	private final UserRepository userRepository;
 	private final HashtagRepository hashtagRepository;
 	private final Trie trie;
 	private final RedisService redisService;
@@ -33,12 +42,48 @@ public class SearchService {
 	@Transactional
 	@Scheduled(cron = "0 * * * * *")
 	public void createAutoCompleteWords() {
-		List<Hashtag> feedList = hashtagRepository.findAll();
-		saveAllHashtags(feedList);
+		List<Hashtag> hashtagList = hashtagRepository.findAll();
+		saveAllHashtags(hashtagList);
 	}
 
 	public List<String> getAutoCompleteWords(String keyword, Integer numberOfWords) {
 		return getAutoCompleteHashtags(keyword, numberOfWords);
+	}
+
+	public GetHashtagsSearchResponse getSearchResultUsingHashtags(
+		String keyword, Integer page, Integer pageSize) {
+
+		Optional<Hashtag> hashtag = hashtagRepository.findByHashtagString(keyword);
+
+		if(hashtag.isPresent()){
+			return GetHashtagsSearchResponse.from(
+				hashtag.get(), page, pageSize);
+		}
+
+		return GetHashtagsSearchResponse.builder()
+			.totalNumberOfSearches(0L)
+			.feedList(null)
+			.build();
+	}
+
+	public List<GetUsernameSearchResponse> getSearchResultUsingUsername(
+		String keyword, Integer page, Integer pageSize) {
+		Pageable pageable = PageRequest.of(page, pageSize);
+
+		return userRepository.findByUsername(keyword, pageable)
+			.stream().map(User -> GetUsernameSearchResponse.from(User))
+			.collect(Collectors.toList());
+	}
+
+	public List<GetNicknameSearchResponse> getSearchResultUsingNickname(
+		String keyword, Integer page, Integer pageSize) {
+		Pageable pageable = PageRequest.of(page, pageSize);
+
+		if(keyword.charAt(0) == '@') keyword = keyword.substring(1);
+
+		return userRepository.findByNickname(keyword, pageable)
+			.stream().map(User -> GetNicknameSearchResponse.from(User))
+			.collect(Collectors.toList());
 	}
 
 	// 해시태그가 저장된 Trie 자료구조를 직렬화하여 Redis 에 저장.
@@ -65,7 +110,7 @@ public class SearchService {
 	}
 
 	// Redis 에 저장된 Trie 자료구조를 역직렬화하여 자동완성된 단어들을 가져옴.
-	public List<String> getAutoCompleteHashtags(String keyword, Integer numberOfWords){
+	public List<String> getAutoCompleteHashtags(String keyword, Integer numberOfWords) {
 		String output = redisService.getTrieValue(TRIE_KEY);
 
 		byte[] serializedTrie;
