@@ -38,4 +38,12 @@ public class UserController {
         );
         return ApiSuccessResponse.NO_DATA_RESPONSE;
     }
+
+    @GetMapping("/profile/{nickname}")
+    public ApiSuccessResponse<?> getProfileByNickname(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable String nickname
+    ) {
+        return ApiSuccessResponse.from(userService.getProfileByNickname(nickname));
+    }
 }

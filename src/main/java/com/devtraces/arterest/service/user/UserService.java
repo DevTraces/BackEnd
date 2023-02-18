@@ -4,7 +4,8 @@ import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.exception.ErrorCode;
 import com.devtraces.arterest.controller.user.dto.EmailCheckResponse;
 import com.devtraces.arterest.controller.user.dto.NicknameCheckResponse;
-import com.devtraces.arterest.controller.user.dto.PasswordUpdateRequest;
+import com.devtraces.arterest.controller.user.dto.ProfileByNicknameResponse;
+import com.devtraces.arterest.domain.feed.FeedRepository;
 import com.devtraces.arterest.domain.user.User;
 import com.devtraces.arterest.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,13 +14,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-import static com.devtraces.arterest.common.exception.ErrorCode.*;
-
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
+    private final FeedRepository feedRepository;
     private final PasswordEncoder passwordEncoder;
 
     public EmailCheckResponse checkEmail(String email) {
@@ -60,5 +60,17 @@ public class UserService {
 
         user.setPassword(passwordEncoder.encode(afterPassword));
         userRepository.save(user);
+    }
+
+    public ProfileByNicknameResponse getProfileByNickname(String nickname) {
+        User user = userRepository.findByNickname(nickname).orElseThrow(
+                () -> new BaseException(ErrorCode.USER_NOT_FOUND)
+        );
+
+        Integer totalFeedNumber = feedRepository.countAllByUserId(user.getId());
+
+        // TODO : follow 로직 구현된 후, 팔로우/팔로잉 숫자, 팔로잉 여부 로직 추가 예정
+
+        return ProfileByNicknameResponse.from(user, totalFeedNumber);
     }
 }
