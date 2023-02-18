@@ -13,10 +13,4 @@ public class ReissueRequest {
 
 	@NotBlank(message = "닉네임 입력은 필수입니다.")
 	private String nickname;
-
-	@NotBlank(message = "Access Token 입력은 필수입니다.")
-	private String accessToken;
-
-	@NotBlank(message = "Refresh Token 입력은 필수입니다.")
-	private String refreshToken;
 }

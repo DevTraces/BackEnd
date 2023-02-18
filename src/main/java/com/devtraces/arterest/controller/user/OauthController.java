@@ -5,6 +5,7 @@ import com.devtraces.arterest.common.response.ApiSuccessResponse;
 import com.devtraces.arterest.controller.user.dto.OauthKakaoSignInRequest;
 import com.devtraces.arterest.service.user.AuthService;
 import com.devtraces.arterest.service.user.OauthService;
+import java.util.HashMap;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import static com.devtraces.arterest.common.jwt.JwtProperties.AUTHORIZATION_HEADER;
 import static com.devtraces.arterest.common.jwt.JwtProperties.TOKEN_PREFIX;
+import static com.devtraces.arterest.controller.user.AuthController.ACCESS_TOKEN_PREFIX;
+import static com.devtraces.arterest.controller.user.AuthController.SET_COOKIE;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,14 +30,10 @@ public class OauthController {
     public ResponseEntity<ApiSuccessResponse<?>> oauthKakaoSignIn(@RequestBody OauthKakaoSignInRequest request) {
         TokenDto tokenDto = oauthService.oauthKakaoSignIn(request.getAccessToken());
 
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add(AUTHORIZATION_HEADER,
-                TOKEN_PREFIX + " " + tokenDto.getAccessToken());
-        httpHeaders.add("X-REFRESH-TOKEN", tokenDto.getRefreshToken());
-
-        return ResponseEntity
-                .ok()
-                .headers(httpHeaders)
-                .body(ApiSuccessResponse.NO_DATA_RESPONSE);
+        return ResponseEntity.ok()
+            .header(SET_COOKIE, tokenDto.getResponseCookie().toString())
+            .body(ApiSuccessResponse.from(new HashMap(){{
+                put(ACCESS_TOKEN_PREFIX, TOKEN_PREFIX + " " + tokenDto.getAccessToken());
+            }}));
     }
 }
