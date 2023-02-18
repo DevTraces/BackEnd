@@ -1,5 +1,6 @@
 package com.devtraces.arterest.service.user;
 
+import com.devtraces.arterest.common.component.S3Util;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.controller.user.dto.EmailCheckResponse;
 import com.devtraces.arterest.controller.user.dto.NicknameCheckResponse;
@@ -14,7 +15,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -34,6 +37,8 @@ class UserServiceTest {
     private FeedRepository feedRepository;
     @Mock
     private PasswordEncoder passwordEncoder;
+    @Mock
+    private S3Util s3Util;
     @InjectMocks
     private UserService userService;
 
@@ -179,5 +184,96 @@ class UserServiceTest {
 
         //then
         assertEquals(USER_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("프로필 수정 성공")
+    void success_updateProfile() {
+        //given
+        String nickname = "nickname";
+        String updateUsername = "updateUsername";
+        String updateNickname = "updateNickname";
+        String updateDescription = "updateDescription";
+        String updateProfileImageUrl = "updateProfileImageUrl";
+        MultipartFile multipartFile =
+                new MockMultipartFile("file", "fileContent".getBytes());
+        User user = User.builder()
+                .id(1L)
+                .nickname(nickname)
+                .build();
+
+        given(userRepository.findById(user.getId())).willReturn(Optional.of(user));
+        given(s3Util.uploadImage(multipartFile)).willReturn(updateProfileImageUrl);
+        given(userRepository.save(any())).willReturn(user);
+
+        ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+
+        //when
+       userService.updateProfile(
+                user.getId(), nickname, updateUsername,
+                updateNickname, updateDescription, multipartFile
+        );
+
+        //then
+        verify(userRepository, times(1)).save(captor.capture());
+        verify(s3Util, times(1)).uploadImage(any());
+        assertEquals(updateUsername, captor.getValue().getUsername());
+        assertEquals(updateNickname, captor.getValue().getNickname());
+        assertEquals(updateDescription, captor.getValue().getDescription());
+    }
+
+    @Test
+    @DisplayName("프로필 수정 실패 - 존재하지 않는 사용자")
+    void fail_updateProfile_USER_NOT_FOUND() {
+        //given
+        String nickname = "nickname";
+        String updateUsername = "updateUsername";
+        String updateNickname = "updateNickname";
+        String updateDescription = "updateDescription";
+        MultipartFile multipartFile =
+                new MockMultipartFile("file", "fileContent".getBytes());
+
+        given(userRepository.findById(anyLong())).willReturn(Optional.empty());
+
+        //when
+        BaseException exception = assertThrows(BaseException.class,
+                () -> userService.updateProfile(
+                        anyLong(), nickname, updateUsername,
+                        updateNickname, updateDescription, multipartFile
+                )
+        );
+
+        //then
+        assertEquals(USER_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("프로필 수정 실패 - 본인 프로필 아닌 경우")
+    void fail_updateProfile_FORBIDDEN() {
+        //given
+        String ownerNickname = "ownerNickname";
+        String notOwnerNickname = "notOwnerNickname";
+        String updateUsername = "updateUsername";
+        String updateNickname = "updateNickname";
+        String updateDescription = "updateDescription";
+        MultipartFile multipartFile =
+                new MockMultipartFile("file", "fileContent".getBytes());
+        User notOwner = User.builder()
+                .id(2L)
+                .nickname(notOwnerNickname)
+                .build();
+
+        given(userRepository.findById(anyLong())).willReturn(Optional.of(notOwner));
+
+        //when
+        BaseException exception = assertThrows(BaseException.class,
+                () -> userService.updateProfile(
+                        notOwner.getId(), ownerNickname, updateUsername,
+                        updateNickname, updateDescription, multipartFile
+                )
+        );
+
+        //then
+        assertEquals(FORBIDDEN, exception.getErrorCode());
     }
 }
