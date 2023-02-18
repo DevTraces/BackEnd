@@ -3,6 +3,8 @@ package com.devtraces.arterest.service.user;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.controller.user.dto.EmailCheckResponse;
 import com.devtraces.arterest.controller.user.dto.NicknameCheckResponse;
+import com.devtraces.arterest.controller.user.dto.ProfileByNicknameResponse;
+import com.devtraces.arterest.domain.feed.FeedRepository;
 import com.devtraces.arterest.domain.user.User;
 import com.devtraces.arterest.domain.user.UserRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -28,10 +30,10 @@ class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
-
+    @Mock
+    private FeedRepository feedRepository;
     @Mock
     private PasswordEncoder passwordEncoder;
-
     @InjectMocks
     private UserService userService;
 
@@ -136,5 +138,46 @@ class UserServiceTest {
 
         // then
         assertEquals(WRONG_BEFORE_PASSWORD, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("사용자 프로필 조회 성공")
+    void success_getProfileByNickname() {
+        //given
+        String testNickname = "nickname";
+        Integer totalFeedNumber = 1;
+        User user = User.builder().id(1L).nickname(testNickname).build();
+
+        given(userRepository.findByNickname(anyString()))
+                .willReturn(Optional.of(user));
+        given(feedRepository.countAllByUserId(1L))
+                .willReturn(totalFeedNumber);
+
+        //when
+        ProfileByNicknameResponse response =
+                userService.getProfileByNickname(testNickname);
+
+        //then
+        assertEquals(testNickname, response.getNickname());
+        assertEquals(totalFeedNumber, response.getTotalFeedNumber());
+    }
+
+    @Test
+    @DisplayName("사용자 프로필 조회 실패 - 존재하지 않는 사용자")
+    void fail_getProfileByNickname_USER_NOT_FOUND() {
+        //given
+        String testNickname = "nickname";
+        given(userRepository.findByNickname(anyString()))
+                .willReturn(Optional.empty());
+
+        //when
+        BaseException exception =
+                assertThrows(
+                        BaseException.class,
+                        () -> userService.getProfileByNickname(testNickname)
+                );
+
+        //then
+        assertEquals(USER_NOT_FOUND, exception.getErrorCode());
     }
 }
