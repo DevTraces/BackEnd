@@ -15,6 +15,8 @@ public class BaseException extends RuntimeException {
 	public static final BaseException CONTENT_LIMIT_EXCEED = new BaseException(ErrorCode.CONTENT_LIMIT_EXCEED);
 	public static final BaseException USER_INFO_NOT_MATCH = new BaseException(ErrorCode.USER_INFO_NOT_MATCH);
 	public static final BaseException WRONG_EMAIL_OR_PASSWORD = new BaseException(ErrorCode.WRONG_EMAIL_OR_PASSWORD);
+
+	public static final BaseException WRONG_BEFORE_PASSWORD = new BaseException(ErrorCode.WRONG_BEFORE_PASSWORD);
 	public static final BaseException NOT_EXPIRED_ACCESS_TOKEN = new BaseException(ErrorCode.NOT_EXPIRED_ACCESS_TOKEN);
   public static final BaseException INVALID_IMAGE_EXTENSION = new BaseException(ErrorCode.INVALID_IMAGE_EXTENSION);
 	public static final BaseException INVALID_TOKEN = new BaseException(ErrorCode.INVALID_TOKEN);
