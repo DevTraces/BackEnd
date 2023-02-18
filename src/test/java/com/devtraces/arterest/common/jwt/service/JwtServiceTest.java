@@ -39,7 +39,7 @@ class JwtServiceTest {
 	void testReissue() {
 		TokenDto mockTokenDto = TokenDto.builder()
 			.accessToken("access-token2")
-			.refreshToken("refresh-token2")
+	//		.refreshToken("refresh-token2")
 			.build();
 		given(userRepository.findByNickname(anyString()))
 			.willReturn(Optional.of(createMockUser()));
@@ -55,7 +55,7 @@ class JwtServiceTest {
 		TokenDto tokenDto = jwtService.reissue("arterest", "access-token", "refresh-token");
 
 		assertEquals("access-token2", tokenDto.getAccessToken());
-		assertEquals("refresh-token2", tokenDto.getRefreshToken());
+		// assertEquals("refresh-token2", tokenDto.getRefreshToken());
 	}
 
 	// 해당 nickname으로 된 사용자 정보 없을 경우

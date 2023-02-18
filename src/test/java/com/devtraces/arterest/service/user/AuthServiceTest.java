@@ -11,7 +11,7 @@ import static org.mockito.Mockito.verify;
 import com.devtraces.arterest.common.UserSignUpType;
 import com.devtraces.arterest.common.UserStatusType;
 import com.devtraces.arterest.common.component.MailUtil;
-import com.devtraces.arterest.common.component.S3Uploader;
+import com.devtraces.arterest.common.component.S3Util;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.jwt.JwtProvider;
 import com.devtraces.arterest.common.jwt.dto.TokenDto;
@@ -38,7 +38,7 @@ class AuthServiceTest {
 	@Mock
 	private JwtProvider jwtProvider;
 	@Mock
-	private S3Uploader s3Uploader;
+	private S3Util s3Util;
 	@Mock
 	private MailUtil mailUtil;
 	@Mock
@@ -215,7 +215,7 @@ class AuthServiceTest {
 			.build();
 		TokenDto mockTokenDto = TokenDto.builder()
 			.accessToken("access-token")
-			.refreshToken("refresh-token")
+			// .refreshToken("refresh-token")
 			.build();
 		given(userRepository.findByEmail(anyString()))
 			.willReturn(Optional.of(mockUser));
