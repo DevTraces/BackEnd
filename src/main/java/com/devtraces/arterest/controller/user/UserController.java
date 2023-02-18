@@ -8,6 +8,8 @@ import com.devtraces.arterest.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import reactor.util.annotation.Nullable;
 
 import javax.validation.Valid;
 
@@ -46,4 +48,27 @@ public class UserController {
     ) {
         return ApiSuccessResponse.from(userService.getProfileByNickname(nickname));
     }
+
+    @PostMapping("/profile/{nickname}")
+    public ApiSuccessResponse<?> updateProfile(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable String nickname,
+            @RequestParam @Nullable String updateUsername,
+            @RequestParam @Nullable String updateNickname,
+            @RequestParam @Nullable String updateDescription,
+            @RequestParam @Nullable MultipartFile updateProfileImage
+
+    ) {
+        return ApiSuccessResponse.from(
+                userService.updateProfile(
+                        userId,
+                        nickname,
+                        updateUsername,
+                        updateNickname,
+                        updateDescription,
+                        updateProfileImage
+                )
+        );
+    }
+
 }

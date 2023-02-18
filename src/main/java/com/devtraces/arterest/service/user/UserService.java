@@ -1,16 +1,19 @@
 package com.devtraces.arterest.service.user;
 
+import com.devtraces.arterest.common.component.S3Util;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.exception.ErrorCode;
 import com.devtraces.arterest.controller.user.dto.EmailCheckResponse;
 import com.devtraces.arterest.controller.user.dto.NicknameCheckResponse;
 import com.devtraces.arterest.controller.user.dto.ProfileByNicknameResponse;
+import com.devtraces.arterest.controller.user.dto.UpdateProfileResponse;
 import com.devtraces.arterest.domain.feed.FeedRepository;
 import com.devtraces.arterest.domain.user.User;
 import com.devtraces.arterest.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -21,6 +24,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final FeedRepository feedRepository;
     private final PasswordEncoder passwordEncoder;
+    private final S3Util s3Util;
 
     public EmailCheckResponse checkEmail(String email) {
 
@@ -49,16 +53,14 @@ public class UserService {
     public void updatePassword(
             Long userId, String beforePassword, String afterPassword
     ) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> BaseException.USER_NOT_FOUND
-        );
+        User user = getUserById(userId);
 
         // 비밀번호와 입력한 비밀번호가 다른 경우
         if (!passwordEncoder.matches(beforePassword, user.getPassword())) {
             throw BaseException.WRONG_BEFORE_PASSWORD;
         }
 
-        user.setPassword(passwordEncoder.encode(afterPassword));
+        user.updatePassword(passwordEncoder.encode(afterPassword));
         userRepository.save(user);
     }
 
@@ -72,5 +74,35 @@ public class UserService {
         // TODO : follow 로직 구현된 후, 팔로우/팔로잉 숫자, 팔로잉 여부 로직 추가 예정
 
         return ProfileByNicknameResponse.from(user, totalFeedNumber);
+    }
+
+    public UpdateProfileResponse updateProfile(
+            Long userId, String nickname,
+            String updateUsername, String updateNickname,
+            String updateDescription, MultipartFile updateProfileImage
+            ) {
+        User user = getUserById(userId);
+
+        // 본인의 프로필 정보만 수정가능
+        if (!user.getNickname().equals(nickname)) { throw BaseException.FORBIDDEN; }
+
+        if (updateUsername != null) { user.updateUsername(updateUsername); }
+
+        if (updateNickname != null) { user.updateNickname(updateNickname); }
+
+        if (updateDescription != null) { user.updateDescription(updateDescription); }
+
+        if (updateProfileImage != null) {
+            user.updateProfileImageUrl(s3Util.uploadImage(updateProfileImage));
+        }
+
+        return UpdateProfileResponse.from(userRepository.save(user));
+    }
+
+    private User getUserById(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> BaseException.USER_NOT_FOUND
+        );
+        return user;
     }
 }

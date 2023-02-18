@@ -82,7 +82,22 @@ public class User extends BaseEntity {
     @ToString.Exclude
     private List<Rereply> rereplyList = new ArrayList<>();
 
-    public void setPassword(String password) {
+    public void updatePassword(String password) {
         this.password = password;
+    }
+
+    public void updateUsername(String username) {
+        this.username = username;
+    }
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
+    public void updateDescription(String description) {
+        this.description = description;
+    }
+
+    public void updateProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 }
