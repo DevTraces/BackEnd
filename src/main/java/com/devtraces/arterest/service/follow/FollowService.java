@@ -7,8 +7,6 @@ import com.devtraces.arterest.domain.follow.Follow;
 import com.devtraces.arterest.domain.follow.FollowRepository;
 import com.devtraces.arterest.domain.user.User;
 import com.devtraces.arterest.domain.user.UserRepository;
-import com.fasterxml.jackson.databind.ser.Serializers.Base;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -27,9 +25,7 @@ public class FollowService {
 
     @Transactional
     public void createFollowRelation(Long userId, String nickname) {
-        User followerUser = userRepository.findById(userId).orElseThrow(
-            () -> BaseException.USER_NOT_FOUND
-        );
+        User followerUser = findUserById(userId);
 
         if(
             followerUser.getFollowList() != null
@@ -38,9 +34,7 @@ public class FollowService {
             throw BaseException.FOLLOW_LIMIT_EXCEED;
         }
 
-        User followingUser = userRepository.findByNickname(nickname).orElseThrow(
-            () -> BaseException.USER_NOT_FOUND
-        );
+        User followingUser = findUserByNickname(nickname);
 
         if(Objects.equals(followingUser.getId(), userId)){
             throw BaseException.FOLLOWING_SELF_NOT_ALLOWED;
@@ -68,17 +62,13 @@ public class FollowService {
     ) {
         // 타깃 유저가 팔로우 하고 있는 사람들이 누구인지를 체크한다.
         // 타깃 유저 엔티티의 팔로우 엔티티 내의 followingId 필드를 보면 된다.
-        User targetUser = userRepository.findByNickname(nickname).orElseThrow(
-            () -> BaseException.USER_NOT_FOUND
-        );
+        User targetUser = findUserByNickname(nickname);
         List<Long> followingUserIdListOfTargetUser = targetUser.getFollowList()
             .stream().map(Follow::getFollowingId).collect(Collectors.toList());
 
         // 그 사람들 중에서 내가 팔로우를 하고 있는지 그렇지 않은지를 일일이 판단해야 한다.
         // 따라서 내가 팔로우 하고 있는 사람들도 봐야 한다.
-        User requestedUser = userRepository.findById(userId).orElseThrow(
-            () -> BaseException.USER_NOT_FOUND
-        );
+        User requestedUser = findUserById(userId);
         Set<Long> followingUserIdSetOfRequestUser = requestedUser.getFollowList()
             .stream().map(Follow::getFollowingId).collect(Collectors.toSet());
 
@@ -98,14 +88,10 @@ public class FollowService {
         Long userId, String nickname, Integer page, Integer pageSize
     ) {
         // 타깃 유저를 찾아낸다.
-        User targetUser = userRepository.findByNickname(nickname).orElseThrow(
-            () -> BaseException.USER_NOT_FOUND
-        );
+        User targetUser = findUserByNickname(nickname);
 
         // 현재 '내'가 팔로우 하고 있는 사람들을 확인한다.
-        User requestedUser = userRepository.findById(userId).orElseThrow(
-            () -> BaseException.USER_NOT_FOUND
-        );
+        User requestedUser = findUserById(userId);
         Set<Long> followingUserIdSetOfRequestUser = requestedUser.getFollowList()
             .stream().map(Follow::getFollowingId).collect(Collectors.toSet());
 
@@ -120,9 +106,19 @@ public class FollowService {
 
     @Transactional
     public void deleteFollowRelation(Long userId, String nickname) {
-        User followingUser = userRepository.findByNickname(nickname).orElseThrow(
+        User unfollowTargetUser = findUserByNickname(nickname);
+        followRepository.deleteByUserIdAndFollowingId(userId, unfollowTargetUser.getId());
+    }
+
+    private User findUserById(Long userId){
+        return userRepository.findById(userId).orElseThrow(
             () -> BaseException.USER_NOT_FOUND
         );
-        followRepository.deleteByUserIdAndFollowingId(userId, followingUser.getId());
+    }
+
+    private User findUserByNickname(String nickname){
+        return userRepository.findByNickname(nickname).orElseThrow(
+            () -> BaseException.USER_NOT_FOUND
+        );
     }
 }
