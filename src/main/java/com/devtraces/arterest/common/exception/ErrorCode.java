@@ -16,6 +16,8 @@ public enum ErrorCode {
 	WRONG_BEFORE_PASSWORD(HttpStatus.BAD_REQUEST, "WRONG_BEFORE_PASSWORD", "이전 비밀번호가 일치하지 않습니다."),
 	INVALID_TOKEN(HttpStatus.BAD_REQUEST, "INVALID_TOKEN", "유효하지 않은 토큰입니다."),
 	NOT_EXPIRED_ACCESS_TOKEN(HttpStatus.BAD_REQUEST, "NOT_EXPIRED_ACCESS_TOKEN", "만료되지 않은 Access Token입니다. 비정상적인 시도이므로 로그아웃됩니다."),
+	FOLLOW_LIMIT_EXCEED(HttpStatus.BAD_REQUEST, "FOLLOW_LIMIT_EXCEED", "5000명을 초과하여 팔로우 할 수 없습니다."),
+	FOLLOWING_SELF_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "FOLLOWING_SELF_NOT_ALLOWED", "자기자신을 팔로우 하는 것은 불가능합니다."),
  	INVALID_IMAGE_EXTENSION(HttpStatus.BAD_REQUEST, "INVALID_IMAGE_EXTENSION", "처리할 수 없는 이미지 형식입니다."),
  	CONTENT_LIMIT_EXCEED(HttpStatus.BAD_REQUEST,"CONTENT_LIMIT_EXCEED","1000자를 초과하여 입력할 수 없습니다."),
  	USER_INFO_NOT_MATCH(HttpStatus.BAD_REQUEST,"USER_INFO_NOT_MATCH","작성자만 내용을 수정할 수 있습니다."),

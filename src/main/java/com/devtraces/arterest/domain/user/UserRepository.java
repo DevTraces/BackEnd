@@ -1,6 +1,9 @@
 package com.devtraces.arterest.domain.user;
 
+import java.util.Collection;
 import java.util.Optional;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,4 +19,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	Page<User> findByUsername(String username, Pageable pageable);
 	Page<User> findByNickname(String nickname, Pageable pageable);
 	Optional<User> findByKakaoUserId(long kakaoUserId);
+
+	Slice<User> findAllByIdIn(Collection<Long> idList, PageRequest pageRequest);
 }
