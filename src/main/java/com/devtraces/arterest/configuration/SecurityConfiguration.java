@@ -35,25 +35,28 @@ public class SecurityConfiguration {
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
 		http
 			.httpBasic().disable()
 			.csrf().disable()
-			.cors().configurationSource(corsConfigurationSource()).and()
-			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+			.cors().configurationSource(corsConfigurationSource())
 
-		http
-			.authorizeRequests()
-				.antMatchers("/api/auth/sign-out", "api/auth/password/check").hasRole("USER")
-				.anyRequest().permitAll();
-
-		http
-			.addFilterBefore(new JwtAuthenticationFilter(jwtProvider, redisService),
-				UsernamePasswordAuthenticationFilter.class);
-
-		http
+			.and()
 			.exceptionHandling()
 			.authenticationEntryPoint(jwtAuthenticationEntryPoint)
-			.accessDeniedHandler(jwtAccessDeniedHandler);
+			.accessDeniedHandler(jwtAccessDeniedHandler)
+
+			.and()
+			.sessionManagement()
+			.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+
+			.and()
+			.addFilterBefore(new JwtAuthenticationFilter(jwtProvider, redisService),
+				UsernamePasswordAuthenticationFilter.class)
+
+			.authorizeRequests()
+			.antMatchers("/api/auth/sign-out", "api/auth/password/check").hasRole("USER")
+			.anyRequest().authenticated(); // permitAll() 로 하면 JwtAuthenticationEntryPoint 동작안함
 
 		return http.build();
 	}
