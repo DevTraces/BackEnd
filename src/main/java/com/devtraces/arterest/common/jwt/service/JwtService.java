@@ -21,16 +21,15 @@ public class JwtService {
 	private final UserRepository userRepository;
 
 	@Transactional
-	public TokenDto reissue(String nickname, String accessToken, String refreshToken) {
-		User user = userRepository.findByNickname(nickname)
-			.orElseThrow(() -> BaseException.USER_NOT_FOUND);
-		validateTokens(accessToken, refreshToken, user.getId());
+	public TokenDto reissue(String accessToken, String refreshToken) {
+		Long userId = Long.parseLong(jwtProvider.getUserId(accessToken));
+		validateTokens(accessToken, refreshToken, userId);
 
-		if (!redisService.hasSameRefreshToken(user.getId(), refreshToken)) {
+		if (!redisService.hasSameRefreshToken(userId, refreshToken)) {
 			throw BaseException.EXPIRED_OR_PREVIOUS_REFRESH_TOKEN;
 		}
 
-		return jwtProvider.generateAccessTokenAndRefreshToken(user.getId());
+		return jwtProvider.generateAccessTokenAndRefreshToken(userId);
 	}
 
 	private void validateTokens(String accessToken, String refreshToken, Long userId) {
@@ -44,4 +43,5 @@ public class JwtService {
 			throw BaseException.EXPIRED_OR_PREVIOUS_REFRESH_TOKEN;
 		}
 	}
+
 }

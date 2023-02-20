@@ -65,7 +65,7 @@ class JwtProviderTest {
 		assertTrue(accessTokenBody.getExpiration().after(new Date()));
 
 		Claims refreshTokenBody = Jwts.parserBuilder().setSigningKey(secretKey).build()
-			.parseClaimsJws(tokenDto.getRefreshToken()).getBody();
+			.parseClaimsJws(tokenDto.getResponseCookie().getValue()).getBody();
 		assertEquals(JwtProvider.REFRESH_TOKEN_SUBJECT_PREFIX + "1", refreshTokenBody.getSubject());
 		assertTrue(refreshTokenBody.getExpiration().after(new Date()));
 	}

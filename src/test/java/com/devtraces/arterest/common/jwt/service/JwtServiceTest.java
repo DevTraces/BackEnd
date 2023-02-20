@@ -19,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseCookie;
 
 @ExtendWith(MockitoExtension.class)
 class JwtServiceTest {
@@ -29,8 +30,6 @@ class JwtServiceTest {
 	private AuthService authService;
 	@Mock
 	private RedisService redisService;
-	@Mock
-	private UserRepository userRepository;
 
 	@InjectMocks
 	private JwtService jwtService;
@@ -39,10 +38,10 @@ class JwtServiceTest {
 	void testReissue() {
 		TokenDto mockTokenDto = TokenDto.builder()
 			.accessToken("access-token2")
-			.refreshToken("refresh-token2")
+			.responseCookie(ResponseCookie.from("freshToken", "refresh-token2").build())
 			.build();
-		given(userRepository.findByNickname(anyString()))
-			.willReturn(Optional.of(createMockUser()));
+		given(jwtProvider.getUserId(anyString()))
+			.willReturn("1");
 		given(jwtProvider.isExpiredToken("access-token"))
 			.willReturn(true);
 		given(jwtProvider.isExpiredToken("refresh-token"))
@@ -52,34 +51,22 @@ class JwtServiceTest {
 		given(jwtProvider.generateAccessTokenAndRefreshToken(anyLong()))
 			.willReturn(mockTokenDto);
 
-		TokenDto tokenDto = jwtService.reissue("arterest", "access-token", "refresh-token");
+		TokenDto tokenDto = jwtService.reissue( "access-token", "refresh-token");
 
 		assertEquals("access-token2", tokenDto.getAccessToken());
-		assertEquals("refresh-token2", tokenDto.getRefreshToken());
-	}
-
-	// 해당 nickname으로 된 사용자 정보 없을 경우
-	@Test
-	void testReissueByWrongNickname() {
-		given(userRepository.findByNickname(anyString()))
-			.willReturn(Optional.empty());
-
-		BaseException exception = assertThrows(BaseException.class,
-			() -> jwtService.reissue("arterest", "access-token", "refresh-token"));
-
-		assertEquals(BaseException.USER_NOT_FOUND, exception);
+		assertEquals("refresh-token2", tokenDto.getResponseCookie().getValue());
 	}
 
 	// 유효하지 않은 토큰인 경우
 	@Test
 	void testReissueByInvalidToken() {
-		given(userRepository.findByNickname(anyString()))
-			.willReturn(Optional.of(createMockUser()));
+		given(jwtProvider.getUserId(anyString()))
+			.willReturn("1");
 		given(jwtProvider.isExpiredToken(anyString()))
 			.willThrow(BaseException.INVALID_TOKEN);
 
 		BaseException exception = assertThrows(BaseException.class,
-			() -> jwtService.reissue("arterest", "access-token", "refresh-token"));
+			() -> jwtService.reissue("access-token", "refresh-token"));
 
 		assertEquals(BaseException.INVALID_TOKEN, exception);
 	}
@@ -87,15 +74,15 @@ class JwtServiceTest {
 	// access token이 만료되지 않은 경우
 	@Test
 	void testReissueByNotExpiredAccessToken() {
-		given(userRepository.findByNickname(anyString()))
-			.willReturn(Optional.of(createMockUser()));
+		given(jwtProvider.getUserId(anyString()))
+			.willReturn("1");
 		given(jwtProvider.isExpiredToken("access-token"))
 			.willReturn(false);
 		willDoNothing()
 			.given(authService).signOut(anyLong(), anyString());
 
 		BaseException exception = assertThrows(BaseException.class,
-			() -> jwtService.reissue("arterest", "access-token", "refresh-token"));
+			() -> jwtService.reissue( "access-token", "refresh-token"));
 
 		assertEquals(BaseException.NOT_EXPIRED_ACCESS_TOKEN, exception);
 	}
@@ -103,15 +90,15 @@ class JwtServiceTest {
 	// refresh token이 만료된 경우
 	@Test
 	void testReissueByExpiredRefreshToken() {
-		given(userRepository.findByNickname(anyString()))
-			.willReturn(Optional.of(createMockUser()));
+		given(jwtProvider.getUserId(anyString()))
+			.willReturn("1");
 		given(jwtProvider.isExpiredToken("access-token"))
 			.willReturn(true);
 		given(jwtProvider.isExpiredToken("refresh-token"))
 			.willReturn(true);
 
 		BaseException exception = assertThrows(BaseException.class,
-			() -> jwtService.reissue("arterest", "access-token", "refresh-token"));
+			() -> jwtService.reissue( "access-token", "refresh-token"));
 
 		assertEquals(BaseException.EXPIRED_OR_PREVIOUS_REFRESH_TOKEN, exception);
 	}
@@ -119,8 +106,8 @@ class JwtServiceTest {
 	// Redis에 저장된 Refresh Token과 정보가 다른 경우
 	@Test
 	void testReissueByDifferentRefreshToken() {
-		given(userRepository.findByNickname(anyString()))
-			.willReturn(Optional.of(createMockUser()));
+		given(jwtProvider.getUserId(anyString()))
+			.willReturn("1");
 		given(jwtProvider.isExpiredToken("access-token"))
 			.willReturn(true);
 		given(jwtProvider.isExpiredToken("refresh-token"))
@@ -129,14 +116,8 @@ class JwtServiceTest {
 			.willReturn(false);
 
 		BaseException exception = assertThrows(BaseException.class,
-			() -> jwtService.reissue("arterest", "access-token", "refresh-token"));
+			() -> jwtService.reissue("access-token", "refresh-token"));
 
 		assertEquals(BaseException.EXPIRED_OR_PREVIOUS_REFRESH_TOKEN, exception);
-	}
-
-	private User createMockUser() {
-		return User.builder()
-			.id(1L)
-			.build();
 	}
 }

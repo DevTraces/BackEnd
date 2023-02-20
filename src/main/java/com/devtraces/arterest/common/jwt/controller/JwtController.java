@@ -30,11 +30,9 @@ public class JwtController {
 
 	@PostMapping("/reissue")
 	public ResponseEntity<ApiSuccessResponse<?>> reissue(
-		@RequestBody @Valid ReissueRequest request,
 		@RequestHeader("accessToken") String accessToken,
 		@CookieValue("refreshToken") String refreshToken) {
 		TokenDto tokenDto = jwtService.reissue(
-			request.getNickname(),
 			accessToken,
 			refreshToken);
 

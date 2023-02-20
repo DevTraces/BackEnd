@@ -89,7 +89,7 @@ public class JwtProvider {
 	}
 
 	// JWT 토큰에서 회원 구별 정보 추출
-	private String getUserId(String accessToken) {
+	public String getUserId(String accessToken) {
 		return Jwts.parserBuilder().setSigningKey(secretKey).build()
 			.parseClaimsJws(accessToken).getBody().getSubject();
 	}

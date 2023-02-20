@@ -1,4 +1,4 @@
-package com.devtraces.arterest.controller.bookmark.dto;
+package com.devtraces.arterest.controller.feed.bookmark.dto;
 
 import com.devtraces.arterest.domain.bookmark.Bookmark;
 import lombok.AccessLevel;
