@@ -28,7 +28,7 @@ public class OauthController {
 
     @PostMapping("/kakao/callback")
     public ResponseEntity<ApiSuccessResponse<?>> oauthKakaoSignIn(@RequestBody OauthKakaoSignInRequest request) {
-        TokenDto tokenDto = oauthService.oauthKakaoSignIn(request.getAccessToken());
+        TokenDto tokenDto = oauthService.oauthKakaoSignIn(request.getAccessTokenFromKakao());
 
         return ResponseEntity.ok()
             .header(SET_COOKIE, tokenDto.getResponseCookie().toString())

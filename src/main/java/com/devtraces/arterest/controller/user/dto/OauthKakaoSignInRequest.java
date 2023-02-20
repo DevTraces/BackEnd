@@ -5,5 +5,5 @@ import lombok.Getter;
 @Getter
 public class OauthKakaoSignInRequest {
 
-    private String accessToken;
+    private String accessTokenFromKakao;
 }
