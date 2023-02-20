@@ -29,6 +29,9 @@ public class RereplyService {
     @Transactional
     public RereplyResponse createRereply(
         Long userId, Long feedId, Long replyId, RereplyRequest rereplyRequest) {
+        if(rereplyRequest.getContent() == null || rereplyRequest.getContent().equals("")){
+            throw BaseException.NULL_AND_EMPTY_STRING_NOT_ALLOWED;
+        }
         if(rereplyRequest.getContent().length() > CommonUtils.CONTENT_LENGTH_LIMIT){
             throw BaseException.CONTENT_LIMIT_EXCEED;
         }
@@ -62,6 +65,9 @@ public class RereplyService {
     public RereplyResponse updateRereply(
         Long userId, Long feedId, Long rereplyId, RereplyRequest rereplyRequest
     ) {
+        if(rereplyRequest.getContent() == null || rereplyRequest.getContent().equals("")){
+            throw BaseException.NULL_AND_EMPTY_STRING_NOT_ALLOWED;
+        }
         if(rereplyRequest.getContent().length() > CommonUtils.CONTENT_LENGTH_LIMIT){
             throw BaseException.CONTENT_LIMIT_EXCEED;
         }
