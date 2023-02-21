@@ -5,8 +5,6 @@ import com.devtraces.arterest.service.s3.S3Service;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.controller.feed.dto.response.FeedCreateResponse;
 import com.devtraces.arterest.controller.feed.dto.response.FeedResponse;
-import com.devtraces.arterest.controller.feed.dto.ExistingImageUrlDto;
-import com.devtraces.arterest.controller.feed.dto.request.FeedUpdateRequest;
 import com.devtraces.arterest.controller.feed.dto.response.FeedUpdateResponse;
 import com.devtraces.arterest.model.bookmark.BookmarkRepository;
 import com.devtraces.arterest.model.feed.Feed;
