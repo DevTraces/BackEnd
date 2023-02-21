@@ -1,13 +1,13 @@
 package com.devtraces.arterest.service.search;
 
 import com.devtraces.arterest.common.exception.BaseException;
-import com.devtraces.arterest.common.redis.service.RedisService;
 import com.devtraces.arterest.controller.search.dto.response.GetHashtagsSearchResponse;
 import com.devtraces.arterest.controller.search.dto.response.GetNicknameSearchResponse;
 import com.devtraces.arterest.controller.search.dto.response.GetUsernameSearchResponse;
 import com.devtraces.arterest.model.hashtag.Hashtag;
 import com.devtraces.arterest.model.hashtag.HashtagRepository;
 import com.devtraces.arterest.model.user.UserRepository;
+import com.devtraces.arterest.service.search.util.SearchRedisUtil;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -34,7 +34,7 @@ public class SearchService {
 	private final UserRepository userRepository;
 	private final HashtagRepository hashtagRepository;
 	private final Trie trie;
-	private final RedisService redisService;
+	private final SearchRedisUtil searchRedisUtil;
 	private final String TRIE_KEY = "trie";
 
 
@@ -106,12 +106,12 @@ public class SearchService {
 
 		String encodingTrie = Base64.getEncoder().encodeToString(serializedTrie);
 
-		redisService.setTrieValue(TRIE_KEY, encodingTrie);
+		searchRedisUtil.setTrieValue(TRIE_KEY, encodingTrie);
 	}
 
 	// Redis 에 저장된 Trie 자료구조를 역직렬화하여 자동완성된 단어들을 가져옴.
 	public List<String> getAutoCompleteHashtags(String keyword, Integer numberOfWords) {
-		String output = redisService.getTrieValue(TRIE_KEY);
+		String output = searchRedisUtil.getTrieValue(TRIE_KEY);
 
 		byte[] serializedTrie;
 		Trie trie = null;

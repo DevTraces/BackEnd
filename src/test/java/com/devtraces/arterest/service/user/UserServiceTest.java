@@ -2,9 +2,9 @@ package com.devtraces.arterest.service.user;
 
 import com.devtraces.arterest.service.s3.S3Service;
 import com.devtraces.arterest.common.exception.BaseException;
-import com.devtraces.arterest.controller.user.dto.EmailCheckResponse;
-import com.devtraces.arterest.controller.user.dto.NicknameCheckResponse;
-import com.devtraces.arterest.controller.user.dto.ProfileByNicknameResponse;
+import com.devtraces.arterest.controller.user.dto.response.EmailCheckResponse;
+import com.devtraces.arterest.controller.user.dto.response.NicknameCheckResponse;
+import com.devtraces.arterest.controller.user.dto.response.ProfileByNicknameResponse;
 import com.devtraces.arterest.model.feed.FeedRepository;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;

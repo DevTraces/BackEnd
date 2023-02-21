@@ -1,26 +1,22 @@
-package com.devtraces.arterest.controller.user;
+package com.devtraces.arterest.controller.auth;
 
-import static com.devtraces.arterest.common.jwt.JwtProperties.AUTHORIZATION_HEADER;
 import static com.devtraces.arterest.common.jwt.JwtProperties.TOKEN_PREFIX;
 
-import com.devtraces.arterest.common.jwt.dto.TokenDto;
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
-import com.devtraces.arterest.controller.user.dto.MailAuthKeyCheckRequest;
-import com.devtraces.arterest.controller.user.dto.MailAuthKeyCheckResponse;
-import com.devtraces.arterest.controller.user.dto.MailAuthKeyRequest;
-import com.devtraces.arterest.controller.user.dto.PasswordCheckRequest;
-import com.devtraces.arterest.controller.user.dto.PasswordCheckResponse;
-import com.devtraces.arterest.controller.user.dto.SignInRequest;
-import com.devtraces.arterest.controller.user.dto.UserRegistrationRequest;
-import com.devtraces.arterest.controller.user.dto.UserRegistrationResponse;
-import com.devtraces.arterest.service.user.AuthService;
+import com.devtraces.arterest.controller.auth.dto.request.MailAuthKeyCheckRequest;
+import com.devtraces.arterest.controller.auth.dto.response.MailAuthKeyCheckResponse;
+import com.devtraces.arterest.controller.auth.dto.request.MailAuthKeyRequest;
+import com.devtraces.arterest.controller.user.dto.request.PasswordCheckRequest;
+import com.devtraces.arterest.controller.user.dto.response.PasswordCheckResponse;
+import com.devtraces.arterest.controller.auth.dto.request.SignInRequest;
+import com.devtraces.arterest.controller.auth.dto.request.UserRegistrationRequest;
+import com.devtraces.arterest.controller.auth.dto.response.UserRegistrationResponse;
+import com.devtraces.arterest.service.auth.AuthService;
 import java.util.HashMap;
-import javax.servlet.http.Cookie;
 import javax.validation.Valid;
 
-import com.devtraces.arterest.service.user.dto.TokenWithNicknameDto;
+import com.devtraces.arterest.controller.auth.dto.TokenWithNicknameDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.ModelAttribute;

@@ -14,13 +14,14 @@ import static org.mockito.Mockito.verify;
 
 import com.devtraces.arterest.common.type.UserSignUpType;
 import com.devtraces.arterest.common.type.UserStatusType;
+import com.devtraces.arterest.service.auth.AuthService;
 import com.devtraces.arterest.service.mail.MailService;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.jwt.JwtProvider;
 import com.devtraces.arterest.common.jwt.dto.TokenDto;
-import com.devtraces.arterest.common.redis.service.RedisService;
-import com.devtraces.arterest.controller.user.dto.UserRegistrationRequest;
-import com.devtraces.arterest.controller.user.dto.UserRegistrationResponse;
+import com.devtraces.arterest.service.auth.util.AuthRedisUtil;
+import com.devtraces.arterest.controller.auth.dto.request.UserRegistrationRequest;
+import com.devtraces.arterest.controller.auth.dto.response.UserRegistrationResponse;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
 import java.util.Optional;
@@ -44,7 +45,7 @@ class AuthServiceTest {
 	@Mock
 	private MailService mailService;
 	@Mock
-	private RedisService redisService;
+	private AuthRedisUtil searchRedisUtil;
 	@Mock
 	private UserRepository userRepository;
 
@@ -61,7 +62,7 @@ class AuthServiceTest {
 			.signupType(UserSignUpType.EMAIL)
 			.userStatus(UserStatusType.ACTIVE)
 			.build();
-		given(redisService.notExistsAuthCompletedValue(anyString()))
+		given(searchRedisUtil.notExistsAuthCompletedValue(anyString()))
 			.willReturn(false);
 		given(userRepository.existsByEmail(anyString()))
 			.willReturn(false);
@@ -94,7 +95,7 @@ class AuthServiceTest {
 	// 이미 가입된 이메일의 경우
 	@Test
 	void testRegisterByRegisteredUser() {
-		given(redisService.notExistsAuthCompletedValue(anyString()))
+		given(searchRedisUtil.notExistsAuthCompletedValue(anyString()))
 			.willReturn(false);
 		given(userRepository.existsByEmail(anyString()))
 			.willReturn(true);
@@ -114,7 +115,7 @@ class AuthServiceTest {
 	// 중복된 닉네임인 경우
 	@Test
 	void testRegisterByDuplicatedNickname() {
-		given(redisService.notExistsAuthCompletedValue(anyString()))
+		given(searchRedisUtil.notExistsAuthCompletedValue(anyString()))
 			.willReturn(false);
 		given(userRepository.existsByEmail(anyString()))
 			.willReturn(false);
@@ -140,7 +141,7 @@ class AuthServiceTest {
 		willDoNothing()
 			.given(mailService).sendMail(anyString(), anyString(), anyString());
 		willDoNothing()
-			.given(redisService).setAuthKeyValue(anyString(), anyString());
+			.given(searchRedisUtil).setAuthKeyValue(anyString(), anyString());
 
 		authService.sendMailWithAuthKey("example@gmail.com");
 	}
@@ -172,12 +173,12 @@ class AuthServiceTest {
 	void checkAuthKeyWhenCorrect() {
 		given(userRepository.existsByEmail(anyString()))
 			.willReturn(false);
-		given(redisService.getAuthKeyValue(anyString()))
+		given(searchRedisUtil.getAuthKeyValue(anyString()))
 			.willReturn("010101");
 		willDoNothing()
-			.given(redisService).deleteAuthKeyValue(anyString());
+			.given(searchRedisUtil).deleteAuthKeyValue(anyString());
 		willDoNothing()
-			.given(redisService).setAuthCompletedValue(anyString());
+			.given(searchRedisUtil).setAuthCompletedValue(anyString());
 
 		boolean isCorrect = authService.checkAuthKey("example@gmail.com", "010101");
 
@@ -189,7 +190,7 @@ class AuthServiceTest {
 	void checkAuthKeyWhenNotCorrect() {
 		given(userRepository.existsByEmail(anyString()))
 			.willReturn(false);
-		given(redisService.getAuthKeyValue(anyString()))
+		given(searchRedisUtil.getAuthKeyValue(anyString()))
 			.willReturn("111111");
 
 		boolean isCorrect = authService.checkAuthKey("example@gmail.com", "010101");

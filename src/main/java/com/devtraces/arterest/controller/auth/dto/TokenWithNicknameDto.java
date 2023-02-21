@@ -1,10 +1,8 @@
-package com.devtraces.arterest.service.user.dto;
+package com.devtraces.arterest.controller.auth.dto;
 
 import com.devtraces.arterest.common.jwt.dto.TokenDto;
 import lombok.*;
 import org.springframework.http.ResponseCookie;
-
-import static com.devtraces.arterest.common.jwt.JwtProperties.TOKEN_PREFIX;
 
 @Getter
 @AllArgsConstructor

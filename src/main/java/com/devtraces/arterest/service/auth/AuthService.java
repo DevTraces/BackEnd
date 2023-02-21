@@ -1,14 +1,15 @@
-package com.devtraces.arterest.service.user;
+package com.devtraces.arterest.service.auth;
 
+import com.devtraces.arterest.service.auth.util.AuthRedisUtil;
+import com.devtraces.arterest.service.auth.util.TokenRedisUtil;
 import com.devtraces.arterest.service.s3.S3Service;
 import com.devtraces.arterest.service.mail.MailService;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.jwt.JwtProvider;
 import com.devtraces.arterest.common.jwt.dto.TokenDto;
-import com.devtraces.arterest.common.redis.service.RedisService;
 
-import com.devtraces.arterest.controller.user.dto.UserRegistrationRequest;
-import com.devtraces.arterest.controller.user.dto.UserRegistrationResponse;
+import com.devtraces.arterest.controller.auth.dto.request.UserRegistrationRequest;
+import com.devtraces.arterest.controller.auth.dto.response.UserRegistrationResponse;
 
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
@@ -17,7 +18,7 @@ import java.util.Date;
 
 import java.util.Random;
 
-import com.devtraces.arterest.service.user.dto.TokenWithNicknameDto;
+import com.devtraces.arterest.controller.auth.dto.TokenWithNicknameDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,8 @@ public class AuthService {
 	private final JwtProvider jwtProvider;
 	private final S3Service s3Service;
 	private final MailService mailService;
-	private final RedisService redisService;
+	private final AuthRedisUtil authRedisUtil;
+	private final TokenRedisUtil tokenRedisUtil;
 	private final UserRepository userRepository;
 
 	@Transactional
@@ -55,7 +57,7 @@ public class AuthService {
 	}
 
 	private void validateRegistration(UserRegistrationRequest request) {
-		if (redisService.notExistsAuthCompletedValue(request.getEmail())) {
+		if (authRedisUtil.notExistsAuthCompletedValue(request.getEmail())) {
 			throw BaseException.NOT_AUTHENTICATION_YET;
 		}
 
@@ -74,10 +76,10 @@ public class AuthService {
 		}
 		String authKey = generateAuthKey();
 		sendAuthenticationEmail(email, authKey);
-		redisService.setAuthKeyValue(email, authKey);
+		authRedisUtil.setAuthKeyValue(email, authKey);
 	}
 
-	protected String generateAuthKey() {
+	public String generateAuthKey() {
 		Random random = new Random();
 		StringBuilder resultNumber = new StringBuilder();
 
@@ -99,13 +101,13 @@ public class AuthService {
 		if (userRepository.existsByEmail(email)) {
 			throw BaseException.ALREADY_EXIST_EMAIL;
 		}
-		String authKeyInRedis = redisService.getAuthKeyValue(email);
+		String authKeyInRedis = authRedisUtil.getAuthKeyValue(email);
 		if (!authKey.equals(authKeyInRedis)) {
 			return false;
 		}
 		// 인증 완료했으므로 Redis 정보 변경
-		redisService.deleteAuthKeyValue(email);
-		redisService.setAuthCompletedValue(email);
+		authRedisUtil.deleteAuthKeyValue(email);
+		authRedisUtil.setAuthCompletedValue(email);
 		return true;
 	}
 
@@ -129,11 +131,11 @@ public class AuthService {
 
 	@Transactional
 	public void signOut(long userId, String accessToken) {
-		redisService.deleteRefreshTokenBy(userId);
+		tokenRedisUtil.deleteRefreshTokenBy(userId);
 
 		// Access Token을 무효화시킬 수 없으므로 Redis에 블랙리스트 작성
 		Date expiredDate = jwtProvider.getExpiredDate(accessToken);
-		redisService.setAccessTokenBlackListValue(accessToken, userId, expiredDate);
+		tokenRedisUtil.setAccessTokenBlackListValue(accessToken, userId, expiredDate);
 	}
 
 	public boolean checkPassword(long userId, String password) {

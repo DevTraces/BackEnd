@@ -3,9 +3,8 @@ package com.devtraces.arterest.common.jwt;
 import static com.devtraces.arterest.common.jwt.JwtProperties.AUTHORIZATION_HEADER;
 import static com.devtraces.arterest.common.jwt.JwtProperties.TOKEN_PREFIX;
 
-import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.exception.ErrorCode;
-import com.devtraces.arterest.common.redis.service.RedisService;
+import com.devtraces.arterest.service.auth.util.TokenRedisUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
@@ -27,7 +26,7 @@ import org.springframework.web.filter.GenericFilterBean;
 public class JwtAuthenticationFilter extends GenericFilterBean {
 
 	private final JwtProvider jwtProvider;
-	private final RedisService redisService;
+	private final TokenRedisUtil tokenRedisUtil;
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -35,7 +34,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
 		String token = resolveToken((HttpServletRequest) request);
 
 		try {
-			if (token != null && redisService.notExistsInAccessTokenBlackListBy(token)) {
+			if (token != null && tokenRedisUtil.notExistsInAccessTokenBlackListBy(token)) {
 				Authentication authentication = jwtProvider.getAuthentication(token);
 				SecurityContextHolder.getContext().setAuthentication(authentication);
 			}

@@ -9,9 +9,9 @@ import static org.mockito.BDDMockito.willDoNothing;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.jwt.JwtProvider;
 import com.devtraces.arterest.common.jwt.dto.TokenDto;
-import com.devtraces.arterest.common.redis.service.RedisService;
-import com.devtraces.arterest.service.user.AuthService;
-import com.devtraces.arterest.service.user.dto.TokenWithNicknameDto;
+import com.devtraces.arterest.service.auth.util.AuthRedisUtil;
+import com.devtraces.arterest.service.auth.AuthService;
+import com.devtraces.arterest.controller.auth.dto.TokenWithNicknameDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,7 +27,7 @@ class JwtServiceTest {
 	@Mock
 	private AuthService authService;
 	@Mock
-	private RedisService redisService;
+	private AuthRedisUtil searchRedisUtil;
 
 	@InjectMocks
 	private JwtService jwtService;
@@ -44,7 +44,7 @@ class JwtServiceTest {
 			.willReturn(true);
 		given(jwtProvider.isExpiredToken("refresh-token"))
 			.willReturn(false);
-		given(redisService.hasSameRefreshToken(anyLong(), anyString()))
+		given(searchRedisUtil.hasSameRefreshToken(anyLong(), anyString()))
 			.willReturn(true);
 		given(jwtProvider.generateAccessTokenAndRefreshToken(anyLong()))
 			.willReturn(mockTokenDto);
@@ -110,7 +110,7 @@ class JwtServiceTest {
 			.willReturn(true);
 		given(jwtProvider.isExpiredToken("refresh-token"))
 			.willReturn(false);
-		given(redisService.hasSameRefreshToken(anyLong(), anyString()))
+		given(searchRedisUtil.hasSameRefreshToken(anyLong(), anyString()))
 			.willReturn(false);
 
 		BaseException exception = assertThrows(BaseException.class,

@@ -1,17 +1,13 @@
 package com.devtraces.arterest.controller.user;
 
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
-import com.devtraces.arterest.controller.user.dto.EmailCheckRequest;
-import com.devtraces.arterest.controller.user.dto.NicknameCheckRequest;
-import com.devtraces.arterest.controller.user.dto.PasswordUpdateRequest;
+import com.devtraces.arterest.controller.user.dto.request.PasswordUpdateRequest;
 import com.devtraces.arterest.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.util.annotation.Nullable;
-
-import javax.validation.Valid;
 
 @RestController
 @RequiredArgsConstructor

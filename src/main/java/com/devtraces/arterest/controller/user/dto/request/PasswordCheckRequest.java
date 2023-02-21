@@ -1,4 +1,4 @@
-package com.devtraces.arterest.controller.user.dto;
+package com.devtraces.arterest.controller.user.dto.request;
 
 import javax.validation.constraints.NotBlank;
 import lombok.AccessLevel;

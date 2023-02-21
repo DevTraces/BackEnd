@@ -1,4 +1,4 @@
-package com.devtraces.arterest.controller.user.dto;
+package com.devtraces.arterest.controller.auth.dto.request;
 
 import lombok.Getter;
 

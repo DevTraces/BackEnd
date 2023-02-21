@@ -5,7 +5,7 @@ import static com.devtraces.arterest.common.jwt.JwtProperties.REFRESH_TOKEN_EXPI
 
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.jwt.dto.TokenDto;
-import com.devtraces.arterest.common.redis.service.RedisService;
+import com.devtraces.arterest.service.auth.util.TokenRedisUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -29,17 +29,17 @@ public class JwtProvider {
 	protected static final String REFRESH_TOKEN_SUBJECT_PREFIX = "refresh:";
 
 	private final UserDetailsService userDetailsService;
-	private final RedisService redisService;
+	private final TokenRedisUtil tokenRedisUtil;
 
 	private final Key secretKey;
 
 	public JwtProvider(
 		UserDetailsService userDetailsService,
-		RedisService redisService,
+		TokenRedisUtil tokenRedisUtil,
 		@Value("${jwt.secret}") String secretKey
 	) {
 		this.userDetailsService = userDetailsService;
-		this.redisService = redisService;
+		this.tokenRedisUtil = tokenRedisUtil;
 
 		byte[] keyBytes = Decoders.BASE64.decode(secretKey);
 		this.secretKey = Keys.hmacShaKeyFor(keyBytes);
@@ -65,7 +65,7 @@ public class JwtProvider {
 			.signWith(secretKey, SignatureAlgorithm.HS256)
 			.compact();
 
-		redisService.setRefreshTokenValue(userId, refreshToken, refreshTokenExpiredIn);
+		tokenRedisUtil.setRefreshTokenValue(userId, refreshToken, refreshTokenExpiredIn);
 
 		return TokenDto.builder()
 			.accessToken(accessToken)

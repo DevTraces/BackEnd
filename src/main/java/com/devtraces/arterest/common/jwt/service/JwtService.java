@@ -4,12 +4,11 @@ import static com.devtraces.arterest.common.jwt.JwtProperties.TOKEN_PREFIX;
 
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.jwt.JwtProvider;
-import com.devtraces.arterest.common.jwt.dto.TokenDto;
-import com.devtraces.arterest.common.redis.service.RedisService;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
-import com.devtraces.arterest.service.user.AuthService;
-import com.devtraces.arterest.service.user.dto.TokenWithNicknameDto;
+import com.devtraces.arterest.service.auth.AuthService;
+import com.devtraces.arterest.controller.auth.dto.TokenWithNicknameDto;
+import com.devtraces.arterest.service.auth.util.TokenRedisUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +20,7 @@ public class JwtService {
 
 	private final JwtProvider jwtProvider;
 	private final AuthService authService;
-	private final RedisService redisService;
+	private final TokenRedisUtil tokenRedisUtil;
 	private final UserRepository userRepository;
 
 	@Transactional
@@ -34,7 +33,7 @@ public class JwtService {
 		Long userId = Long.parseLong(jwtProvider.getUserId(accessToken));
 		validateTokens(accessToken, refreshToken, userId);
 
-		if (!redisService.hasSameRefreshToken(userId, refreshToken)) {
+		if (!tokenRedisUtil.hasSameRefreshToken(userId, refreshToken)) {
 			throw BaseException.EXPIRED_OR_PREVIOUS_REFRESH_TOKEN;
 		}
 

@@ -1,13 +1,12 @@
-package com.devtraces.arterest.service.user;
+package com.devtraces.arterest.service.auth;
 
 import com.devtraces.arterest.common.type.UserSignUpType;
 import com.devtraces.arterest.common.type.UserStatusType;
 import com.devtraces.arterest.common.jwt.JwtProvider;
-import com.devtraces.arterest.common.jwt.dto.TokenDto;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
-import com.devtraces.arterest.service.user.dto.TokenWithNicknameDto;
-import com.devtraces.arterest.service.user.dto.UserInfoFromKakaoDto;
+import com.devtraces.arterest.controller.auth.dto.TokenWithNicknameDto;
+import com.devtraces.arterest.controller.auth.dto.UserInfoFromKakaoDto;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import lombok.RequiredArgsConstructor;

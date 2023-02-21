@@ -1,4 +1,4 @@
-package com.devtraces.arterest.controller.user.dto;
+package com.devtraces.arterest.controller.user.dto.response;
 
 import com.devtraces.arterest.model.user.User;
 import lombok.*;

@@ -1,4 +1,4 @@
-package com.devtraces.arterest.controller.user.dto;
+package com.devtraces.arterest.controller.auth.dto.response;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class PasswordCheckResponse {
+public class MailAuthKeyCheckResponse {
 
 	private boolean isCorrect;
 

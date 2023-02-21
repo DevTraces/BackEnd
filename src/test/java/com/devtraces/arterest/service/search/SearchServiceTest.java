@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 
 import com.devtraces.arterest.common.exception.BaseException;
-import com.devtraces.arterest.common.redis.service.RedisService;
 import com.devtraces.arterest.controller.search.dto.response.GetHashtagsSearchResponse;
 import com.devtraces.arterest.controller.search.dto.response.GetNicknameSearchResponse;
 import com.devtraces.arterest.controller.search.dto.response.GetUsernameSearchResponse;
@@ -17,6 +16,7 @@ import com.devtraces.arterest.model.hashtag.Hashtag;
 import com.devtraces.arterest.model.hashtag.HashtagRepository;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
+import com.devtraces.arterest.service.search.util.SearchRedisUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -43,7 +43,7 @@ class SearchServiceTest {
 	@Mock
 	private Trie trie;
 	@Mock
-	private RedisService redisService;
+	private SearchRedisUtil searchRedisUtil;
 
 	@Test
 	void testInternalServerErrorInCreateAutoCompleteWords() throws Exception{
@@ -66,7 +66,7 @@ class SearchServiceTest {
 	@Test
 	void testInternalServerErrorInGetAutoCompleteHashtags() throws Exception{
 		// given
-		given(redisService.getTrieValue(anyString()))
+		given(searchRedisUtil.getTrieValue(anyString()))
 			.willReturn("serializedTrie");
 
 		// when

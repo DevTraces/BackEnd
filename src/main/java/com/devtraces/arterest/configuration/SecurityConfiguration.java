@@ -4,14 +4,10 @@ import com.devtraces.arterest.common.jwt.JwtAccessDeniedHandler;
 import com.devtraces.arterest.common.jwt.JwtAuthenticationEntryPoint;
 import com.devtraces.arterest.common.jwt.JwtAuthenticationFilter;
 import com.devtraces.arterest.common.jwt.JwtProvider;
-import com.devtraces.arterest.common.redis.service.RedisService;
+import com.devtraces.arterest.service.auth.util.TokenRedisUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.boot.autoconfigure.security.ConditionalOnDefaultWebSecurity;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -29,7 +25,7 @@ import java.util.Arrays;
 public class SecurityConfiguration {
 
 	private final JwtProvider jwtProvider;
-	private final RedisService redisService;
+	private final TokenRedisUtil tokenRedisUtil;
 	private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 	private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
@@ -51,7 +47,7 @@ public class SecurityConfiguration {
 			.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 
 			.and()
-			.addFilterBefore(new JwtAuthenticationFilter(jwtProvider, redisService),
+			.addFilterBefore(new JwtAuthenticationFilter(jwtProvider, tokenRedisUtil),
 				UsernamePasswordAuthenticationFilter.class)
 
 			.authorizeRequests()
