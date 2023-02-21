@@ -60,7 +60,7 @@ public class UserService {
             throw BaseException.WRONG_BEFORE_PASSWORD;
         }
 
-        user.updatePassword(passwordEncoder.encode(afterPassword));
+        user.setPassword(passwordEncoder.encode(afterPassword));
         userRepository.save(user);
     }
 
@@ -86,14 +86,14 @@ public class UserService {
         // 본인의 프로필 정보만 수정가능
         if (!user.getNickname().equals(nickname)) { throw BaseException.FORBIDDEN; }
 
-        if (updateUsername != null) { user.updateUsername(updateUsername); }
+        if (updateUsername != null) { user.setUsername(updateUsername); }
 
-        if (updateNickname != null) { user.updateNickname(updateNickname); }
+        if (updateNickname != null) { user.setNickname(updateNickname); }
 
-        if (updateDescription != null) { user.updateDescription(updateDescription); }
+        if (updateDescription != null) { user.setDescription(updateDescription); }
 
         if (updateProfileImage != null) {
-            user.updateProfileImageUrl(s3Util.uploadImage(updateProfileImage));
+            user.setProfileImageUrl(s3Util.uploadImage(updateProfileImage));
         }
 
         return UpdateProfileResponse.from(userRepository.save(user));
