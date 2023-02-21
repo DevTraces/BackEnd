@@ -1,7 +1,7 @@
 package com.devtraces.arterest.service.user;
 
-import com.devtraces.arterest.common.component.S3Util;
-import com.devtraces.arterest.common.component.MailUtil;
+import com.devtraces.arterest.service.s3.S3Service;
+import com.devtraces.arterest.service.mail.MailService;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.jwt.JwtProvider;
 import com.devtraces.arterest.common.jwt.dto.TokenDto;
@@ -10,8 +10,8 @@ import com.devtraces.arterest.common.redis.service.RedisService;
 import com.devtraces.arterest.controller.user.dto.UserRegistrationRequest;
 import com.devtraces.arterest.controller.user.dto.UserRegistrationResponse;
 
-import com.devtraces.arterest.domain.user.User;
-import com.devtraces.arterest.domain.user.UserRepository;
+import com.devtraces.arterest.model.user.User;
+import com.devtraces.arterest.model.user.UserRepository;
 
 import java.util.Date;
 
@@ -29,8 +29,8 @@ public class AuthService {
 
 	private final PasswordEncoder passwordEncoder;
 	private final JwtProvider jwtProvider;
-	private final S3Util s3Util;
-	private final MailUtil mailUtil;
+	private final S3Service s3Service;
+	private final MailService mailService;
 	private final RedisService redisService;
 	private final UserRepository userRepository;
 
@@ -47,7 +47,7 @@ public class AuthService {
 
 	private void uploadAndUpdateImageUrl(UserRegistrationRequest request) {
 		if (request.getProfileImage() != null) {
-			String profileImageUrl = s3Util.uploadImage(request.getProfileImage());
+			String profileImageUrl = s3Service.uploadImage(request.getProfileImage());
 			request.setProfileImageLink(profileImageUrl);
 		}
 	}
@@ -90,7 +90,7 @@ public class AuthService {
 		String text = "<h2>이메일 인증코드</h2>\n"
 			+ "<p>Arterest에 가입하신 것을 환영합니다.<br>아래의 인증코드를 입력하시면 가입이 정상적으로 완료됩니다.</p>\n"
 			+ "<p style=\"background: #EFEFEF; font-size: 30px;padding: 10px\">" + authKey + "</p>";
-		mailUtil.sendMail(email, subject, text);
+		mailService.sendMail(email, subject, text);
 	}
 
 	public boolean checkAuthKey(String email, String authKey) {

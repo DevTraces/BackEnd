@@ -12,18 +12,17 @@ import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.devtraces.arterest.common.UserSignUpType;
-import com.devtraces.arterest.common.UserStatusType;
-import com.devtraces.arterest.common.component.MailUtil;
-import com.devtraces.arterest.common.component.S3Util;
+import com.devtraces.arterest.common.type.UserSignUpType;
+import com.devtraces.arterest.common.type.UserStatusType;
+import com.devtraces.arterest.service.mail.MailService;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.jwt.JwtProvider;
 import com.devtraces.arterest.common.jwt.dto.TokenDto;
 import com.devtraces.arterest.common.redis.service.RedisService;
 import com.devtraces.arterest.controller.user.dto.UserRegistrationRequest;
 import com.devtraces.arterest.controller.user.dto.UserRegistrationResponse;
-import com.devtraces.arterest.domain.user.User;
-import com.devtraces.arterest.domain.user.UserRepository;
+import com.devtraces.arterest.model.user.User;
+import com.devtraces.arterest.model.user.UserRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,7 +42,7 @@ class AuthServiceTest {
 	@Mock
 	private JwtProvider jwtProvider;
 	@Mock
-	private MailUtil mailUtil;
+	private MailService mailService;
 	@Mock
 	private RedisService redisService;
 	@Mock
@@ -139,7 +138,7 @@ class AuthServiceTest {
 		given(userRepository.existsByEmail(anyString()))
 			.willReturn(false);
 		willDoNothing()
-			.given(mailUtil).sendMail(anyString(), anyString(), anyString());
+			.given(mailService).sendMail(anyString(), anyString(), anyString());
 		willDoNothing()
 			.given(redisService).setAuthKeyValue(anyString(), anyString());
 

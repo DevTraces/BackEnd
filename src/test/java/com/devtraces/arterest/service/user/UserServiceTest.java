@@ -1,13 +1,13 @@
 package com.devtraces.arterest.service.user;
 
-import com.devtraces.arterest.common.component.S3Util;
+import com.devtraces.arterest.service.s3.S3Service;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.controller.user.dto.EmailCheckResponse;
 import com.devtraces.arterest.controller.user.dto.NicknameCheckResponse;
 import com.devtraces.arterest.controller.user.dto.ProfileByNicknameResponse;
-import com.devtraces.arterest.domain.feed.FeedRepository;
-import com.devtraces.arterest.domain.user.User;
-import com.devtraces.arterest.domain.user.UserRepository;
+import com.devtraces.arterest.model.feed.FeedRepository;
+import com.devtraces.arterest.model.user.User;
+import com.devtraces.arterest.model.user.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,7 +38,7 @@ class UserServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
     @Mock
-    private S3Util s3Util;
+    private S3Service s3Service;
     @InjectMocks
     private UserService userService;
 
@@ -203,7 +203,7 @@ class UserServiceTest {
                 .build();
 
         given(userRepository.findById(user.getId())).willReturn(Optional.of(user));
-        given(s3Util.uploadImage(multipartFile)).willReturn(updateProfileImageUrl);
+        given(s3Service.uploadImage(multipartFile)).willReturn(updateProfileImageUrl);
         given(userRepository.save(any())).willReturn(user);
 
         ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
@@ -216,7 +216,7 @@ class UserServiceTest {
 
         //then
         verify(userRepository, times(1)).save(captor.capture());
-        verify(s3Util, times(1)).uploadImage(any());
+        verify(s3Service, times(1)).uploadImage(any());
         assertEquals(updateUsername, captor.getValue().getUsername());
         assertEquals(updateNickname, captor.getValue().getNickname());
         assertEquals(updateDescription, captor.getValue().getDescription());

@@ -1,8 +1,8 @@
 package com.devtraces.arterest.controller.rereply;
 
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
-import com.devtraces.arterest.controller.rereply.dto.RereplyRequest;
-import com.devtraces.arterest.controller.rereply.dto.RereplyResponse;
+import com.devtraces.arterest.controller.rereply.dto.request.RereplyRequest;
+import com.devtraces.arterest.controller.rereply.dto.response.RereplyResponse;
 import com.devtraces.arterest.service.rereply.RereplyService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

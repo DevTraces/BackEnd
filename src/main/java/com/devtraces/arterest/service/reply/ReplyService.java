@@ -1,17 +1,17 @@
 package com.devtraces.arterest.service.reply;
 
-import com.devtraces.arterest.common.CommonUtils;
+import com.devtraces.arterest.common.constant.CommonConstant;
 import com.devtraces.arterest.common.exception.BaseException;
-import com.devtraces.arterest.domain.feed.Feed;
-import com.devtraces.arterest.domain.feed.FeedRepository;
-import com.devtraces.arterest.domain.reply.Reply;
-import com.devtraces.arterest.domain.reply.ReplyRepository;
-import com.devtraces.arterest.domain.rereply.Rereply;
-import com.devtraces.arterest.domain.rereply.RereplyRepository;
-import com.devtraces.arterest.domain.user.User;
-import com.devtraces.arterest.domain.user.UserRepository;
-import com.devtraces.arterest.controller.reply.dto.ReplyRequest;
-import com.devtraces.arterest.controller.reply.dto.ReplyResponse;
+import com.devtraces.arterest.model.feed.Feed;
+import com.devtraces.arterest.model.feed.FeedRepository;
+import com.devtraces.arterest.model.reply.Reply;
+import com.devtraces.arterest.model.reply.ReplyRepository;
+import com.devtraces.arterest.model.rereply.Rereply;
+import com.devtraces.arterest.model.rereply.RereplyRepository;
+import com.devtraces.arterest.model.user.User;
+import com.devtraces.arterest.model.user.UserRepository;
+import com.devtraces.arterest.controller.reply.dto.request.ReplyRequest;
+import com.devtraces.arterest.controller.reply.dto.response.ReplyResponse;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -34,7 +34,7 @@ public class ReplyService {
         if(replyRequest.getContent() == null || replyRequest.getContent().equals("")){
             throw BaseException.NULL_AND_EMPTY_STRING_NOT_ALLOWED;
         }
-        if(replyRequest.getContent().length() > CommonUtils.CONTENT_LENGTH_LIMIT){
+        if(replyRequest.getContent().length() > CommonConstant.CONTENT_LENGTH_LIMIT){
             throw BaseException.CONTENT_LIMIT_EXCEED;
         }
         User authorUser = userRepository.findById(userId).orElseThrow(
@@ -64,7 +64,7 @@ public class ReplyService {
         if(replyRequest.getContent() == null || replyRequest.getContent().equals("")){
             throw BaseException.NULL_AND_EMPTY_STRING_NOT_ALLOWED;
         }
-        if(replyRequest.getContent().length() > CommonUtils.CONTENT_LENGTH_LIMIT){
+        if(replyRequest.getContent().length() > CommonConstant.CONTENT_LENGTH_LIMIT){
             throw BaseException.CONTENT_LIMIT_EXCEED;
         }
         Reply reply = replyRepository.findById(replyId).orElseThrow(

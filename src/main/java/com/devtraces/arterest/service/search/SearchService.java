@@ -2,12 +2,12 @@ package com.devtraces.arterest.service.search;
 
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.redis.service.RedisService;
-import com.devtraces.arterest.controller.search.dto.GetHashtagsSearchResponse;
-import com.devtraces.arterest.controller.search.dto.GetNicknameSearchResponse;
-import com.devtraces.arterest.controller.search.dto.GetUsernameSearchResponse;
-import com.devtraces.arterest.domain.hashtag.Hashtag;
-import com.devtraces.arterest.domain.hashtag.HashtagRepository;
-import com.devtraces.arterest.domain.user.UserRepository;
+import com.devtraces.arterest.controller.search.dto.response.GetHashtagsSearchResponse;
+import com.devtraces.arterest.controller.search.dto.response.GetNicknameSearchResponse;
+import com.devtraces.arterest.controller.search.dto.response.GetUsernameSearchResponse;
+import com.devtraces.arterest.model.hashtag.Hashtag;
+import com.devtraces.arterest.model.hashtag.HashtagRepository;
+import com.devtraces.arterest.model.user.UserRepository;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

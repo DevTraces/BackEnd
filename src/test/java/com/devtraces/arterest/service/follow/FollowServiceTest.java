@@ -2,7 +2,6 @@ package com.devtraces.arterest.service.follow;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -10,16 +9,14 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.devtraces.arterest.common.CommonUtils;
+import com.devtraces.arterest.common.constant.CommonConstant;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.exception.ErrorCode;
-import com.devtraces.arterest.controller.follow.dto.FollowResponse;
-import com.devtraces.arterest.domain.feed.Feed;
-import com.devtraces.arterest.domain.follow.Follow;
-import com.devtraces.arterest.domain.follow.FollowRepository;
-import com.devtraces.arterest.domain.user.User;
-import com.devtraces.arterest.domain.user.UserRepository;
-import java.nio.channels.OverlappingFileLockException;
+import com.devtraces.arterest.controller.follow.dto.response.FollowResponse;
+import com.devtraces.arterest.model.follow.Follow;
+import com.devtraces.arterest.model.follow.FollowRepository;
+import com.devtraces.arterest.model.user.User;
+import com.devtraces.arterest.model.user.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -102,7 +99,7 @@ class FollowServiceTest {
             .build();
 
         Follow followEntity = Follow.builder().build();
-        for(int i=1; i<= CommonUtils.FOLLOW_COUNT_LIMIT; i++){
+        for(int i=1; i<= CommonConstant.FOLLOW_COUNT_LIMIT; i++){
             requestedUser.getFollowList().add(followEntity);
         }
 

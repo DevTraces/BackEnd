@@ -1,13 +1,13 @@
 package com.devtraces.arterest.service.bookmark;
 
 import com.devtraces.arterest.common.exception.BaseException;
-import com.devtraces.arterest.controller.bookmark.dto.GetBookmarkListResponse;
-import com.devtraces.arterest.domain.bookmark.Bookmark;
-import com.devtraces.arterest.domain.bookmark.BookmarkRepository;
-import com.devtraces.arterest.domain.feed.Feed;
-import com.devtraces.arterest.domain.feed.FeedRepository;
-import com.devtraces.arterest.domain.user.User;
-import com.devtraces.arterest.domain.user.UserRepository;
+import com.devtraces.arterest.controller.bookmark.dto.response.GetBookmarkListResponse;
+import com.devtraces.arterest.model.bookmark.Bookmark;
+import com.devtraces.arterest.model.bookmark.BookmarkRepository;
+import com.devtraces.arterest.model.feed.Feed;
+import com.devtraces.arterest.model.feed.FeedRepository;
+import com.devtraces.arterest.model.user.User;
+import com.devtraces.arterest.model.user.UserRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;

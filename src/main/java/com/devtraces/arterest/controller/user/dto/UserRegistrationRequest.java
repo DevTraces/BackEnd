@@ -1,8 +1,8 @@
 package com.devtraces.arterest.controller.user.dto;
 
-import com.devtraces.arterest.common.UserSignUpType;
-import com.devtraces.arterest.common.UserStatusType;
-import com.devtraces.arterest.domain.user.User;
+import com.devtraces.arterest.common.type.UserSignUpType;
+import com.devtraces.arterest.common.type.UserStatusType;
+import com.devtraces.arterest.model.user.User;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import lombok.AccessLevel;
