@@ -285,7 +285,7 @@ public class FeedService {
             imageUrlBuilder.toString().equals("") ? null : imageUrlBuilder.toString()
         );
 
-        return FeedUpdateResponse.from( feedRepository.save(feed), hashtagList );
+        return FeedUpdateResponse.from( feedRepository.save(feed), hashtagList, content );
     }
 
     // TODO 스프링 @Async를 사용해서 비동기 멀티 스레딩으로 처리하면 응답지연시간 최소화 가능.

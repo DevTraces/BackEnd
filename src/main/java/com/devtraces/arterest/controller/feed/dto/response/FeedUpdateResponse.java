@@ -22,10 +22,10 @@ public class FeedUpdateResponse {
     private List<String> imageUrls;
     private List<String> hashtags;
 
-    public static FeedUpdateResponse from(Feed feed, List<String> hashtagStringList){
+    public static FeedUpdateResponse from(Feed feed, List<String> hashtagStringList, String content){
         return FeedUpdateResponse.builder()
             .feedId(feed.getId())
-            .content(feed.getContent() == null ? "" : feed.getContent())
+            .content(content)
             .imageUrls(
                 feed.getImageUrls() == null ? null :
                 Arrays.stream(feed.getImageUrls().split(",")).collect(Collectors.toList())
