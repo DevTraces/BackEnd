@@ -1,8 +1,8 @@
 package com.devtraces.arterest.common.security;
 
 import com.devtraces.arterest.common.exception.BaseException;
-import com.devtraces.arterest.domain.user.User;
-import com.devtraces.arterest.domain.user.UserRepository;
+import com.devtraces.arterest.model.user.User;
+import com.devtraces.arterest.model.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

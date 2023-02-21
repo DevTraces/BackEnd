@@ -1,11 +1,11 @@
 package com.devtraces.arterest.service.user;
 
-import com.devtraces.arterest.common.UserSignUpType;
-import com.devtraces.arterest.common.UserStatusType;
+import com.devtraces.arterest.common.type.UserSignUpType;
+import com.devtraces.arterest.common.type.UserStatusType;
 import com.devtraces.arterest.common.jwt.JwtProvider;
 import com.devtraces.arterest.common.jwt.dto.TokenDto;
-import com.devtraces.arterest.domain.user.User;
-import com.devtraces.arterest.domain.user.UserRepository;
+import com.devtraces.arterest.model.user.User;
+import com.devtraces.arterest.model.user.UserRepository;
 import com.devtraces.arterest.service.user.dto.UserInfoFromKakaoDto;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;

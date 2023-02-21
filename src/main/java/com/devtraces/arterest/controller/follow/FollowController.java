@@ -1,7 +1,7 @@
 package com.devtraces.arterest.controller.follow;
 
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
-import com.devtraces.arterest.controller.follow.dto.FollowResponse;
+import com.devtraces.arterest.controller.follow.dto.response.FollowResponse;
 import com.devtraces.arterest.service.follow.FollowService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

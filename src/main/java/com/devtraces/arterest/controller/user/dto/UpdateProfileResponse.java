@@ -1,6 +1,6 @@
 package com.devtraces.arterest.controller.user.dto;
 
-import com.devtraces.arterest.domain.user.User;
+import com.devtraces.arterest.model.user.User;
 import lombok.*;
 
 @Getter

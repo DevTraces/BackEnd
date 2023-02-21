@@ -1,9 +1,9 @@
 package com.devtraces.arterest.controller.search;
 
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
-import com.devtraces.arterest.controller.search.dto.GetHashtagsSearchResponse;
-import com.devtraces.arterest.controller.search.dto.GetNicknameSearchResponse;
-import com.devtraces.arterest.controller.search.dto.GetUsernameSearchResponse;
+import com.devtraces.arterest.controller.search.dto.response.GetHashtagsSearchResponse;
+import com.devtraces.arterest.controller.search.dto.response.GetNicknameSearchResponse;
+import com.devtraces.arterest.controller.search.dto.response.GetUsernameSearchResponse;
 import com.devtraces.arterest.service.search.SearchService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

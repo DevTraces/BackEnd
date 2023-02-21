@@ -1,6 +1,6 @@
 package com.devtraces.arterest.common.security;
 
-import com.devtraces.arterest.domain.user.User;
+import com.devtraces.arterest.model.user.User;
 import org.springframework.security.core.authority.AuthorityUtils;
 
 public class SecurityUser extends org.springframework.security.core.userdetails.User {

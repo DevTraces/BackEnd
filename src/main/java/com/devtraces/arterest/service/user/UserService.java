@@ -1,15 +1,15 @@
 package com.devtraces.arterest.service.user;
 
-import com.devtraces.arterest.common.component.S3Util;
+import com.devtraces.arterest.service.s3.S3Service;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.exception.ErrorCode;
 import com.devtraces.arterest.controller.user.dto.EmailCheckResponse;
 import com.devtraces.arterest.controller.user.dto.NicknameCheckResponse;
 import com.devtraces.arterest.controller.user.dto.ProfileByNicknameResponse;
 import com.devtraces.arterest.controller.user.dto.UpdateProfileResponse;
-import com.devtraces.arterest.domain.feed.FeedRepository;
-import com.devtraces.arterest.domain.user.User;
-import com.devtraces.arterest.domain.user.UserRepository;
+import com.devtraces.arterest.model.feed.FeedRepository;
+import com.devtraces.arterest.model.user.User;
+import com.devtraces.arterest.model.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,7 +24,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final FeedRepository feedRepository;
     private final PasswordEncoder passwordEncoder;
-    private final S3Util s3Util;
+    private final S3Service s3Service;
 
     public EmailCheckResponse checkEmail(String email) {
 
@@ -93,7 +93,7 @@ public class UserService {
         if (updateDescription != null) { user.setDescription(updateDescription); }
 
         if (updateProfileImage != null) {
-            user.setProfileImageUrl(s3Util.uploadImage(updateProfileImage));
+            user.setProfileImageUrl(s3Service.uploadImage(updateProfileImage));
         }
 
         return UpdateProfileResponse.from(userRepository.save(user));

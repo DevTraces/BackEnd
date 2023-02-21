@@ -12,7 +12,7 @@ import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.jwt.dto.TokenDto;
 import com.devtraces.arterest.common.redis.service.RedisService;
 import com.devtraces.arterest.common.security.SecurityUser;
-import com.devtraces.arterest.domain.user.User;
+import com.devtraces.arterest.model.user.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
