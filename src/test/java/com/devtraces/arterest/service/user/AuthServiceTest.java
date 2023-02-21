@@ -1,6 +1,10 @@
 package com.devtraces.arterest.service.user;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -28,6 +32,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,8 +42,6 @@ class AuthServiceTest {
 	private PasswordEncoder passwordEncoder;
 	@Mock
 	private JwtProvider jwtProvider;
-	@Mock
-	private S3Util s3Util;
 	@Mock
 	private MailUtil mailUtil;
 	@Mock
@@ -215,7 +218,7 @@ class AuthServiceTest {
 			.build();
 		TokenDto mockTokenDto = TokenDto.builder()
 			.accessToken("access-token")
-			// .refreshToken("refresh-token")
+			.responseCookie(ResponseCookie.from("refreshToken", "refresh-token").build())
 			.build();
 		given(userRepository.findByEmail(anyString()))
 			.willReturn(Optional.of(mockUser));
