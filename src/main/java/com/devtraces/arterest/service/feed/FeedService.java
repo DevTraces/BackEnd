@@ -164,24 +164,26 @@ public class FeedService {
 
     @Transactional
     public FeedUpdateResponse updateFeed(
-        Long userId,
+        Long userId, String content,
         List<MultipartFile> imageFileList,
-        FeedUpdateRequest feedUpdateRequest,
+        List<String> hashtagList,
+        List<String> prevImageUrlList,
         Long feedId
     ) {
         if(
-            feedUpdateRequest.getContent() != null &&
-            feedUpdateRequest.getContent().length() > CommonConstant.CONTENT_LENGTH_LIMIT
+            content != null && content.length() > CommonConstant.CONTENT_LENGTH_LIMIT
         ){
             throw BaseException.CONTENT_LIMIT_EXCEED;
         }
         if(
-            feedUpdateRequest.getHashtags() != null &&
-            feedUpdateRequest.getHashtags().size() > CommonConstant.HASHTAG_COUNT_LIMIT
+            hashtagList != null && hashtagList.size() > CommonConstant.HASHTAG_COUNT_LIMIT
         ){
             throw BaseException.HASHTAG_LIMIT_EXCEED;
         }
-        if(imageFileList != null && imageFileList.size() > CommonConstant.IMAGE_FILE_COUNT_LIMIT){
+        if(
+            imageFileList != null && prevImageUrlList != null &&
+            imageFileList.size() + prevImageUrlList.size() > CommonConstant.IMAGE_FILE_COUNT_LIMIT
+        ){
             throw BaseException.IMAGE_FILE_COUNT_LIMIT_EXCEED;
         }
 
@@ -195,9 +197,9 @@ public class FeedService {
 
         // 기존 사진들 중 유지해야 하는 사진들을 찾아낸다.
         Set<String> imagesToKeepSet = new HashSet<>();
-        if(feedUpdateRequest.getExistingImageUrls() != null){
-            for(ExistingImageUrlDto dto : feedUpdateRequest.getExistingImageUrls()){
-                imagesToKeepSet.add(dto.getImageUrl());
+        if(prevImageUrlList != null){
+            for(String prevImageUrlInfo : prevImageUrlList){
+                imagesToKeepSet.add( prevImageUrlInfo.split(",")[0] );
             }
         }
 
@@ -212,14 +214,14 @@ public class FeedService {
 
         // String 배열을 만든 후, 기존 이미지 url들을 정해진 인덱스에 맞게 넣어 둔다.
         int newImageFileCount = imageFileList == null ? 0 : imageFileList.size();
-        int existingImageUrlCount = feedUpdateRequest.getExistingImageUrls() == null ? 0 :
-            feedUpdateRequest.getExistingImageUrls().size();
+        int existingImageUrlCount = prevImageUrlList == null ? 0 : prevImageUrlList.size();
 
         String[] resultImageUrlArr = new String[newImageFileCount + existingImageUrlCount];
 
         if(existingImageUrlCount != 0){
-            for(ExistingImageUrlDto dto : feedUpdateRequest.getExistingImageUrls()){
-                resultImageUrlArr[dto.getIndex()] = dto.getImageUrl();
+            for(String prevImageUrlInfo : prevImageUrlList){
+                String[] prevImageUrlInfoArr = prevImageUrlInfo.split(",");
+                resultImageUrlArr[Integer.parseInt(prevImageUrlInfoArr[1])] = prevImageUrlInfoArr[0];
             }
         }
 
@@ -240,8 +242,8 @@ public class FeedService {
         feedHashtagMapRepository.deleteAllByFeedId(feedId);
 
         // 그 후 입력 받은 값에 따라서 새롭게 저장한다.
-        if(feedUpdateRequest.getHashtags() != null){
-            for(String hashtagInputString : feedUpdateRequest.getHashtags()){
+        if(hashtagList != null){
+            for(String hashtagInputString : hashtagList){
                 Optional<Hashtag> optionalHashtag = hashtagRepository
                     .findByHashtagString(hashtagInputString);
                 if(optionalHashtag.isPresent()){
@@ -268,7 +270,7 @@ public class FeedService {
             }
         }
 
-        feed.updateContent(feedUpdateRequest.getContent());
+        feed.updateContent(content);
 
         // Feed 엔티티의 imageUrls 필드의 내용물을 수정할 때 사용할 문자열을 만들어 준다.
         StringBuilder imageUrlBuilder = new StringBuilder();
@@ -283,7 +285,7 @@ public class FeedService {
             imageUrlBuilder.toString().equals("") ? null : imageUrlBuilder.toString()
         );
 
-        return FeedUpdateResponse.from( feedRepository.save(feed), feedUpdateRequest.getHashtags() );
+        return FeedUpdateResponse.from( feedRepository.save(feed), hashtagList );
     }
 
     // TODO 스프링 @Async를 사용해서 비동기 멀티 스레딩으로 처리하면 응답지연시간 최소화 가능.
