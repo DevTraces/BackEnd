@@ -90,4 +90,19 @@ public class User extends BaseEntity {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
+    }
 }

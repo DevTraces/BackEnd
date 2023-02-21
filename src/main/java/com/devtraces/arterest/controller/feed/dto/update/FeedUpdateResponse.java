@@ -1,4 +1,4 @@
-package com.devtraces.arterest.controller.feed.dto;
+package com.devtraces.arterest.controller.feed.dto.update;
 
 import com.devtraces.arterest.domain.feed.Feed;
 import java.util.Arrays;
