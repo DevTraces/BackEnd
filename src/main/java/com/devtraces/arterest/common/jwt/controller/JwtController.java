@@ -11,6 +11,8 @@ import com.devtraces.arterest.common.jwt.service.JwtService;
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
 import java.util.HashMap;
 import javax.validation.Valid;
+
+import com.devtraces.arterest.service.user.dto.TokenWithNicknameDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -32,14 +34,14 @@ public class JwtController {
 	public ResponseEntity<ApiSuccessResponse<?>> reissue(
 		@RequestHeader("accessToken") String accessToken,
 		@CookieValue("refreshToken") String refreshToken) {
-		TokenDto tokenDto = jwtService.reissue(
-			accessToken,
-			refreshToken);
+		TokenWithNicknameDto dto = jwtService.reissue(accessToken, refreshToken);
+
+		HashMap hashMap = new HashMap();
+		hashMap.put(ACCESS_TOKEN_PREFIX, TOKEN_PREFIX + " " + dto.getAccessToken());
+		hashMap.put("nickname", dto.getNickname());
 
 		return ResponseEntity.ok()
-			.header(SET_COOKIE, tokenDto.getResponseCookie().toString())
-			.body(ApiSuccessResponse.from(new HashMap(){{
-				put(ACCESS_TOKEN_PREFIX, TOKEN_PREFIX + " " + tokenDto.getAccessToken());
-			}}));
+			.header(SET_COOKIE, dto.getResponseCookie().toString())
+			.body(ApiSuccessResponse.from(hashMap));
 	}
 }

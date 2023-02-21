@@ -6,7 +6,10 @@ import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.jwt.JwtProvider;
 import com.devtraces.arterest.common.jwt.dto.TokenDto;
 import com.devtraces.arterest.common.redis.service.RedisService;
+import com.devtraces.arterest.model.user.User;
+import com.devtraces.arterest.model.user.UserRepository;
 import com.devtraces.arterest.service.user.AuthService;
+import com.devtraces.arterest.service.user.dto.TokenWithNicknameDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,9 +22,10 @@ public class JwtService {
 	private final JwtProvider jwtProvider;
 	private final AuthService authService;
 	private final RedisService redisService;
+	private final UserRepository userRepository;
 
 	@Transactional
-	public TokenDto reissue(String accessToken, String refreshToken) {
+	public TokenWithNicknameDto reissue(String accessToken, String refreshToken) {
 
 		if (StringUtils.hasText(accessToken) && accessToken.startsWith(TOKEN_PREFIX)) {
 			accessToken = accessToken.substring(TOKEN_PREFIX.length() + 1);
@@ -34,7 +38,13 @@ public class JwtService {
 			throw BaseException.EXPIRED_OR_PREVIOUS_REFRESH_TOKEN;
 		}
 
-		return jwtProvider.generateAccessTokenAndRefreshToken(userId);
+		User user = userRepository.findById(userId)
+				.orElseThrow(() -> BaseException.USER_NOT_FOUND);
+
+		return TokenWithNicknameDto.from(
+				user.getNickname(),
+				jwtProvider.generateAccessTokenAndRefreshToken(userId)
+		);
 	}
 
 	private void validateTokens(String accessToken, String refreshToken, Long userId) {
