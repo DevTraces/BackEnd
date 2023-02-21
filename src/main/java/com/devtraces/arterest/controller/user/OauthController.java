@@ -6,6 +6,8 @@ import com.devtraces.arterest.controller.user.dto.OauthKakaoSignInRequest;
 import com.devtraces.arterest.service.user.AuthService;
 import com.devtraces.arterest.service.user.OauthService;
 import java.util.HashMap;
+
+import com.devtraces.arterest.service.user.dto.TokenWithNicknameDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -28,12 +30,15 @@ public class OauthController {
 
     @PostMapping("/kakao/callback")
     public ResponseEntity<ApiSuccessResponse<?>> oauthKakaoSignIn(@RequestBody OauthKakaoSignInRequest request) {
-        TokenDto tokenDto = oauthService.oauthKakaoSignIn(request.getAccessTokenFromKakao());
+        TokenWithNicknameDto dto =
+                oauthService.oauthKakaoSignIn(request.getAccessTokenFromKakao());
+
+        HashMap hashMap = new HashMap();
+        hashMap.put(ACCESS_TOKEN_PREFIX, TOKEN_PREFIX + " " + dto.getAccessToken());
+        hashMap.put("nickname", dto.getNickname());
 
         return ResponseEntity.ok()
-            .header(SET_COOKIE, tokenDto.getResponseCookie().toString())
-            .body(ApiSuccessResponse.from(new HashMap(){{
-                put(ACCESS_TOKEN_PREFIX, TOKEN_PREFIX + " " + tokenDto.getAccessToken());
-            }}));
+            .header(SET_COOKIE, dto.getResponseCookie().toString())
+            .body(ApiSuccessResponse.from(hashMap));
     }
 }

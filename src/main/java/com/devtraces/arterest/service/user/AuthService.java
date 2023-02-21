@@ -16,6 +16,8 @@ import com.devtraces.arterest.model.user.UserRepository;
 import java.util.Date;
 
 import java.util.Random;
+
+import com.devtraces.arterest.service.user.dto.TokenWithNicknameDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -108,12 +110,15 @@ public class AuthService {
 	}
 
 	@Transactional(readOnly = true)
-	public TokenDto signInAndGenerateJwtToken(String email, String password) {
+	public TokenWithNicknameDto signInAndGenerateJwtToken(String email, String password) {
 		User user = userRepository.findByEmail(email)
 			.orElseThrow(() -> BaseException.WRONG_EMAIL_OR_PASSWORD);
 		validateLogin(user, password);
 
-		return jwtProvider.generateAccessTokenAndRefreshToken(user.getId());
+		TokenDto tokenDto =
+				jwtProvider.generateAccessTokenAndRefreshToken(user.getId());
+
+		return TokenWithNicknameDto.from(user.getNickname(), tokenDto);
 	}
 
 	private void validateLogin(User user, String passwordInput) {
