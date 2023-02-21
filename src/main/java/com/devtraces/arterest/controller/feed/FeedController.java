@@ -4,6 +4,8 @@ import com.devtraces.arterest.common.response.ApiSuccessResponse;
 import com.devtraces.arterest.controller.feed.dto.response.FeedCreateResponse;
 import com.devtraces.arterest.controller.feed.dto.response.FeedResponse;
 import com.devtraces.arterest.controller.feed.dto.response.FeedUpdateResponse;
+import com.devtraces.arterest.service.feed.FeedDeleteService;
+import com.devtraces.arterest.service.feed.FeedReadService;
 import com.devtraces.arterest.service.feed.FeedService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,8 @@ import org.springframework.web.multipart.MultipartFile;
 public class FeedController {
 
     private final FeedService feedService;
+    private final FeedReadService feedreadService;
+    private final FeedDeleteService feedDeleteService;
 
     @PostMapping
     public ApiSuccessResponse<FeedCreateResponse> createFeed(
@@ -43,14 +47,14 @@ public class FeedController {
         @RequestParam int page,
         @RequestParam(required = false, defaultValue = "10") int pageSize
     ){
-        return ApiSuccessResponse.from(feedService.getFeedResponseList(userId, page, pageSize));
+        return ApiSuccessResponse.from(feedreadService.getFeedResponseList(userId, page, pageSize));
     }
 
     @GetMapping("/{feedId}")
     public ApiSuccessResponse<FeedResponse> getOneFeed(
         @AuthenticationPrincipal Long userId, @PathVariable Long feedId
     ){
-        return ApiSuccessResponse.from(feedService.getOneFeed(userId, feedId));
+        return ApiSuccessResponse.from(feedreadService.getOneFeed(userId, feedId));
     }
 
     @PutMapping("/{feedId}")
@@ -71,7 +75,7 @@ public class FeedController {
     public ApiSuccessResponse<?> deleteFeed(
         @AuthenticationPrincipal Long userId, @PathVariable Long feedId
     ){
-        feedService.deleteFeed(userId, feedId);
+        feedDeleteService.deleteFeed(userId, feedId);
         return ApiSuccessResponse.NO_DATA_RESPONSE;
     }
 

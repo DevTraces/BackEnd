@@ -70,6 +70,10 @@ class FeedServiceTest {
     private FeedHashtagMapRepository feedHashtagMapRepository;
     @InjectMocks
     private FeedService feedService;
+    @InjectMocks
+    private FeedReadService feedReadService;
+    @InjectMocks
+    private FeedDeleteService feedDeleteService;
 
     @Test
     @DisplayName("기존 해시태그 찾아내면서 게시물 1개 생성 성공.")
@@ -307,7 +311,7 @@ class FeedServiceTest {
         //given(likeRepository.countByFeedId(1L)).willReturn(0L);
 
         //when
-        List<FeedResponse> feedResponseList = feedService.getFeedResponseList(1L, 0, 10);
+        List<FeedResponse> feedResponseList = feedReadService.getFeedResponseList(1L, 0, 10);
 
         //then
         verify(likeNumberCacheRepository, times(1)).getFeedLikeNumber(1L);
@@ -352,7 +356,7 @@ class FeedServiceTest {
         doNothing().when(likeNumberCacheRepository).setInitialLikeNumber(0L);
 
         //when
-        List<FeedResponse> feedResponseList = feedService.getFeedResponseList(1L, 0, 10);
+        List<FeedResponse> feedResponseList = feedReadService.getFeedResponseList(1L, 0, 10);
 
         //then
         verify(likeNumberCacheRepository, times(1)).getFeedLikeNumber(1L);
@@ -393,7 +397,7 @@ class FeedServiceTest {
         //given(likeRepository.countByFeedId(1L)).willReturn(0L);
 
         //when
-        FeedResponse feedResponse = feedService.getOneFeed(2L, 1L);
+        FeedResponse feedResponse = feedReadService.getOneFeed(2L, 1L);
 
         //then
         verify(likeNumberCacheRepository, times(1)).getFeedLikeNumber(1L);
@@ -434,7 +438,7 @@ class FeedServiceTest {
         doNothing().when(likeNumberCacheRepository).setInitialLikeNumber(0L);
 
         //when
-        FeedResponse feedResponse = feedService.getOneFeed(2L, 1L);
+        FeedResponse feedResponse = feedReadService.getOneFeed(2L, 1L);
 
         //then
         verify(likeNumberCacheRepository, times(1)).getFeedLikeNumber(1L);
@@ -751,7 +755,7 @@ class FeedServiceTest {
         doNothing().when(feedRepository).deleteById(anyLong());
 
         // when
-        feedService.deleteFeed(1L, 1L);
+        feedDeleteService.deleteFeed(1L, 1L);
 
         List<Long> longList = new ArrayList<>();
         longList.add(1L);
@@ -776,7 +780,7 @@ class FeedServiceTest {
         // when
         BaseException exception = assertThrows(
             BaseException.class ,
-            () -> feedService.deleteFeed(1L, 1L)
+            () -> feedDeleteService.deleteFeed(1L, 1L)
         );
 
         // then
@@ -801,11 +805,10 @@ class FeedServiceTest {
         // when
         BaseException exception = assertThrows(
             BaseException.class ,
-            () -> feedService.deleteFeed(1L, 1L)
+            () -> feedDeleteService.deleteFeed(1L, 1L)
         );
 
         // then
         assertEquals(ErrorCode.USER_INFO_NOT_MATCH, exception.getErrorCode());
     }
-
 }

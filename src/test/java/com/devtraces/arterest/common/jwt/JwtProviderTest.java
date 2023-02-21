@@ -13,6 +13,7 @@ import com.devtraces.arterest.common.jwt.dto.TokenDto;
 import com.devtraces.arterest.service.auth.util.AuthRedisUtil;
 import com.devtraces.arterest.common.security.SecurityUser;
 import com.devtraces.arterest.model.user.User;
+import com.devtraces.arterest.service.auth.util.TokenRedisUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -38,7 +39,7 @@ class JwtProviderTest {
 	@Mock
 	private UserDetailsService userDetailsService;
 	@Mock
-	private AuthRedisUtil searchRedisUtil;
+	private TokenRedisUtil tokenRedisUtil;
 	@Value("${jwt.secret}")
 	private String secretKeyString;
 	private JwtProvider jwtProvider;
@@ -46,7 +47,7 @@ class JwtProviderTest {
 
 	@BeforeEach
 	private void initEach() {
-		jwtProvider = new JwtProvider(userDetailsService, searchRedisUtil, secretKeyString);
+		jwtProvider = new JwtProvider(userDetailsService, tokenRedisUtil, secretKeyString);
 
 		byte[] keyBytes = Decoders.BASE64.decode(secretKeyString);
 		this.secretKey = Keys.hmacShaKeyFor(keyBytes);
@@ -55,7 +56,7 @@ class JwtProviderTest {
 	@Test
 	void testGenerateAccessTokenAndRefreshToken() {
 		willDoNothing()
-			.given(searchRedisUtil).setRefreshTokenValue(anyLong(), anyString(), any());
+			.given(tokenRedisUtil).setRefreshTokenValue(anyLong(), anyString(), any());
 
 		TokenDto tokenDto = jwtProvider.generateAccessTokenAndRefreshToken(1L);
 
