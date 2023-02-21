@@ -1,10 +1,9 @@
-package com.devtraces.arterest.controller.feed.dto;
+package com.devtraces.arterest.controller.feed.dto.create;
 
 import com.devtraces.arterest.domain.feed.Feed;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

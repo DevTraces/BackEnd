@@ -14,6 +14,8 @@ import com.devtraces.arterest.common.component.S3Util;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.exception.ErrorCode;
 import com.devtraces.arterest.controller.feed.dto.FeedResponse;
+import com.devtraces.arterest.controller.feed.dto.update.ExistingImageUrlDto;
+import com.devtraces.arterest.controller.feed.dto.update.FeedUpdateRequest;
 import com.devtraces.arterest.domain.bookmark.BookmarkRepository;
 import com.devtraces.arterest.domain.feed.Feed;
 import com.devtraces.arterest.domain.feed.FeedRepository;
@@ -457,6 +459,12 @@ class FeedServiceTest {
         List<MultipartFile> imageFileList = new ArrayList<>();
         imageFileList.add(multipartFile);
 
+        List<ExistingImageUrlDto> imageUrlListToKeep = new ArrayList<>();
+        ExistingImageUrlDto imageUrlDto = new ExistingImageUrlDto("existingUrlDto", 1);
+        imageUrlListToKeep.add(imageUrlDto);
+
+        FeedUpdateRequest feedUpdateRequest = new FeedUpdateRequest(content, hashtagList, imageUrlListToKeep);
+
         User user = User.builder()
             .id(1L)
             .build();
@@ -488,7 +496,7 @@ class FeedServiceTest {
         given(feedRepository.save(any())).willReturn(feed);
 
         // when
-        feedService.updateFeed(1L, content, imageFileList, hashtagList, 1L);
+        feedService.updateFeed(1L, imageFileList, feedUpdateRequest, 1L);
 
         // then
         verify(feedRepository, times(1)).findById(1L);
@@ -513,6 +521,12 @@ class FeedServiceTest {
 
         List<MultipartFile> imageFileList = new ArrayList<>();
         imageFileList.add(multipartFile);
+
+        List<ExistingImageUrlDto> imageUrlListToKeep = new ArrayList<>();
+        ExistingImageUrlDto imageUrlDto = new ExistingImageUrlDto("existingUrlDto", 1);
+        imageUrlListToKeep.add(imageUrlDto);
+
+        FeedUpdateRequest feedUpdateRequest = new FeedUpdateRequest(content, hashtagList, imageUrlListToKeep);
 
         User user = User.builder()
             .id(1L)
@@ -546,7 +560,7 @@ class FeedServiceTest {
         given(feedRepository.save(any())).willReturn(feed);
 
         // when
-        feedService.updateFeed(1L, content, imageFileList, hashtagList, 1L);
+        feedService.updateFeed(1L, imageFileList, feedUpdateRequest, 1L);
 
         // then
         verify(feedRepository, times(1)).findById(1L);
@@ -578,10 +592,12 @@ class FeedServiceTest {
         List<MultipartFile> imageFileList = new ArrayList<>();
         imageFileList.add(multipartFile);
 
+        FeedUpdateRequest feedUpdateRequest = new FeedUpdateRequest(content, hashtagList, new ArrayList<>());
+
         // when
         BaseException exception = assertThrows(
             BaseException.class ,
-            () -> feedService.updateFeed(1L, content, imageFileList, hashtagList, 1L)
+            () -> feedService.updateFeed(1L, imageFileList, feedUpdateRequest, 1L)
         );
 
         // then
@@ -604,10 +620,12 @@ class FeedServiceTest {
         List<MultipartFile> imageFileList = new ArrayList<>();
         imageFileList.add(multipartFile);
 
+        FeedUpdateRequest feedUPdateRequest = new FeedUpdateRequest(content, hashtagList, new ArrayList<>());
+
         // when
         BaseException exception = assertThrows(
             BaseException.class ,
-            () -> feedService.updateFeed(1L, content, imageFileList, hashtagList, 1L)
+            () -> feedService.updateFeed(1L, imageFileList, feedUPdateRequest, 1L)
         );
 
         // then
@@ -630,10 +648,12 @@ class FeedServiceTest {
             imageFileList.add(multipartFile);
         }
 
+        FeedUpdateRequest feedUpdateRequest = new FeedUpdateRequest(content, hashtagList, new ArrayList<>());
+
         // when
         BaseException exception = assertThrows(
             BaseException.class ,
-            () -> feedService.updateFeed(1L, content, imageFileList, hashtagList, 1L)
+            () -> feedService.updateFeed(1L, imageFileList, feedUpdateRequest, 1L)
         );
 
         // then
@@ -656,10 +676,12 @@ class FeedServiceTest {
 
         given(feedRepository.findById(1L)).willReturn(Optional.empty());
 
+        FeedUpdateRequest feedUpdateRequest = new FeedUpdateRequest(content, hashtagList, new ArrayList<>());
+
         // when
         BaseException exception = assertThrows(
             BaseException.class ,
-            () -> feedService.updateFeed(1L, content, imageFileList, hashtagList, 1L)
+            () -> feedService.updateFeed(1L, imageFileList, feedUpdateRequest, 1L)
         );
 
         // then
@@ -689,12 +711,14 @@ class FeedServiceTest {
             .user(user)
             .build();
 
+        FeedUpdateRequest feedUpdateREquest = new FeedUpdateRequest(content, hashtagList, new ArrayList<>());
+
         given(feedRepository.findById(1L)).willReturn(Optional.of(feed));
 
         // when
         BaseException exception = assertThrows(
             BaseException.class ,
-            () -> feedService.updateFeed(1L, content, imageFileList, hashtagList, 1L)
+            () -> feedService.updateFeed(1L, imageFileList, feedUpdateREquest, 1L)
         );
 
         // then
