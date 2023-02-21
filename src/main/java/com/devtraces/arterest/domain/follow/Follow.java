@@ -1,16 +1,16 @@
-package com.devtraces.arterest.domain.hashtag;
+package com.devtraces.arterest.domain.follow;
 
 import com.devtraces.arterest.common.domain.BaseEntity;
-import com.devtraces.arterest.domain.feedhashtagmap.FeedHashtagMap;
-import java.util.ArrayList;
-import java.util.List;
+import com.devtraces.arterest.domain.user.User;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
-import javax.persistence.OneToMany;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -26,22 +26,21 @@ import org.hibernate.envers.AuditOverride;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AuditOverride(forClass = BaseEntity.class)
-@Table(name = "hashtag", indexes = {@Index(name = "hashtag_string_index",columnList = "hashtag_string")})
+@Table(name = "follow", indexes = @Index(name = "following_id_index", columnList = "following_id"))
 @Entity
-public class Hashtag extends BaseEntity {
+public class Follow extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "hashtag_id")
+    @Column(name = "follow_id")
     private Long id;
 
-
-	  @Column(unique = true, name = "hashtag_string")
-	  private String hashtagString;
-
-    // 1:N mapping with FeedHashtagMap
-    @OneToMany(mappedBy = "hashtag")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     @ToString.Exclude
-    List<FeedHashtagMap> feedHashtagMapList = new ArrayList<>();
+    private User user;
+
+    @Column(name = "following_id")
+    private Long followingId; // 팔로우 대상 유저 주키 아이디 값. 인덱스 설정해줌.
 
 }

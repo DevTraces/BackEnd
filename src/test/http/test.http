@@ -81,18 +81,29 @@ DELETE http://localhost:8080/api/feeds/1/replies/1/rereplies/1/1
 ### 테스트 유저 생성
 POST http://localhost:8080/make-testuser
 
+### make test user - 테스트 유저 1~4번 생성.
+POST http://localhost:8080/make-testuser
 
+### 팔로우 관계 설정 / 1>2 - OK
+POST http://localhost:8080/api/follows/two?userId=1
 
+### 팔로우 관계 설정 / 1>3 - OK
+POST http://localhost:8080/api/follows/three?userId=1
 
+### 팔로우 관계 설정  2> 3 - OK
+POST http://localhost:8080/api/follows/three?userId=2
 
+### 팔로우 관계 설정  2> 4 - OK
+POST http://localhost:8080/api/follows/four?userId=2
 
+### 팔로우 관계 설정 / 3>2 - OK
+POST http://localhost:8080/api/follows/two?userId=3
 
+### 1번 유저가 2번 유저가 팔로우 하고 있는 유저들의 리스트를 확인한다. 1번 유저의 입장에서 2번 유저가 팔로우 하고 있는 3,4번 유저를 팔로우 하고 있지 않으므로 둘다 false로 떠야 맞다. - OK
+GET http://localhost:8080/api/follows/following/two?userId=1&page=0
 
+### 1번 유저가 2번 유저를 팔로우 하고 있는 유저들의 리스트를 본다. 2번 유저를 팔로우 하고 있는 유저는 1번과 3번이다. 1번 유저의 입장에서 1번은 자기 자신이고 3번은 1번이 팔로우 하고 있는 사람이므로 3번 유저에 대해서는 true가 떠야 맞다.
+GET http://localhost:8080/api/follows/follower/two?userId=1&page=0
 
-
-
-
-
-
-
-
+### 팔로우 관계 제거 : 1번이 3번을 언팔로우 했다. - OK
+DELETE http://localhost:8080/api/follows/three?userId=1

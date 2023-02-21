@@ -4,6 +4,7 @@ import com.devtraces.arterest.common.UserSignUpType;
 import com.devtraces.arterest.common.UserStatusType;
 import com.devtraces.arterest.common.domain.BaseEntity;
 import com.devtraces.arterest.domain.feed.Feed;
+import com.devtraces.arterest.domain.follow.Follow;
 import com.devtraces.arterest.domain.reply.Reply;
 import com.devtraces.arterest.domain.rereply.Rereply;
 import java.time.LocalDateTime;
@@ -34,7 +35,10 @@ import org.hibernate.envers.AuditOverride;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AuditOverride(forClass = BaseEntity.class)
-@Table(name = "user", indexes = @Index(name = "nickname_index", columnList = "nickname"))
+@Table(name = "user", indexes = {
+    @Index(name = "username_index", columnList = "username"),
+    @Index(name = "nickname_index", columnList = "nickname")
+})
 @Entity
 public class User extends BaseEntity {
 
@@ -44,9 +48,8 @@ public class User extends BaseEntity {
     private Long id;
 
     private Long kakaoUserId;
-
+    @Column(name = "username")
     private String username;
-
     @Column(name = "nickname", unique = true)
     private String nickname;
 
@@ -80,4 +83,26 @@ public class User extends BaseEntity {
     @ToString.Exclude
     private List<Rereply> rereplyList = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private List<Follow> followList = new ArrayList<>();
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void updateUsername(String username) {
+        this.username = username;
+    }
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
+    public void updateDescription(String description) {
+        this.description = description;
+    }
+
+    public void updateProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
+    }
 }

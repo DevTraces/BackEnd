@@ -92,9 +92,9 @@ public class RedisService {
 		values.set(AUTH_COMPLETED_PREFIX + email, "O");
 	}
 
-	public boolean existsAuthCompletedValue(String email) {
+	public boolean notExistsAuthCompletedValue(String email) {
 		ValueOperations<String, String> values = redisTemplate.opsForValue();
-		return values.get(AUTH_COMPLETED_PREFIX + email) != null;
+		return values.get(AUTH_COMPLETED_PREFIX + email) == null;
 	}
 
 	public void deleteAuthCompletedValue(String email) {

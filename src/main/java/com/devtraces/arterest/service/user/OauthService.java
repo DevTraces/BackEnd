@@ -26,9 +26,9 @@ public class OauthService {
     private final JwtProvider jwtProvider;
     private final UserRepository userRepository;
 
-    public TokenDto oauthKakaoSignIn(String accessToken) {
+    public TokenDto oauthKakaoSignIn(String accessTokenFromKakao) {
         // kakao 서버에 액세스 토큰 보낸 뒤 사용자 정보 가져오기
-        UserInfoFromKakaoDto userInfoFromKakaoDto = createKakaoUser(accessToken);
+        UserInfoFromKakaoDto userInfoFromKakaoDto = createKakaoUser(accessTokenFromKakao);
 
         // DB에 dto에서 kakaoUserId가 없는 사람만 회원가입 진행
         long kakaoUserId = userInfoFromKakaoDto.getKakaoUserId();
@@ -55,7 +55,7 @@ public class OauthService {
     }
 
     // 카카오 서버로 요청하는 함수
-    private UserInfoFromKakaoDto createKakaoUser(String accessToken) {
+    private UserInfoFromKakaoDto createKakaoUser(String accessTokenFromKakao) {
 
         String requestURL = "https://kapi.kakao.com/v2/user/me";
 
@@ -67,7 +67,7 @@ public class OauthService {
             conn.setRequestMethod("POST");
             conn.setDoOutput(true);
             //전송할 header 작성, accessToken 전송
-            conn.setRequestProperty("Authorization", "Bearer " + accessToken);
+            conn.setRequestProperty("Authorization", "Bearer " + accessTokenFromKakao);
 
             // 요청을 통해 얻은 JSON타입의 Response 메세지 읽어오기
             BufferedReader br =
