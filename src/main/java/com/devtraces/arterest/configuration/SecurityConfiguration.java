@@ -55,8 +55,13 @@ public class SecurityConfiguration {
 				UsernamePasswordAuthenticationFilter.class)
 
 			.authorizeRequests()
-			.antMatchers("/api/auth/sign-out", "api/auth/password/check").hasRole("USER")
-			.anyRequest().permitAll(); // permitAll() 로 하면 JwtAuthenticationEntryPoint 동작안함
+			.antMatchers("/api/auth/sign-up", "/api/auth/email/auth-key",
+				"/api/auth/email/auth-key/check", "/api/auth/sign-in",
+				"/api/oauth/kakao/callback", "/api/auth/password/check",
+				"/api/auth/sign-out", "/api/auth/withdrawal",
+				"/api/users/email/**", "/api/users/nickname/**",
+				"/api/users/password", "/api/tokens/reissue").permitAll()//.hasRole("USER")
+			.anyRequest().authenticated(); // permitAll() 로 하면 JwtAuthenticationEntryPoint 동작안함
 
 		return http.build();
 	}
