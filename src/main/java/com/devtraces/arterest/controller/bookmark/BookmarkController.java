@@ -1,7 +1,7 @@
 package com.devtraces.arterest.controller.bookmark;
 
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
-import com.devtraces.arterest.controller.bookmark.dto.GetBookmarkListResponse;
+import com.devtraces.arterest.controller.bookmark.dto.response.GetBookmarkListResponse;
 import com.devtraces.arterest.service.bookmark.BookmarkService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

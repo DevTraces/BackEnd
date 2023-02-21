@@ -1,30 +1,29 @@
 package com.devtraces.arterest.service.feed;
 
-import com.devtraces.arterest.common.CommonUtils;
-import com.devtraces.arterest.common.component.S3Util;
+import com.devtraces.arterest.common.constant.CommonConstant;
+import com.devtraces.arterest.service.s3.S3Service;
 import com.devtraces.arterest.common.exception.BaseException;
-import com.devtraces.arterest.controller.feed.dto.create.FeedCreateResponse;
-import com.devtraces.arterest.controller.feed.dto.FeedResponse;
-import com.devtraces.arterest.controller.feed.dto.update.ExistingImageUrlDto;
-import com.devtraces.arterest.controller.feed.dto.update.FeedUpdateRequest;
-import com.devtraces.arterest.controller.feed.dto.update.FeedUpdateResponse;
-import com.devtraces.arterest.domain.bookmark.BookmarkRepository;
-import com.devtraces.arterest.domain.feed.Feed;
-import com.devtraces.arterest.domain.feed.FeedRepository;
-import com.devtraces.arterest.domain.feedhashtagmap.FeedHashtagMap;
-import com.devtraces.arterest.domain.feedhashtagmap.FeedHashtagMapRepository;
-import com.devtraces.arterest.domain.hashtag.Hashtag;
-import com.devtraces.arterest.domain.hashtag.HashtagRepository;
-import com.devtraces.arterest.domain.like.LikeRepository;
-import com.devtraces.arterest.domain.like.Likes;
-import com.devtraces.arterest.domain.likecache.LikeNumberCacheRepository;
-import com.devtraces.arterest.domain.reply.Reply;
-import com.devtraces.arterest.domain.reply.ReplyRepository;
-import com.devtraces.arterest.domain.rereply.Rereply;
-import com.devtraces.arterest.domain.rereply.RereplyRepository;
-import com.devtraces.arterest.domain.user.User;
-import com.devtraces.arterest.domain.user.UserRepository;
-import java.util.ArrayList;
+import com.devtraces.arterest.controller.feed.dto.response.FeedCreateResponse;
+import com.devtraces.arterest.controller.feed.dto.response.FeedResponse;
+import com.devtraces.arterest.controller.feed.dto.ExistingImageUrlDto;
+import com.devtraces.arterest.controller.feed.dto.request.FeedUpdateRequest;
+import com.devtraces.arterest.controller.feed.dto.response.FeedUpdateResponse;
+import com.devtraces.arterest.model.bookmark.BookmarkRepository;
+import com.devtraces.arterest.model.feed.Feed;
+import com.devtraces.arterest.model.feed.FeedRepository;
+import com.devtraces.arterest.model.feedhashtagmap.FeedHashtagMap;
+import com.devtraces.arterest.model.feedhashtagmap.FeedHashtagMapRepository;
+import com.devtraces.arterest.model.hashtag.Hashtag;
+import com.devtraces.arterest.model.hashtag.HashtagRepository;
+import com.devtraces.arterest.model.like.LikeRepository;
+import com.devtraces.arterest.model.like.Likes;
+import com.devtraces.arterest.model.likecache.LikeNumberCacheRepository;
+import com.devtraces.arterest.model.reply.Reply;
+import com.devtraces.arterest.model.reply.ReplyRepository;
+import com.devtraces.arterest.model.rereply.Rereply;
+import com.devtraces.arterest.model.rereply.RereplyRepository;
+import com.devtraces.arterest.model.user.User;
+import com.devtraces.arterest.model.user.UserRepository;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -48,7 +47,7 @@ public class FeedService {
     private final LikeRepository likeRepository;
     private final BookmarkRepository bookmarkRepository;
     private final LikeNumberCacheRepository likeNumberCacheRepository;
-    private final S3Util s3Util;
+    private final S3Service s3Service;
     private final HashtagRepository hashtagRepository;
     private final FeedHashtagMapRepository feedHashtagMapRepository;
 
@@ -58,13 +57,13 @@ public class FeedService {
     ) {
         // 게시물 텍스트 없이 사진 또는 해시태그만 게시물로서 올리고 싶은 유저가 분명 있을 것이므로,
         // content가 빈 스트링인 것에 대해서도 받아들인다.
-        if(content.length() > CommonUtils.CONTENT_LENGTH_LIMIT){
+        if(content.length() > CommonConstant.CONTENT_LENGTH_LIMIT){
             throw BaseException.CONTENT_LIMIT_EXCEED;
         }
-        if(hashtagList != null && hashtagList.size() > CommonUtils.HASHTAG_COUNT_LIMIT){
+        if(hashtagList != null && hashtagList.size() > CommonConstant.HASHTAG_COUNT_LIMIT){
             throw BaseException.HASHTAG_LIMIT_EXCEED;
         }
-        if(imageFileList != null && imageFileList.size() > CommonUtils.IMAGE_FILE_COUNT_LIMIT){
+        if(imageFileList != null && imageFileList.size() > CommonConstant.IMAGE_FILE_COUNT_LIMIT){
             throw BaseException.IMAGE_FILE_COUNT_LIMIT_EXCEED;
         }
         User authorUser = userRepository.findById(userId).orElseThrow(
@@ -75,7 +74,7 @@ public class FeedService {
         StringBuilder imageUrlBuilder = new StringBuilder();
         if(imageFileList != null){
             for(MultipartFile imageFile : imageFileList){
-                imageUrlBuilder.append(s3Util.uploadImage(imageFile));
+                imageUrlBuilder.append(s3Service.uploadImage(imageFile));
                 imageUrlBuilder.append(',');
             }
         }
@@ -172,17 +171,17 @@ public class FeedService {
     ) {
         if(
             feedUpdateRequest.getContent() != null &&
-            feedUpdateRequest.getContent().length() > CommonUtils.CONTENT_LENGTH_LIMIT
+            feedUpdateRequest.getContent().length() > CommonConstant.CONTENT_LENGTH_LIMIT
         ){
             throw BaseException.CONTENT_LIMIT_EXCEED;
         }
         if(
             feedUpdateRequest.getHashtags() != null &&
-            feedUpdateRequest.getHashtags().size() > CommonUtils.HASHTAG_COUNT_LIMIT
+            feedUpdateRequest.getHashtags().size() > CommonConstant.HASHTAG_COUNT_LIMIT
         ){
             throw BaseException.HASHTAG_LIMIT_EXCEED;
         }
-        if(imageFileList != null && imageFileList.size() > CommonUtils.IMAGE_FILE_COUNT_LIMIT){
+        if(imageFileList != null && imageFileList.size() > CommonConstant.IMAGE_FILE_COUNT_LIMIT){
             throw BaseException.IMAGE_FILE_COUNT_LIMIT_EXCEED;
         }
 
@@ -206,7 +205,7 @@ public class FeedService {
         if(!feed.getImageUrls().equals("")){
             for(String deleteTargetUrl : feed.getImageUrls().split(",")){
                 if(!imagesToKeepSet.contains(deleteTargetUrl)){
-                    s3Util.deleteImage(deleteTargetUrl);
+                    s3Service.deleteImage(deleteTargetUrl);
                 }
             }
         }
@@ -230,7 +229,7 @@ public class FeedService {
                 innerFor:
                 for(int i=0; i< resultImageUrlArr.length; i++){
                     if(resultImageUrlArr[i]==null){
-                        resultImageUrlArr[i] = s3Util.uploadImage(newImageFile);
+                        resultImageUrlArr[i] = s3Service.uploadImage(newImageFile);
                         break innerFor;
                     }
                 }
@@ -300,7 +299,7 @@ public class FeedService {
         // S3에 올려놨던 사진들을 전부 삭제한다.
         if(!feed.getImageUrls().equals("")){
             for(String deleteTargetUrl : feed.getImageUrls().split(",")){
-                s3Util.deleteImage(deleteTargetUrl);
+                s3Service.deleteImage(deleteTargetUrl);
             }
         }
 

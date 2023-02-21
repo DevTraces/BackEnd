@@ -1,15 +1,15 @@
 package com.devtraces.arterest.service.rereply;
 
-import com.devtraces.arterest.common.CommonUtils;
+import com.devtraces.arterest.common.constant.CommonConstant;
 import com.devtraces.arterest.common.exception.BaseException;
-import com.devtraces.arterest.domain.reply.Reply;
-import com.devtraces.arterest.domain.reply.ReplyRepository;
-import com.devtraces.arterest.domain.rereply.Rereply;
-import com.devtraces.arterest.domain.rereply.RereplyRepository;
-import com.devtraces.arterest.domain.user.User;
-import com.devtraces.arterest.domain.user.UserRepository;
-import com.devtraces.arterest.controller.rereply.dto.RereplyRequest;
-import com.devtraces.arterest.controller.rereply.dto.RereplyResponse;
+import com.devtraces.arterest.model.reply.Reply;
+import com.devtraces.arterest.model.reply.ReplyRepository;
+import com.devtraces.arterest.model.rereply.Rereply;
+import com.devtraces.arterest.model.rereply.RereplyRepository;
+import com.devtraces.arterest.model.user.User;
+import com.devtraces.arterest.model.user.UserRepository;
+import com.devtraces.arterest.controller.rereply.dto.request.RereplyRequest;
+import com.devtraces.arterest.controller.rereply.dto.response.RereplyResponse;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -32,7 +32,7 @@ public class RereplyService {
         if(rereplyRequest.getContent() == null || rereplyRequest.getContent().equals("")){
             throw BaseException.NULL_AND_EMPTY_STRING_NOT_ALLOWED;
         }
-        if(rereplyRequest.getContent().length() > CommonUtils.CONTENT_LENGTH_LIMIT){
+        if(rereplyRequest.getContent().length() > CommonConstant.CONTENT_LENGTH_LIMIT){
             throw BaseException.CONTENT_LIMIT_EXCEED;
         }
         User authorUser = userRepository.findById(userId).orElseThrow(
@@ -68,7 +68,7 @@ public class RereplyService {
         if(rereplyRequest.getContent() == null || rereplyRequest.getContent().equals("")){
             throw BaseException.NULL_AND_EMPTY_STRING_NOT_ALLOWED;
         }
-        if(rereplyRequest.getContent().length() > CommonUtils.CONTENT_LENGTH_LIMIT){
+        if(rereplyRequest.getContent().length() > CommonConstant.CONTENT_LENGTH_LIMIT){
             throw BaseException.CONTENT_LIMIT_EXCEED;
         }
         Rereply rereply = rereplyRepository.findById(rereplyId).orElseThrow(

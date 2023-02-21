@@ -1,12 +1,12 @@
 package com.devtraces.arterest.service.follow;
 
-import com.devtraces.arterest.common.CommonUtils;
+import com.devtraces.arterest.common.constant.CommonConstant;
 import com.devtraces.arterest.common.exception.BaseException;
-import com.devtraces.arterest.controller.follow.dto.FollowResponse;
-import com.devtraces.arterest.domain.follow.Follow;
-import com.devtraces.arterest.domain.follow.FollowRepository;
-import com.devtraces.arterest.domain.user.User;
-import com.devtraces.arterest.domain.user.UserRepository;
+import com.devtraces.arterest.controller.follow.dto.response.FollowResponse;
+import com.devtraces.arterest.model.follow.Follow;
+import com.devtraces.arterest.model.follow.FollowRepository;
+import com.devtraces.arterest.model.user.User;
+import com.devtraces.arterest.model.user.UserRepository;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -29,7 +29,7 @@ public class FollowService {
 
         if(
             followerUser.getFollowList() != null
-                && followerUser.getFollowList().size() >= CommonUtils.FOLLOW_COUNT_LIMIT
+                && followerUser.getFollowList().size() >= CommonConstant.FOLLOW_COUNT_LIMIT
         ){
             throw BaseException.FOLLOW_LIMIT_EXCEED;
         }
