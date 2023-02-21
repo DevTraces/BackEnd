@@ -127,7 +127,7 @@ public class OauthService {
         return UserInfoFromKakaoDto.builder()
                 .kakaoUserId(kakaoUserId)
                 .email(email)
-                .username("사용자 이름")
+                .username(nickname)
                 .nickname(nickname)
                 .profileImageUrl(profileImageUrl)
                 .description("나에 대한 설명을 추가해주세요!")
