@@ -56,7 +56,7 @@ public class SecurityConfiguration {
 
 			.authorizeRequests()
 			.antMatchers("/api/auth/sign-out", "api/auth/password/check").hasRole("USER")
-			.anyRequest().authenticated(); // permitAll() 로 하면 JwtAuthenticationEntryPoint 동작안함
+			.anyRequest().permitAll(); // permitAll() 로 하면 JwtAuthenticationEntryPoint 동작안함
 
 		return http.build();
 	}
