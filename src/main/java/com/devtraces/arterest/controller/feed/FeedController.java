@@ -58,12 +58,14 @@ public class FeedController {
     @PutMapping("/{feedId}")
     public ApiSuccessResponse<FeedUpdateResponse> updateFeed(
         @AuthenticationPrincipal Long userId,
+        @RequestParam("content") String content,
         @RequestParam(value = "imageFiles", required = false) List<MultipartFile> imageFileList,
-        @RequestPart(value = "feedUpdateRequest") FeedUpdateRequest feedUpdateRequest,
+        @RequestParam(value = "hashtags", required = false) List<String> hashtagList,
+        @RequestParam(value = "existingImageUrls", required = false) List<String> prevImageUrls,
         @PathVariable Long feedId
     ){
         return ApiSuccessResponse.from(
-            feedService.updateFeed(userId, imageFileList, feedUpdateRequest, feedId)
+            feedService.updateFeed(userId, content, imageFileList, hashtagList, prevImageUrls, feedId)
         );
     }
 
