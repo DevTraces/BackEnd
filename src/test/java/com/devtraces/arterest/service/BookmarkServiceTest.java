@@ -10,7 +10,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import com.devtraces.arterest.common.exception.BaseException;
-import com.devtraces.arterest.controller.feed.bookmark.dto.GetBookmarkListResponse;
+import com.devtraces.arterest.controller.bookmark.dto.GetBookmarkListResponse;
 import com.devtraces.arterest.domain.bookmark.Bookmark;
 import com.devtraces.arterest.domain.bookmark.BookmarkRepository;
 import com.devtraces.arterest.domain.feed.Feed;
