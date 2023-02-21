@@ -11,6 +11,7 @@ import com.devtraces.arterest.common.jwt.JwtProvider;
 import com.devtraces.arterest.common.jwt.dto.TokenDto;
 import com.devtraces.arterest.common.redis.service.RedisService;
 import com.devtraces.arterest.service.user.AuthService;
+import com.devtraces.arterest.service.user.dto.TokenWithNicknameDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -48,10 +49,10 @@ class JwtServiceTest {
 		given(jwtProvider.generateAccessTokenAndRefreshToken(anyLong()))
 			.willReturn(mockTokenDto);
 
-		TokenDto tokenDto = jwtService.reissue( "access-token", "refresh-token");
+		TokenWithNicknameDto dto = jwtService.reissue("access-token", "refresh-token");
 
-		assertEquals("access-token2", tokenDto.getAccessToken());
-		assertEquals("refresh-token2", tokenDto.getResponseCookie().getValue());
+		assertEquals("access-token2", dto.getAccessToken());
+		assertEquals("refresh-token2", dto.getResponseCookie().getValue());
 	}
 
 	// 유효하지 않은 토큰인 경우

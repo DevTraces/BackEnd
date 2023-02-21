@@ -6,6 +6,7 @@ import com.devtraces.arterest.common.jwt.JwtProvider;
 import com.devtraces.arterest.common.jwt.dto.TokenDto;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
+import com.devtraces.arterest.service.user.dto.TokenWithNicknameDto;
 import com.devtraces.arterest.service.user.dto.UserInfoFromKakaoDto;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -26,7 +27,7 @@ public class OauthService {
     private final JwtProvider jwtProvider;
     private final UserRepository userRepository;
 
-    public TokenDto oauthKakaoSignIn(String accessTokenFromKakao) {
+    public TokenWithNicknameDto oauthKakaoSignIn(String accessTokenFromKakao) {
         // kakao 서버에 액세스 토큰 보낸 뒤 사용자 정보 가져오기
         UserInfoFromKakaoDto userInfoFromKakaoDto = createKakaoUser(accessTokenFromKakao);
 
@@ -34,7 +35,7 @@ public class OauthService {
         long kakaoUserId = userInfoFromKakaoDto.getKakaoUserId();
         Optional<User> optionalUser = userRepository.findByKakaoUserId(kakaoUserId);
         if (!optionalUser.isPresent()) {
-            User save = userRepository.save(User.builder()
+            User savedUser = userRepository.save(User.builder()
                     .kakaoUserId(userInfoFromKakaoDto.getKakaoUserId())
                     .email(userInfoFromKakaoDto.getEmail())
                     .username(userInfoFromKakaoDto.getUsername())
@@ -45,13 +46,19 @@ public class OauthService {
                     .signupType(UserSignUpType.KAKAO_TALK)
                     .build());
 
-            return jwtProvider.generateAccessTokenAndRefreshToken(save.getId());
+
+            return TokenWithNicknameDto.from(
+                    savedUser.getNickname(),
+                    jwtProvider.generateAccessTokenAndRefreshToken(savedUser.getId())
+            );
         }
 
         // 이미 회원가입한 사용자는 액세스, 리프레쉬 토큰 생성해서 응답
         User user = optionalUser.get();
 
-        return jwtProvider.generateAccessTokenAndRefreshToken(user.getId());
+        return TokenWithNicknameDto.from(
+                user.getNickname(),
+                jwtProvider.generateAccessTokenAndRefreshToken(user.getId()));
     }
 
     // 카카오 서버로 요청하는 함수
