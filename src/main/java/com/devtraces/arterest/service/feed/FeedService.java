@@ -14,6 +14,7 @@ import com.devtraces.arterest.model.likecache.LikeNumberCacheRepository;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
 import com.devtraces.arterest.service.s3.S3Service;
+import com.google.gson.Gson;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -34,6 +35,8 @@ public class FeedService {
     private final S3Service s3Service;
     private final HashtagRepository hashtagRepository;
     private final FeedHashtagMapRepository feedHashtagMapRepository;
+
+    private final Gson gson;
 
     @Transactional
     public FeedCreateResponse createFeed(
@@ -97,6 +100,7 @@ public class FeedService {
         List<MultipartFile> imageFileList,
         List<String> hashtagList,
         List<String> prevImageUrlList,
+        List<String> indexList,
         Long feedId
     ) {
         validateContentAndHashtagList(content, hashtagList);
@@ -119,7 +123,7 @@ public class FeedService {
         Set<String> imagesToKeepSet = new HashSet<>();
         if(prevImageUrlList != null){
             for(String prevImageUrlInfo : prevImageUrlList){
-                imagesToKeepSet.add( prevImageUrlInfo.split(",")[0] );
+                imagesToKeepSet.add( prevImageUrlInfo );
             }
         }
         // 기존에 S3에 저장돼 있던 사진들 중 위에서 정의한 셋에 포함돼 있지 않는 이미지들을 삭제한다.
@@ -135,11 +139,11 @@ public class FeedService {
         int existingImageUrlCount = prevImageUrlList == null ? 0 : prevImageUrlList.size();
         String[] resultImageUrlArr = new String[newImageFileCount + existingImageUrlCount];
         if(existingImageUrlCount != 0){
-            for(String prevImageUrlInfo : prevImageUrlList){
-                String[] prevImageUrlInfoArr = prevImageUrlInfo.split(",");
-                resultImageUrlArr[Integer.parseInt(prevImageUrlInfoArr[1])] = prevImageUrlInfoArr[0];
+            for(int i=0; i<prevImageUrlList.size(); i++){
+                resultImageUrlArr[ Integer.parseInt(indexList.get(i)) ] = prevImageUrlList.get(i);
             }
         }
+
         // 새로운 이미지들을 S3에 업로드 하면서 resultImageUrlArr의 null 인 칸들에 순서대로 넣어준다.
         if(newImageFileCount != 0){
             for(MultipartFile newImageFile : imageFileList){
