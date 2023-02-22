@@ -31,6 +31,7 @@ import com.devtraces.arterest.model.rereply.RereplyRepository;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -743,10 +744,25 @@ class FeedServiceTest {
             .build();
         feed.getReplyList().add(reply);
 
+        Hashtag hashtag = Hashtag.builder()
+            .id(1L)
+            .hashtagString("hashtag").build();
+
+        FeedHashtagMap feedHashtagMap = FeedHashtagMap.builder()
+            .feed(feed)
+            .hashtag(hashtag)
+            .build();
+
+        List<FeedHashtagMap> feedHashtagMapList = new ArrayList<>();
+        feedHashtagMapList.add(feedHashtagMap);
+
         given(feedRepository.findById(anyLong())).willReturn(Optional.of(feed));
+        given(feedHashtagMapRepository.findByFeed(any())).willReturn(feedHashtagMapList);
+        given(feedHashtagMapRepository.existsByHashtag(any())).willReturn(false);
 
         doNothing().when(s3Service).deleteImage(anyString());
         doNothing().when(feedHashtagMapRepository).deleteAllByFeedId(anyLong());
+        doNothing().when(hashtagRepository).deleteById(anyLong());
         doNothing().when(likeNumberCacheRepository).deleteLikeNumberInfo(anyLong());
         doNothing().when(likeRepository).deleteAllByFeedId(anyLong());
         doNothing().when(bookmarkRepository).deleteAllByFeedId(anyLong());
@@ -763,6 +779,7 @@ class FeedServiceTest {
         // then
         verify(s3Service, times(1)).deleteImage("imageUrl");
         verify(feedHashtagMapRepository, times(1)).deleteAllByFeedId(1L);
+        verify(hashtagRepository, times(1)).deleteById(1L);
         verify(likeNumberCacheRepository, times(1)).deleteLikeNumberInfo(1L);
         verify(likeRepository, times(1)).deleteAllByFeedId(1L);
         verify(bookmarkRepository, times(1)).deleteAllByFeedId(1L);
