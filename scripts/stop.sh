@@ -1,7 +1,7 @@
-
+PROJECT_ROOT="/home/ubuntu/app/deploy"
 JAR_FILE="arterest-0.0.1-SNAPSHOT.jar"	# jar 파일명
 
-DEPLOY_LOG="$PROJECT_ROOT/deploy.log"
+DEPLOY_LOG="$PROJECT_ROOT/deploy-stop.log"
 
 TIME_NOW=$(date +%c)
 

@@ -3,7 +3,7 @@ JAR_FILE="$PROJECT_ROOT/deploy/arterest-0.0.1-SNAPSHOT.jar"
 
 APP_LOG="$PROJECT_ROOT/application.log"
 ERROR_LOG="$PROJECT_ROOT/error.log"
-DEPLOY_LOG="$PROJECT_ROOT/deploy.log"
+DEPLOY_LOG="$PROJECT_ROOT/deploy-start.log"
 
 TIME_NOW=$(date +%c)
 
