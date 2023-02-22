@@ -70,7 +70,7 @@ public class SearchService {
 		String keyword, Integer page, Integer pageSize) {
 		Pageable pageable = PageRequest.of(page, pageSize);
 
-		return userRepository.findByUsername(keyword, pageable)
+		return userRepository.findByUsernameStartsWith(keyword, pageable)
 			.stream().map(User -> GetUsernameSearchResponse.from(User))
 			.collect(Collectors.toList());
 	}
@@ -79,9 +79,7 @@ public class SearchService {
 		String keyword, Integer page, Integer pageSize) {
 		Pageable pageable = PageRequest.of(page, pageSize);
 
-		if(keyword.charAt(0) == '@') keyword = keyword.substring(1);
-
-		return userRepository.findByNickname(keyword, pageable)
+		return userRepository.findByNicknameStartsWith(keyword, pageable)
 			.stream().map(User -> GetNicknameSearchResponse.from(User))
 			.collect(Collectors.toList());
 	}
