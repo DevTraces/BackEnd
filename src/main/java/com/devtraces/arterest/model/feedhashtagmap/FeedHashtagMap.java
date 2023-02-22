@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,7 +28,15 @@ import org.hibernate.envers.AuditOverride;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AuditOverride(forClass = BaseEntity.class)
-@Table(name = "feed_hashtag_map")
+@Table(
+    name = "feed_hashtag_map",
+    uniqueConstraints={
+        @UniqueConstraint(
+            name="feed_id_hastag_id_unique",
+            columnNames={"feed_id", "hashtag_id"}
+        )
+    }
+)
 @Entity
 public class FeedHashtagMap extends BaseEntity {
 

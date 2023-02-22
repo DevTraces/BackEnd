@@ -8,6 +8,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,7 +19,14 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "likes", indexes = @Index(name = "user_id_index", columnList = "user_id"))
+@Table(name = "likes", indexes = @Index(name = "user_id_index", columnList = "user_id"),
+    uniqueConstraints={
+        @UniqueConstraint(
+            name="feed_id_user_id_unique",
+            columnNames={"feed_id", "user_id"}
+        )
+    }
+)
 @Entity
 public class Likes extends BaseEntity {
 
@@ -26,6 +34,7 @@ public class Likes extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "feed_id")
     private Long feedId;
 
     @Column(name = "user_id")

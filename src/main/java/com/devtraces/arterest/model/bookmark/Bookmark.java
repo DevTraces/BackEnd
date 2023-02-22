@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,7 +31,14 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @EntityListeners(value = {AuditingEntityListener.class})
-@Table(name = "bookmark")
+@Table(name = "bookmark",
+	uniqueConstraints={
+		@UniqueConstraint(
+			name="user_id_feed_id_unique",
+			columnNames={"user_id", "feed_id"}
+		)
+	}
+)
 public class Bookmark {
 
 	@Id

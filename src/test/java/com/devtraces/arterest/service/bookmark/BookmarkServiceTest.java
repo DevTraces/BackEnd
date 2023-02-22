@@ -1,4 +1,4 @@
-package com.devtraces.arterest.service;
+package com.devtraces.arterest.service.bookmark;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
