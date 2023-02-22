@@ -31,7 +31,16 @@ public class LikeNumberCacheRepository {
             String key = getKey(feedId);
             template.opsForValue().set(key, "0");
         } catch (Exception e){
-            log.error("캐시서버에서 좋아요 개수 저장 실패.");
+            log.error("캐시서버에서 좋아요 개수 0으로 저장 실패.");
+        }
+    }
+
+    public void setLikeNumber(Long feedId, Long likeNumber){
+        try {
+            String key = getKey(feedId);
+            template.opsForValue().set(key, String.valueOf(likeNumber));
+        } catch (Exception e){
+            log.error("캐시서버에 좋아요 개수 저장 실패");
         }
     }
 

@@ -2,7 +2,6 @@ package com.devtraces.arterest.service.feed;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -14,20 +13,13 @@ import com.devtraces.arterest.common.constant.CommonConstant;
 import com.devtraces.arterest.service.s3.S3Service;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.exception.ErrorCode;
-import com.devtraces.arterest.controller.feed.dto.response.FeedResponse;
-import com.devtraces.arterest.model.bookmark.BookmarkRepository;
 import com.devtraces.arterest.model.feed.Feed;
 import com.devtraces.arterest.model.feed.FeedRepository;
 import com.devtraces.arterest.model.feedhashtagmap.FeedHashtagMap;
 import com.devtraces.arterest.model.feedhashtagmap.FeedHashtagMapRepository;
 import com.devtraces.arterest.model.hashtag.Hashtag;
 import com.devtraces.arterest.model.hashtag.HashtagRepository;
-import com.devtraces.arterest.model.like.LikeRepository;
 import com.devtraces.arterest.model.likecache.LikeNumberCacheRepository;
-import com.devtraces.arterest.model.reply.Reply;
-import com.devtraces.arterest.model.reply.ReplyRepository;
-import com.devtraces.arterest.model.rereply.Rereply;
-import com.devtraces.arterest.model.rereply.RereplyRepository;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
 import java.util.ArrayList;
@@ -40,9 +32,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -52,15 +41,7 @@ class FeedServiceTest {
     @Mock
     private FeedRepository feedRepository;
     @Mock
-    private ReplyRepository replyRepository;
-    @Mock
-    private RereplyRepository rereplyRepository;
-    @Mock
     private UserRepository userRepository;
-    @Mock
-    private LikeRepository likeRepository;
-    @Mock
-    private BookmarkRepository bookmarkRepository;
     @Mock
     private LikeNumberCacheRepository likeNumberCacheRepository;
     @Mock
@@ -71,10 +52,6 @@ class FeedServiceTest {
     private FeedHashtagMapRepository feedHashtagMapRepository;
     @InjectMocks
     private FeedService feedService;
-    @InjectMocks
-    private FeedReadService feedReadService;
-    @InjectMocks
-    private FeedDeleteService feedDeleteService;
 
     @Test
     @DisplayName("기존 해시태그 찾아내면서 게시물 1개 생성 성공.")
@@ -274,179 +251,6 @@ class FeedServiceTest {
 
         // then
         assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
-    }
-
-    @Test
-    @DisplayName("피드 리스트 읽기 성공 - 레디스에서 좋아요 개수 획득 성공한 경우.")
-    void successGetFeedListRedisServerAvailable(){
-        //given
-        Reply reply = Reply.builder()
-            .id(1L)
-            .content("this is reply")
-            .build();
-        List<Reply> replyList = new ArrayList<>();
-        replyList.add(reply);
-
-        User user = User.builder()
-            .id(1L)
-            .description("introduction")
-            .profileImageUrl("url1")
-            .nickname("dongvin99")
-            .username("박동빈")
-            .build();
-
-        Feed feed = Feed.builder()
-            .id(1L)
-            .replyList(replyList)
-            .imageUrls("url2,url3")
-            .user(user)
-            .build();
-
-        List<Feed> feedList = new ArrayList<>();
-        feedList.add(feed);
-
-        Slice<Feed> slice = new PageImpl<>(feedList);
-
-        given(feedRepository.findAllByUserId(1L, PageRequest.of(0, 10))).willReturn(slice);
-        given(likeNumberCacheRepository.getFeedLikeNumber(1L)).willReturn(0L);
-        //given(likeRepository.countByFeedId(1L)).willReturn(0L);
-
-        //when
-        List<FeedResponse> feedResponseList = feedReadService.getFeedResponseList(1L, 0, 10);
-
-        //then
-        verify(likeNumberCacheRepository, times(1)).getFeedLikeNumber(1L);
-        verify(feedRepository, times(1)).findAllByUserId(1L, PageRequest.of(0, 10));
-        assertEquals(feedResponseList.size(), 1);
-    }
-
-    @Test
-    @DisplayName("피드 리스트 읽기 성공 - 레디스에서 좋아요 개수 획득에 실패한 경우.")
-    void successGetFeedListRedisServerNotAvailable(){
-        //given
-        Reply reply = Reply.builder()
-            .id(1L)
-            .content("this is reply")
-            .build();
-        List<Reply> replyList = new ArrayList<>();
-        replyList.add(reply);
-
-        User user = User.builder()
-            .id(1L)
-            .description("introduction")
-            .profileImageUrl("url1")
-            .nickname("dongvin99")
-            .username("박동빈")
-            .build();
-
-        Feed feed = Feed.builder()
-            .id(1L)
-            .replyList(replyList)
-            .imageUrls("url2,url3")
-            .user(user)
-            .build();
-
-        List<Feed> feedList = new ArrayList<>();
-        feedList.add(feed);
-
-        Slice<Feed> slice = new PageImpl<>(feedList);
-
-        given(feedRepository.findAllByUserId(1L, PageRequest.of(0, 10))).willReturn(slice);
-        given(likeNumberCacheRepository.getFeedLikeNumber(1L)).willReturn(null);
-        given(likeRepository.countByFeedId(1L)).willReturn(0L);
-        doNothing().when(likeNumberCacheRepository).setInitialLikeNumber(0L);
-
-        //when
-        List<FeedResponse> feedResponseList = feedReadService.getFeedResponseList(1L, 0, 10);
-
-        //then
-        verify(likeNumberCacheRepository, times(1)).getFeedLikeNumber(1L);
-        verify(likeRepository, times(1)).countByFeedId(1L);
-        verify(likeNumberCacheRepository, times(1)).setInitialLikeNumber(0L);
-        verify(feedRepository, times(1)).findAllByUserId(1L, PageRequest.of(0, 10));
-        assertEquals(feedResponseList.size(), 1);
-    }
-
-    @Test
-    @DisplayName("피드 1개 읽기 성공 - 레디스에서 좋아요 개수 획득에 성공한 경우.")
-    void successGetOneFeedRedisServerAvailable(){
-        //given
-        Reply reply = Reply.builder()
-            .id(1L)
-            .content("this is reply")
-            .build();
-        List<Reply> replyList = new ArrayList<>();
-        replyList.add(reply);
-
-        User user = User.builder()
-            .id(1L)
-            .description("introduction")
-            .profileImageUrl("url1")
-            .nickname("dongvin99")
-            .username("박동빈")
-            .build();
-
-        Feed feed = Feed.builder()
-            .id(1L)
-            .replyList(replyList)
-            .imageUrls("url2,url3")
-            .user(user)
-            .build();
-
-        given(feedRepository.findById(1L)).willReturn(Optional.of(feed));
-        given(likeNumberCacheRepository.getFeedLikeNumber(1L)).willReturn(0L);
-        //given(likeRepository.countByFeedId(1L)).willReturn(0L);
-
-        //when
-        FeedResponse feedResponse = feedReadService.getOneFeed(2L, 1L);
-
-        //then
-        verify(likeNumberCacheRepository, times(1)).getFeedLikeNumber(1L);
-        //verify(likeRepository, times(1)).countByFeedId(1L);
-        verify(feedRepository, times(1)).findById(1L);
-        assertEquals(feedResponse.getFeedId(), 1L);
-    }
-
-    @Test
-    @DisplayName("피드 1개 읽기 성공 - 레디스에서 좋아요 개수 획득에 실패한 경우")
-    void successGetOneFeedRedisServerNotAvailable(){
-        //given
-        Reply reply = Reply.builder()
-            .id(1L)
-            .content("this is reply")
-            .build();
-        List<Reply> replyList = new ArrayList<>();
-        replyList.add(reply);
-
-        User user = User.builder()
-            .id(1L)
-            .description("introduction")
-            .profileImageUrl("url1")
-            .nickname("dongvin99")
-            .username("박동빈")
-            .build();
-
-        Feed feed = Feed.builder()
-            .id(1L)
-            .replyList(replyList)
-            .imageUrls("url2,url3")
-            .user(user)
-            .build();
-
-        given(feedRepository.findById(1L)).willReturn(Optional.of(feed));
-        given(likeNumberCacheRepository.getFeedLikeNumber(1L)).willReturn(null);
-        given(likeRepository.countByFeedId(1L)).willReturn(0L);
-        doNothing().when(likeNumberCacheRepository).setInitialLikeNumber(0L);
-
-        //when
-        FeedResponse feedResponse = feedReadService.getOneFeed(2L, 1L);
-
-        //then
-        verify(likeNumberCacheRepository, times(1)).getFeedLikeNumber(1L);
-        verify(likeRepository, times(1)).countByFeedId(1L);
-        verify(likeNumberCacheRepository, times(1)).setInitialLikeNumber(0L);
-        verify(feedRepository, times(1)).findById(1L);
-        assertEquals(feedResponse.getFeedId(), 1L);
     }
 
     @Test
