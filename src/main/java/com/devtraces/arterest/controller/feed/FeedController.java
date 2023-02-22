@@ -44,10 +44,13 @@ public class FeedController {
     @GetMapping("/list/{nickname}")
     public ApiSuccessResponse<List<FeedResponse>> getFeedList(
         @AuthenticationPrincipal Long userId,
+        @PathVariable String nickname,
         @RequestParam int page,
         @RequestParam(required = false, defaultValue = "10") int pageSize
     ){
-        return ApiSuccessResponse.from(feedreadService.getFeedResponseList(userId, page, pageSize));
+        return ApiSuccessResponse.from(
+            feedreadService.getFeedResponseList(userId, nickname, page, pageSize)
+        );
     }
 
     @GetMapping("/{feedId}")
@@ -57,7 +60,7 @@ public class FeedController {
         return ApiSuccessResponse.from(feedreadService.getOneFeed(userId, feedId));
     }
 
-    @PutMapping("/{feedId}")
+    @PostMapping("/{feedId}")
     public ApiSuccessResponse<FeedUpdateResponse> updateFeed(
         @AuthenticationPrincipal Long userId,
         @RequestParam("content") String content,
