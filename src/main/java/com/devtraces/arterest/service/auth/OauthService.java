@@ -30,22 +30,33 @@ public class OauthService {
 
     public TokenWithNicknameDto oauthKakaoSignIn(String accessTokenFromKakao) {
         // kakao 서버에 액세스 토큰 보낸 뒤 사용자 정보 가져오기
-        UserInfoFromKakaoDto userInfoFromKakaoDto = createKakaoUser(accessTokenFromKakao);
+        UserInfoFromKakaoDto userInfoFromKakaoDto =
+                createKakaoUser(accessTokenFromKakao);
 
-        // 중복된 닉네임이 있다면 이미 가입한 회원으로 간주함
-        validateUser(userInfoFromKakaoDto);
+        Optional<User> optionalUser =
+                userRepository.findByNickname(userInfoFromKakaoDto.getNickname());
+
+        // 닉네임 중복이고, EMAIL로 가입했으면 일반 회원가입한 회원이므로 예외처리
+        alreadySignUpUser(optionalUser);
+
+        // 닉네임 중복이고, KAKAO_TALK으로 가입했으면 카카오 소셜 로그인
+        if (optionalUser.isPresent() &&
+                optionalUser.get().getSignupType().equals(UserSignUpType.KAKAO_TALK)
+        ) {
+            return createTokenWithNicknameDto(optionalUser.get());
+        }
 
         // 닉네임 중복이 아니고, kakaoUserId가 없는 사람만 회원가입 실행
         long kakaoUserId = userInfoFromKakaoDto.getKakaoUserId();
-        Optional<User> optionalUser = userRepository.findByKakaoUserId(kakaoUserId);
-        if (!optionalUser.isPresent()) {
+        if (!optionalUser.isPresent() &&
+                !userRepository.findByKakaoUserId(kakaoUserId).isPresent()
+        ) {
             User savedUser = getSavedUser(userInfoFromKakaoDto, kakaoUserId);
 
             return createTokenWithNicknameDto(savedUser);
         }
 
-        // 닉네임 중복 아니고, kakao로 회원가입한 유저는 로그인 실행
-        return createTokenWithNicknameDto(optionalUser.get());
+        return null;
     }
 
     // 카카오 서버로 요청하는 함수
@@ -121,12 +132,6 @@ public class OauthService {
                 .build();
     }
 
-    private void validateUser(UserInfoFromKakaoDto userInfoFromKakaoDto) {
-        if (userRepository.findByNickname(userInfoFromKakaoDto.getNickname()).isPresent()) {
-            throw BaseException.ALREADY_EXIST_USER;
-        }
-    }
-
     private User getSavedUser(UserInfoFromKakaoDto userInfoFromKakaoDto, long kakaoUserId) {
         User savedUser = userRepository.save(User.builder()
                 .kakaoUserId(kakaoUserId)
@@ -146,5 +151,13 @@ public class OauthService {
                 user.getNickname(),
                 jwtProvider.generateAccessTokenAndRefreshToken(user.getId())
         );
+    }
+
+    private static void alreadySignUpUser(Optional<User> optionalUser) {
+        if (optionalUser.isPresent() &&
+                optionalUser.get().getSignupType().equals(UserSignUpType.EMAIL)
+        ) {
+            throw BaseException.ALREADY_EXIST_USER;
+        }
     }
 }
