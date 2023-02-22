@@ -57,7 +57,7 @@ public class FeedController {
         return ApiSuccessResponse.from(feedreadService.getOneFeed(userId, feedId));
     }
 
-    @PutMapping("/{feedId}")
+    @PostMapping("/{feedId}")
     public ApiSuccessResponse<FeedUpdateResponse> updateFeed(
         @AuthenticationPrincipal Long userId,
         @RequestParam("content") String content,
