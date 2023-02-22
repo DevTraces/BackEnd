@@ -36,8 +36,8 @@ public class Hashtag extends BaseEntity {
     private Long id;
 
 
-	  @Column(unique = true, name = "hashtag_string")
-	  private String hashtagString;
+	@Column(unique = true, name = "hashtag_string")
+	private String hashtagString;
 
     // 1:N mapping with FeedHashtagMap
     @OneToMany(mappedBy = "hashtag")

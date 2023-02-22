@@ -141,7 +141,7 @@ class SearchServiceTest {
 		Page<User> userPage = new PageImpl<>(
 			responseList.subList(start, end), pageable, responseList.size());
 
-		given(userRepository.findByUsername(anyString(), any()))
+		given(userRepository.findByUsernameStartsWith(anyString(), any()))
 			.willReturn(userPage);
 
 		//when
@@ -173,7 +173,7 @@ class SearchServiceTest {
 		Page<User> userPage = new PageImpl<>(
 			responseList.subList(start, end), pageable, responseList.size());
 
-		given(userRepository.findByNickname(anyString(), any()))
+		given(userRepository.findByNicknameStartsWith(anyString(), any()))
 			.willReturn(userPage);
 
 		//when
