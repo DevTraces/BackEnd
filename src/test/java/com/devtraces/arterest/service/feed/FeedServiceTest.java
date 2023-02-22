@@ -11,6 +11,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import com.devtraces.arterest.common.constant.CommonConstant;
+import com.devtraces.arterest.model.bookmark.Bookmark;
+import com.devtraces.arterest.model.like.Likes;
 import com.devtraces.arterest.service.s3.S3Service;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.exception.ErrorCode;
@@ -307,11 +309,12 @@ class FeedServiceTest {
         Slice<Feed> slice = new PageImpl<>(feedList);
 
         given(feedRepository.findAllByUserId(1L, PageRequest.of(0, 10))).willReturn(slice);
+        given(userRepository.findByNickname("dongvin99")).willReturn(Optional.of(user));
         given(likeNumberCacheRepository.getFeedLikeNumber(1L)).willReturn(0L);
         //given(likeRepository.countByFeedId(1L)).willReturn(0L);
 
         //when
-        List<FeedResponse> feedResponseList = feedReadService.getFeedResponseList(1L, 0, 10);
+        List<FeedResponse> feedResponseList = feedReadService.getFeedResponseList(1L, "dongvin99", 0, 10);
 
         //then
         verify(likeNumberCacheRepository, times(1)).getFeedLikeNumber(1L);
@@ -351,17 +354,18 @@ class FeedServiceTest {
         Slice<Feed> slice = new PageImpl<>(feedList);
 
         given(feedRepository.findAllByUserId(1L, PageRequest.of(0, 10))).willReturn(slice);
+        given(userRepository.findByNickname("dongvin99")).willReturn(Optional.of(user));
         given(likeNumberCacheRepository.getFeedLikeNumber(1L)).willReturn(null);
         given(likeRepository.countByFeedId(1L)).willReturn(0L);
-        doNothing().when(likeNumberCacheRepository).setInitialLikeNumber(0L);
+        doNothing().when(likeNumberCacheRepository).setLikeNumber(1L, 0L);
 
         //when
-        List<FeedResponse> feedResponseList = feedReadService.getFeedResponseList(1L, 0, 10);
+        List<FeedResponse> feedResponseList = feedReadService.getFeedResponseList(1L, "dongvin99", 0, 10);
 
         //then
         verify(likeNumberCacheRepository, times(1)).getFeedLikeNumber(1L);
         verify(likeRepository, times(1)).countByFeedId(1L);
-        verify(likeNumberCacheRepository, times(1)).setInitialLikeNumber(0L);
+        verify(likeNumberCacheRepository, times(1)).setLikeNumber(1L, 0L);
         verify(feedRepository, times(1)).findAllByUserId(1L, PageRequest.of(0, 10));
         assertEquals(feedResponseList.size(), 1);
     }
@@ -392,16 +396,21 @@ class FeedServiceTest {
             .user(user)
             .build();
 
+        List<Likes> likesList = new ArrayList<>();
+        List<Bookmark> bookmarkList = new ArrayList<>();
+
+        given(likeRepository.findAllByUserId(1L)).willReturn(likesList);
+        given(bookmarkRepository.findAllByUserId(1L)).willReturn(bookmarkList);
         given(feedRepository.findById(1L)).willReturn(Optional.of(feed));
         given(likeNumberCacheRepository.getFeedLikeNumber(1L)).willReturn(0L);
-        //given(likeRepository.countByFeedId(1L)).willReturn(0L);
 
         //when
-        FeedResponse feedResponse = feedReadService.getOneFeed(2L, 1L);
+        FeedResponse feedResponse = feedReadService.getOneFeed(1L, 1L);
 
         //then
+        verify(likeRepository, times(1)).findAllByUserId(1L);
+        verify(bookmarkRepository, times(1)).findAllByUserId(1L);
         verify(likeNumberCacheRepository, times(1)).getFeedLikeNumber(1L);
-        //verify(likeRepository, times(1)).countByFeedId(1L);
         verify(feedRepository, times(1)).findById(1L);
         assertEquals(feedResponse.getFeedId(), 1L);
     }
@@ -432,18 +441,25 @@ class FeedServiceTest {
             .user(user)
             .build();
 
+        List<Likes> likesList = new ArrayList<>();
+        List<Bookmark> bookmarkList = new ArrayList<>();
+
+        given(likeRepository.findAllByUserId(1L)).willReturn(likesList);
+        given(bookmarkRepository.findAllByUserId(1L)).willReturn(bookmarkList);
         given(feedRepository.findById(1L)).willReturn(Optional.of(feed));
         given(likeNumberCacheRepository.getFeedLikeNumber(1L)).willReturn(null);
         given(likeRepository.countByFeedId(1L)).willReturn(0L);
-        doNothing().when(likeNumberCacheRepository).setInitialLikeNumber(0L);
+        doNothing().when(likeNumberCacheRepository).setLikeNumber(1L, 0L);
 
         //when
-        FeedResponse feedResponse = feedReadService.getOneFeed(2L, 1L);
+        FeedResponse feedResponse = feedReadService.getOneFeed(1L, 1L);
 
         //then
+        verify(likeRepository, times(1)).findAllByUserId(1L);
+        verify(bookmarkRepository, times(1)).findAllByUserId(1L);
         verify(likeNumberCacheRepository, times(1)).getFeedLikeNumber(1L);
         verify(likeRepository, times(1)).countByFeedId(1L);
-        verify(likeNumberCacheRepository, times(1)).setInitialLikeNumber(0L);
+        verify(likeNumberCacheRepository, times(1)).setLikeNumber(1L, 0L);
         verify(feedRepository, times(1)).findById(1L);
         assertEquals(feedResponse.getFeedId(), 1L);
     }
