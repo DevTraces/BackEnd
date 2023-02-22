@@ -1,5 +1,6 @@
 package com.devtraces.arterest.service.auth;
 
+import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.type.UserSignUpType;
 import com.devtraces.arterest.common.type.UserStatusType;
 import com.devtraces.arterest.common.jwt.JwtProvider;
@@ -28,14 +29,21 @@ public class OauthService {
 
     public TokenWithNicknameDto oauthKakaoSignIn(String accessTokenFromKakao) {
         // kakao 서버에 액세스 토큰 보낸 뒤 사용자 정보 가져오기
-        UserInfoFromKakaoDto userInfoFromKakaoDto = createKakaoUser(accessTokenFromKakao);
+        UserInfoFromKakaoDto userInfoFromKakaoDto =
+                createKakaoUser(accessTokenFromKakao);
 
-        // DB에 dto에서 kakaoUserId가 없는 사람만 회원가입 진행
+        Optional<User> optionalUser =
+                userRepository.findByNickname(userInfoFromKakaoDto.getNickname());
+        if (optionalUser.isPresent()) {
+            throw BaseException.ALREADY_EXIST_USER;
+        }
+
+        // 닉네임 중복이 아니고, kakaoUserId가 없는 사람만 회원가입 실행
         long kakaoUserId = userInfoFromKakaoDto.getKakaoUserId();
-        Optional<User> optionalUser = userRepository.findByKakaoUserId(kakaoUserId);
-        if (!optionalUser.isPresent()) {
+        Optional<User> optionalUser2 = userRepository.findByKakaoUserId(kakaoUserId);
+        if (!optionalUser2.isPresent()) {
             User savedUser = userRepository.save(User.builder()
-                    .kakaoUserId(userInfoFromKakaoDto.getKakaoUserId())
+                    .kakaoUserId(kakaoUserId)
                     .email(userInfoFromKakaoDto.getEmail())
                     .username(userInfoFromKakaoDto.getUsername())
                     .nickname(userInfoFromKakaoDto.getNickname())
@@ -52,8 +60,8 @@ public class OauthService {
             );
         }
 
-        // 이미 회원가입한 사용자는 액세스, 리프레쉬 토큰 생성해서 응답
-        User user = optionalUser.get();
+        // 닉네임 중복 아니고, kakao로 회원가입한 유저는 로그인 실행
+        User user = optionalUser2.get();
 
         return TokenWithNicknameDto.from(
                 user.getNickname(),
