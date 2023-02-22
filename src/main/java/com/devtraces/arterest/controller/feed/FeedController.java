@@ -62,7 +62,7 @@ public class FeedController {
 
     @PostMapping("/{feedId}")
     public ApiSuccessResponse<FeedUpdateResponse> updateFeed(
-        @RequestParam Long userId,
+        @AuthenticationPrincipal Long userId,
         @RequestParam("content") String content,
         @RequestParam(value = "imageFiles", required = false) List<MultipartFile> imageFileList,
         @RequestParam(value = "hashtags", required = false) List<String> hashtagList,
