@@ -44,7 +44,8 @@ public enum ErrorCode {
  	FAILED_FILE_UPLOAD(HttpStatus.INTERNAL_SERVER_ERROR, "FAILED_FILE_UPLOAD", "파일 업로드에 실패했습니다."),
 	FAILED_CACHE_GET_OPERATION(HttpStatus.INTERNAL_SERVER_ERROR, "FAILED_CACHE_GET_OPERATION", "캐시서버에서 값을 가져오지 못했습니다."),
 	FAILED_CACHE_PUT_OPERATION(HttpStatus.INTERNAL_SERVER_ERROR, "FAILED_CACHE_PUT_OPERATION", "캐시서버에 값을 등록하는 것에 실패했습니다."),
-	FAILED_SEND_EMAIL(HttpStatus.INTERNAL_SERVER_ERROR, "FAILED_SEND_EMAIL", "메일 전송에 실패했습니다.");
+	FAILED_SEND_EMAIL(HttpStatus.INTERNAL_SERVER_ERROR, "FAILED_SEND_EMAIL", "메일 전송에 실패했습니다."),
+	DUPLICATED_FOLLOW_OR_LIKE(HttpStatus.INTERNAL_SERVER_ERROR, "DUPLICATED_FOLLOW_OR_LIKE", "이미 팔로우 또는 좋아요를 하였습니다.");
 
 	private final HttpStatus httpStatus;
 	private final String code;

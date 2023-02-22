@@ -12,4 +12,6 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
 
     Slice<Follow> findAllByFollowingId(Long followingId, PageRequest pageRequest);
 
+    boolean existsByUserIdAndFollowingId(Long user_id, Long followingId);
+
 }
