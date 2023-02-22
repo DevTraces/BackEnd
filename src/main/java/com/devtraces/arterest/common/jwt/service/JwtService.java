@@ -1,6 +1,7 @@
 package com.devtraces.arterest.common.jwt.service;
 
 import static com.devtraces.arterest.common.jwt.JwtProperties.TOKEN_PREFIX;
+import static com.devtraces.arterest.common.jwt.JwtProvider.REFRESH_TOKEN_SUBJECT_PREFIX;
 
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.jwt.JwtProvider;
@@ -19,18 +20,19 @@ import org.springframework.util.StringUtils;
 public class JwtService {
 
 	private final JwtProvider jwtProvider;
-	private final AuthService authService;
 	private final TokenRedisUtil tokenRedisUtil;
 	private final UserRepository userRepository;
 
 	@Transactional
-	public TokenWithNicknameDto reissue(String accessToken, String refreshToken) {
+	public TokenWithNicknameDto reissue(String bearerToken, String refreshToken) {
 
-		if (StringUtils.hasText(accessToken) && accessToken.startsWith(TOKEN_PREFIX)) {
-			accessToken = accessToken.substring(TOKEN_PREFIX.length() + 1);
+		String accessToken = "";
+		if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(TOKEN_PREFIX)) {
+			accessToken = bearerToken.substring(TOKEN_PREFIX.length() + 1);
 		}
 
-		Long userId = Long.parseLong(jwtProvider.getUserId(accessToken));
+		Long userId = Long.parseLong(jwtProvider.getUserId(refreshToken)
+			.replace(REFRESH_TOKEN_SUBJECT_PREFIX, ""));
 		validateTokens(accessToken, refreshToken, userId);
 
 		if (!tokenRedisUtil.hasSameRefreshToken(userId, refreshToken)) {
@@ -49,7 +51,6 @@ public class JwtService {
 	private void validateTokens(String accessToken, String refreshToken, Long userId) {
 		// 토큰 재발행의 경우 Access Token이 만료되어야 한다.
 		if (!jwtProvider.isExpiredToken(accessToken)) {
-			authService.signOut(userId, accessToken);
 			throw BaseException.NOT_EXPIRED_ACCESS_TOKEN;
 		}
 
