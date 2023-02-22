@@ -50,7 +50,7 @@ public class FeedReadService {
 				if(likeNumber == null) {
 					likeNumber = likeRepository.countByFeedId(feed.getId());
 					// 현재 캐시서버에 좋아요 개수가 기록돼 있지 않으므로 다음 read 요쳥을 위해서 캐시해 둠.
-					likeNumberCacheRepository.setInitialLikeNumber(likeNumber);
+					likeNumberCacheRepository.setLikeNumber(feed.getId(), likeNumber);
 				}
 				return FeedResponse.from(feed, likedFeedSet, likeNumber, bookmarkedFeedSet);
 			}
@@ -70,7 +70,7 @@ public class FeedReadService {
 		Long likeNumber = likeNumberCacheRepository.getFeedLikeNumber(feedId);
 		if(likeNumber == null) {
 			likeNumber = likeRepository.countByFeedId(feedId);
-			likeNumberCacheRepository.setInitialLikeNumber(likeNumber);
+			likeNumberCacheRepository.setLikeNumber(feed.getId(), likeNumber);
 		}
 
 		return FeedResponse.from(
