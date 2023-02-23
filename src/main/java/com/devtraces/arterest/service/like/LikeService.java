@@ -57,7 +57,8 @@ public class LikeService {
         Long userId, Long feedId, int page, int pageSize
     ) {
         PageRequest pageRequest = PageRequest.of(page, pageSize);
-        List<Long> likedUserIdList = likeRepository.findAllByFeedId(feedId, pageRequest)
+        List<Long> likedUserIdList = likeRepository
+            .findAllByFeedIdOrderByCreatedAtDesc(feedId, pageRequest)
             .getContent().stream().map(Likes::getUserId).collect(Collectors.toList());
 
         return userRepository.findAllByIdIn(likedUserIdList).stream().map(LikeResponse::from)

@@ -12,7 +12,7 @@ public interface LikeRepository extends JpaRepository<Likes, Long> {
     // 특정 유저가 좋아요를 누른 피드들의 주키 번호를 찾아내기 위한 쿼리
     List<Likes> findAllByUserId(Long userId);
 
-    Slice<Likes> findAllByFeedId(Long feedId, PageRequest pageRequest);
+    Slice<Likes> findAllByFeedIdOrderByCreatedAtDesc(Long feedId, PageRequest pageRequest);
 
     Long countByFeedId(Long feedId);
 
