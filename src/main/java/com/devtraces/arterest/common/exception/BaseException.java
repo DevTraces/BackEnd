@@ -35,6 +35,7 @@ public class BaseException extends RuntimeException {
 	public static final BaseException FOLLOW_LIMIT_EXCEED = new BaseException(ErrorCode.FOLLOW_LIMIT_EXCEED);
 	public static final BaseException FOLLOWING_SELF_NOT_ALLOWED = new BaseException(ErrorCode.FOLLOWING_SELF_NOT_ALLOWED);
 	public static final BaseException DUPLICATED_FOLLOW_OR_LIKE = new BaseException(ErrorCode.DUPLICATED_FOLLOW_OR_LIKE);
+	public static final BaseException LIKE_NUMBER_BELLOW_ZERO = new BaseException(ErrorCode.LIKE_NUMBER_BELLOW_ZERO);
 
 
 	private final ErrorCode errorCode;
