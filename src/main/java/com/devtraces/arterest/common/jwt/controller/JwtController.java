@@ -9,6 +9,8 @@ import com.devtraces.arterest.common.response.ApiSuccessResponse;
 import java.util.HashMap;
 
 import com.devtraces.arterest.controller.auth.dto.TokenWithNicknameDto;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -27,7 +29,18 @@ public class JwtController {
 	@PostMapping("/reissue")
 	public ResponseEntity<ApiSuccessResponse<?>> reissue(
 		@RequestHeader("authorization") String bearerToken,
-		@CookieValue("refreshToken") String refreshToken) {
+		HttpServletRequest req
+	) {
+
+		Cookie[] cookies = req.getCookies();
+
+		String refreshToken = "";
+		for (Cookie cookie : cookies) {
+			if(cookie.getName().equals("refreshToken")){
+				refreshToken = cookie.getValue();
+			}
+		}
+
 		TokenWithNicknameDto dto = jwtService.reissue(bearerToken, refreshToken);
 
 		HashMap hashMap = new HashMap();
