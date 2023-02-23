@@ -97,7 +97,7 @@ public class OauthService {
     }
 
     // 카카오 서버로부터 받은 정보 파싱
-    private static UserInfoFromKakaoDto parseResponseToJson(String result
+    private UserInfoFromKakaoDto parseResponseToJson(String result
     ) throws IOException {
 
         // Gson 라이브러리로 JSON 파싱
@@ -121,15 +121,26 @@ public class OauthService {
         if(hasEmail && jsonEmailElement != null) {
             email = jsonEmailElement.getAsString();
         }
-
+        
         return UserInfoFromKakaoDto.builder()
                 .kakaoUserId(kakaoUserId)
                 .email(email)
-                .username(nickname)
-                .nickname(nickname)
+                .username(nickname) // 카카오에서 nickname을 username으로 사용하기로 함
+                .nickname(generateRandomNickname())
                 .profileImageUrl(profileImageUrl)
                 .description("나에 대한 설명을 추가해주세요!")
                 .build();
+    }
+
+    private String generateRandomNickname() {
+        String randomNickname = "";
+        do {
+            for (int i = 0; i < 30; i++) {
+                randomNickname += (char) ((int) (Math.random() * 25) + 97);
+            }
+        } while (userRepository.existsByNickname(randomNickname));
+
+        return randomNickname;
     }
 
     private User getSavedUser(UserInfoFromKakaoDto userInfoFromKakaoDto, long kakaoUserId) {
