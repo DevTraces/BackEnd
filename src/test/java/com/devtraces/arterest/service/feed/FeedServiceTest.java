@@ -23,7 +23,6 @@ import com.devtraces.arterest.model.likecache.LikeNumberCacheRepository;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -268,7 +267,10 @@ class FeedServiceTest {
         imageFileList.add(multipartFile);
 
         List<String> imageUrlListToKeep = new ArrayList<>();
-        imageUrlListToKeep.add("existingUrlDto,1");
+        imageUrlListToKeep.add("existingUrlDto");
+
+        List<String> indexList = new ArrayList<>();
+        indexList.add("0");
 
         User user = User.builder()
             .id(1L)
@@ -301,7 +303,7 @@ class FeedServiceTest {
         given(feedRepository.save(any())).willReturn(feed);
 
         // when
-        feedService.updateFeed(1L, content, imageFileList, hashtagList,  imageUrlListToKeep, 1L);
+        feedService.updateFeed(1L, content, imageFileList, hashtagList,  imageUrlListToKeep, indexList, 1L);
 
         // then
         verify(feedRepository, times(1)).findById(1L);
@@ -329,6 +331,9 @@ class FeedServiceTest {
 
         List<String> imageUrlListToKeep = new ArrayList<>();
         imageUrlListToKeep.add("existingUrlDto,1");
+
+        List<String> indexList = new ArrayList<>();
+        indexList.add("0");
 
         User user = User.builder()
             .id(1L)
@@ -362,7 +367,7 @@ class FeedServiceTest {
         given(feedRepository.save(any())).willReturn(feed);
 
         // when
-        feedService.updateFeed(1L, content, imageFileList, hashtagList, imageUrlListToKeep, 1L);
+        feedService.updateFeed(1L, content, imageFileList, hashtagList, imageUrlListToKeep, indexList, 1L);
 
         // then
         verify(feedRepository, times(1)).findById(1L);
@@ -397,7 +402,7 @@ class FeedServiceTest {
         // when
         BaseException exception = assertThrows(
             BaseException.class ,
-            () -> feedService.updateFeed(1L, content, imageFileList, hashtagList, null, 1L)
+            () -> feedService.updateFeed(1L, content, imageFileList, hashtagList, null, null, 1L)
         );
 
         // then
@@ -423,7 +428,7 @@ class FeedServiceTest {
         // when
         BaseException exception = assertThrows(
             BaseException.class ,
-            () -> feedService.updateFeed(1L, content, imageFileList, hashtagList, null, 1L)
+            () -> feedService.updateFeed(1L, content, imageFileList, hashtagList, null, null, 1L)
         );
 
         // then
@@ -451,10 +456,13 @@ class FeedServiceTest {
             prevImageInfoList.add("imageUrl" + i);
         }
 
+        List<String> indexList = new ArrayList<>();
+        indexList.add("0");
+
         // when
         BaseException exception = assertThrows(
             BaseException.class ,
-            () -> feedService.updateFeed(1L, content, imageFileList, hashtagList, prevImageInfoList, 1L)
+            () -> feedService.updateFeed(1L, content, imageFileList, hashtagList, prevImageInfoList, indexList, 1L)
         );
 
         // then
@@ -480,7 +488,7 @@ class FeedServiceTest {
         // when
         BaseException exception = assertThrows(
             BaseException.class ,
-            () -> feedService.updateFeed(1L, content, imageFileList, hashtagList, null, 1L)
+            () -> feedService.updateFeed(1L, content, imageFileList, hashtagList, null, null, 1L)
         );
 
         // then
@@ -515,118 +523,7 @@ class FeedServiceTest {
         // when
         BaseException exception = assertThrows(
             BaseException.class ,
-            () -> feedService.updateFeed(1L, content, imageFileList, hashtagList, null, 1L)
-        );
-
-        // then
-        assertEquals(ErrorCode.USER_INFO_NOT_MATCH, exception.getErrorCode());
-    }
-
-    @Test
-    @DisplayName("피드 1개 제거")
-    void successDeleteFeed(){
-        // given
-        User user = User.builder()
-            .id(1L)
-            .build();
-
-        Rereply rereply = Rereply.builder()
-            .id(1L)
-            .build();
-
-        Reply reply = Reply.builder()
-            .id(1L)
-            .rereplyList(new ArrayList<>())
-            .build();
-        reply.getRereplyList().add(rereply);
-
-        Feed feed = Feed.builder()
-            .id(1L)
-            .replyList(new ArrayList<>())
-            .user(user)
-            .imageUrls("imageUrl,")
-            .build();
-        feed.getReplyList().add(reply);
-
-        Hashtag hashtag = Hashtag.builder()
-            .id(1L)
-            .hashtagString("hashtag").build();
-
-        FeedHashtagMap feedHashtagMap = FeedHashtagMap.builder()
-            .feed(feed)
-            .hashtag(hashtag)
-            .build();
-
-        List<FeedHashtagMap> feedHashtagMapList = new ArrayList<>();
-        feedHashtagMapList.add(feedHashtagMap);
-
-        given(feedRepository.findById(anyLong())).willReturn(Optional.of(feed));
-        given(feedHashtagMapRepository.findByFeed(any())).willReturn(feedHashtagMapList);
-        given(feedHashtagMapRepository.existsByHashtag(any())).willReturn(false);
-
-        doNothing().when(s3Service).deleteImage(anyString());
-        doNothing().when(feedHashtagMapRepository).deleteAllByFeedId(anyLong());
-        doNothing().when(hashtagRepository).deleteById(anyLong());
-        doNothing().when(likeNumberCacheRepository).deleteLikeNumberInfo(anyLong());
-        doNothing().when(likeRepository).deleteAllByFeedId(anyLong());
-        doNothing().when(bookmarkRepository).deleteAllByFeedId(anyLong());
-        doNothing().when(rereplyRepository).deleteAllByIdIn(anyList());
-        doNothing().when(replyRepository).deleteAllByIdIn(anyList());
-        doNothing().when(feedRepository).deleteById(anyLong());
-
-        // when
-        feedDeleteService.deleteFeed(1L, 1L);
-
-        List<Long> longList = new ArrayList<>();
-        longList.add(1L);
-
-        // then
-        verify(s3Service, times(1)).deleteImage("imageUrl");
-        verify(feedHashtagMapRepository, times(1)).deleteAllByFeedId(1L);
-        verify(hashtagRepository, times(1)).deleteById(1L);
-        verify(likeNumberCacheRepository, times(1)).deleteLikeNumberInfo(1L);
-        verify(likeRepository, times(1)).deleteAllByFeedId(1L);
-        verify(bookmarkRepository, times(1)).deleteAllByFeedId(1L);
-        verify(rereplyRepository, times(1)).deleteAllByIdIn(longList);
-        verify(replyRepository, times(1)).deleteAllByIdIn(longList);
-        verify(feedRepository).deleteById(anyLong());
-    }
-
-    @Test
-    @DisplayName("게시물 삭제 실패 - 삭제 대상 게시물을 찾을 수 없음.")
-    void failedDeleteFeedFeedNotFound(){
-        // given
-        given(feedRepository.findById(anyLong())).willReturn(Optional.empty());
-
-        // when
-        BaseException exception = assertThrows(
-            BaseException.class ,
-            () -> feedDeleteService.deleteFeed(1L, 1L)
-        );
-
-        // then
-        assertEquals(ErrorCode.FEED_NOT_FOUND, exception.getErrorCode());
-    }
-
-    @Test
-    @DisplayName("게시물 삭제 실패 - 유저 정보가 게시물 작성자 정보와 일치하지 않음.")
-    void failedDeleteFeedUserInfoNotMatch(){
-        // given
-        User user = User.builder()
-            .id(2L)
-            .build();
-
-        Feed feed = Feed.builder()
-            .id(1L)
-            .user(user)
-            .build();
-
-        given(feedRepository.findById(anyLong())).willReturn(Optional.of(feed));
-
-        // when
-        BaseException exception = assertThrows(
-            BaseException.class ,
-            () -> feedDeleteService.deleteFeed(1L, 1L)
+            () -> feedService.updateFeed(1L, content, imageFileList, hashtagList, null, null, 1L)
         );
 
         // then
