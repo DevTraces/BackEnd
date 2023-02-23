@@ -1,7 +1,7 @@
 package com.devtraces.arterest.common.constant;
 
 public class CommonConstant {
-
+    //
     public static final int CONTENT_LENGTH_LIMIT = 1000;
     public static final int FOLLOW_COUNT_LIMIT = 5000;
     public static final int HASHTAG_COUNT_LIMIT = 10;

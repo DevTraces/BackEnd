@@ -1,5 +1,7 @@
 package com.devtraces.arterest.service.auth;
 
+import com.devtraces.arterest.common.exception.BaseException;
+import com.devtraces.arterest.common.jwt.dto.TokenDto;
 import com.devtraces.arterest.common.type.UserSignUpType;
 import com.devtraces.arterest.common.type.UserStatusType;
 import com.devtraces.arterest.common.jwt.JwtProvider;
@@ -28,36 +30,33 @@ public class OauthService {
 
     public TokenWithNicknameDto oauthKakaoSignIn(String accessTokenFromKakao) {
         // kakao 서버에 액세스 토큰 보낸 뒤 사용자 정보 가져오기
-        UserInfoFromKakaoDto userInfoFromKakaoDto = createKakaoUser(accessTokenFromKakao);
+        UserInfoFromKakaoDto userInfoFromKakaoDto =
+                createKakaoUser(accessTokenFromKakao);
 
-        // DB에 dto에서 kakaoUserId가 없는 사람만 회원가입 진행
-        long kakaoUserId = userInfoFromKakaoDto.getKakaoUserId();
-        Optional<User> optionalUser = userRepository.findByKakaoUserId(kakaoUserId);
-        if (!optionalUser.isPresent()) {
-            User savedUser = userRepository.save(User.builder()
-                    .kakaoUserId(userInfoFromKakaoDto.getKakaoUserId())
-                    .email(userInfoFromKakaoDto.getEmail())
-                    .username(userInfoFromKakaoDto.getUsername())
-                    .nickname(userInfoFromKakaoDto.getNickname())
-                    .profileImageUrl(userInfoFromKakaoDto.getProfileImageUrl())
-                    .description(userInfoFromKakaoDto.getDescription())
-                    .userStatus(UserStatusType.ACTIVE)
-                    .signupType(UserSignUpType.KAKAO_TALK)
-                    .build());
+        Optional<User> optionalUser =
+                userRepository.findByNickname(userInfoFromKakaoDto.getNickname());
 
+        // 닉네임 중복이고, EMAIL로 가입했으면 일반 회원가입한 회원이므로 예외처리
+        alreadySignUpUser(optionalUser);
 
-            return TokenWithNicknameDto.from(
-                    savedUser.getNickname(),
-                    jwtProvider.generateAccessTokenAndRefreshToken(savedUser.getId())
-            );
+        // 닉네임 중복이고, KAKAO_TALK으로 가입했으면 카카오 소셜 로그인
+        if (optionalUser.isPresent() &&
+                optionalUser.get().getSignupType().equals(UserSignUpType.KAKAO_TALK)
+        ) {
+            return createTokenWithNicknameDto(optionalUser.get());
         }
 
-        // 이미 회원가입한 사용자는 액세스, 리프레쉬 토큰 생성해서 응답
-        User user = optionalUser.get();
+        // 닉네임 중복이 아니고, kakaoUserId가 없는 사람만 회원가입 실행
+        long kakaoUserId = userInfoFromKakaoDto.getKakaoUserId();
+        if (!optionalUser.isPresent() &&
+                !userRepository.findByKakaoUserId(kakaoUserId).isPresent()
+        ) {
+            User savedUser = getSavedUser(userInfoFromKakaoDto, kakaoUserId);
 
-        return TokenWithNicknameDto.from(
-                user.getNickname(),
-                jwtProvider.generateAccessTokenAndRefreshToken(user.getId()));
+            return createTokenWithNicknameDto(savedUser);
+        }
+
+        return null;
     }
 
     // 카카오 서버로 요청하는 함수
@@ -131,5 +130,34 @@ public class OauthService {
                 .profileImageUrl(profileImageUrl)
                 .description("나에 대한 설명을 추가해주세요!")
                 .build();
+    }
+
+    private User getSavedUser(UserInfoFromKakaoDto userInfoFromKakaoDto, long kakaoUserId) {
+        User savedUser = userRepository.save(User.builder()
+                .kakaoUserId(kakaoUserId)
+                .email(userInfoFromKakaoDto.getEmail())
+                .username(userInfoFromKakaoDto.getUsername())
+                .nickname(userInfoFromKakaoDto.getNickname())
+                .profileImageUrl(userInfoFromKakaoDto.getProfileImageUrl())
+                .description(userInfoFromKakaoDto.getDescription())
+                .userStatus(UserStatusType.ACTIVE)
+                .signupType(UserSignUpType.KAKAO_TALK)
+                .build());
+        return savedUser;
+    }
+
+    private TokenWithNicknameDto createTokenWithNicknameDto(User user) {
+        return TokenWithNicknameDto.from(
+                user.getNickname(),
+                jwtProvider.generateAccessTokenAndRefreshToken(user.getId())
+        );
+    }
+
+    private static void alreadySignUpUser(Optional<User> optionalUser) {
+        if (optionalUser.isPresent() &&
+                optionalUser.get().getSignupType().equals(UserSignUpType.EMAIL)
+        ) {
+            throw BaseException.ALREADY_EXIST_USER;
+        }
     }
 }

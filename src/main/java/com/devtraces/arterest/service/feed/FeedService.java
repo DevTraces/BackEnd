@@ -35,25 +35,21 @@ public class FeedService {
     private final HashtagRepository hashtagRepository;
     private final FeedHashtagMapRepository feedHashtagMapRepository;
 
+    private final FeedDeleteService feedDeleteService;
+
     @Transactional
     public FeedCreateResponse createFeed(
         Long userId, String content, List<MultipartFile> imageFileList, List<String> hashtagList
     ) {
         // 게시물 텍스트 없이 사진 또는 해시태그만 게시물로서 올리고 싶은 유저가 분명 있을 것이므로,
         // content가 빈 스트링인 것에 대해서도 받아들인다.
-        if(content.length() > CommonConstant.CONTENT_LENGTH_LIMIT){
-            throw BaseException.CONTENT_LIMIT_EXCEED;
-        }
-        if(hashtagList != null && hashtagList.size() > CommonConstant.HASHTAG_COUNT_LIMIT){
-            throw BaseException.HASHTAG_LIMIT_EXCEED;
-        }
+        validateContentAndHashtagList(content, hashtagList);
         if(imageFileList != null && imageFileList.size() > CommonConstant.IMAGE_FILE_COUNT_LIMIT){
             throw BaseException.IMAGE_FILE_COUNT_LIMIT_EXCEED;
         }
         User authorUser = userRepository.findById(userId).orElseThrow(
             () -> BaseException.USER_NOT_FOUND
         );
-
         // 유저가 올린 이미지가 없을 경우, imageUrlBuilder는 toString하면 "" 이렇게 빈 문자열 된다.
         StringBuilder imageUrlBuilder = new StringBuilder();
         if(imageFileList != null){
@@ -62,7 +58,6 @@ public class FeedService {
                 imageUrlBuilder.append(',');
             }
         }
-
         // 유저가 올린 이미지가 없을 경우, 최종적으로 프런트엔드가 받는 JSON에서는
         // "imageUrls" : null이 리턴된다.
         Feed newFeed = feedRepository.save(
@@ -72,7 +67,6 @@ public class FeedService {
                 .user(authorUser)
                 .build()
         );
-
         // 입력 받은 해시태그 값들을 순회하면서 새로 저장해야 하는 것은 저장하고, 이미 찾을 수 있는 것은 찾아내서
         // FeedHashtagMap에 저장한다.
         // FeedHashtagMap 엔티티를 빌드하기 위해서는 Feed 엔티티와 Hashtag 엔티티 모두가 필요하다.
@@ -93,11 +87,9 @@ public class FeedService {
                 );
             }
         }
-
         // 새로 만들어진 게시물이므로, 좋아요 개수를 레디스에 0으로 캐시 해둔다.
         // 레디스가 다운되어도 게시물 저장 로직 전체가 취소 및 롤백되지 않고 그대로 완료 된다.
         likeNumberCacheRepository.setInitialLikeNumber(newFeed.getId());
-
         return FeedCreateResponse.from(newFeed, 0L, hashtagList);
     }
 
@@ -107,18 +99,10 @@ public class FeedService {
         List<MultipartFile> imageFileList,
         List<String> hashtagList,
         List<String> prevImageUrlList,
+        List<String> indexList,
         Long feedId
     ) {
-        if(
-            content != null && content.length() > CommonConstant.CONTENT_LENGTH_LIMIT
-        ){
-            throw BaseException.CONTENT_LIMIT_EXCEED;
-        }
-        if(
-            hashtagList != null && hashtagList.size() > CommonConstant.HASHTAG_COUNT_LIMIT
-        ){
-            throw BaseException.HASHTAG_LIMIT_EXCEED;
-        }
+        validateContentAndHashtagList(content, hashtagList);
         if(
             imageFileList != null && prevImageUrlList != null &&
             imageFileList.size() + prevImageUrlList.size() > CommonConstant.IMAGE_FILE_COUNT_LIMIT
@@ -138,10 +122,9 @@ public class FeedService {
         Set<String> imagesToKeepSet = new HashSet<>();
         if(prevImageUrlList != null){
             for(String prevImageUrlInfo : prevImageUrlList){
-                imagesToKeepSet.add( prevImageUrlInfo.split(",")[0] );
+                imagesToKeepSet.add( prevImageUrlInfo );
             }
         }
-
         // 기존에 S3에 저장돼 있던 사진들 중 위에서 정의한 셋에 포함돼 있지 않는 이미지들을 삭제한다.
         if(!feed.getImageUrls().equals("")){
             for(String deleteTargetUrl : feed.getImageUrls().split(",")){
@@ -150,17 +133,13 @@ public class FeedService {
                 }
             }
         }
-
         // String 배열을 만든 후, 기존 이미지 url들을 정해진 인덱스에 맞게 넣어 둔다.
         int newImageFileCount = imageFileList == null ? 0 : imageFileList.size();
         int existingImageUrlCount = prevImageUrlList == null ? 0 : prevImageUrlList.size();
-
         String[] resultImageUrlArr = new String[newImageFileCount + existingImageUrlCount];
-
         if(existingImageUrlCount != 0){
-            for(String prevImageUrlInfo : prevImageUrlList){
-                String[] prevImageUrlInfoArr = prevImageUrlInfo.split(",");
-                resultImageUrlArr[Integer.parseInt(prevImageUrlInfoArr[1])] = prevImageUrlInfoArr[0];
+            for(int i=0; i<prevImageUrlList.size(); i++){
+                resultImageUrlArr[ Integer.parseInt(indexList.get(i)) ] = prevImageUrlList.get(i);
             }
         }
 
@@ -177,8 +156,14 @@ public class FeedService {
             }
         }
 
+        // 삭제될 FeedHashtagMap 데이터 목록을 가져옴.
+        List<FeedHashtagMap> feedHashtagMapList = feedHashtagMapRepository.findByFeed(feed);
+
         // 기존에 FeedHashtagMap 엔티티들을 전부 삭제한다.
         feedHashtagMapRepository.deleteAllByFeedId(feedId);
+
+        // 사용되지 않는 Hashtag 삭제.
+        feedDeleteService.deleteNotUsingHashtag(feedHashtagMapList);
 
         // 그 후 입력 받은 값에 따라서 새롭게 저장한다.
         if(hashtagList != null){
@@ -208,9 +193,7 @@ public class FeedService {
                 }
             }
         }
-
         feed.updateContent(content);
-
         // Feed 엔티티의 imageUrls 필드의 내용물을 수정할 때 사용할 문자열을 만들어 준다.
         StringBuilder imageUrlBuilder = new StringBuilder();
         if(resultImageUrlArr.length != 0){
@@ -219,11 +202,18 @@ public class FeedService {
                 imageUrlBuilder.append(',');
             }
         }
-
         feed.updateImageUrls(
             imageUrlBuilder.toString().equals("") ? null : imageUrlBuilder.toString()
         );
-
         return FeedUpdateResponse.from( feedRepository.save(feed), hashtagList, content );
+    }
+
+    private static void validateContentAndHashtagList(String content, List<String> hashtagList) {
+        if(content.length() > CommonConstant.CONTENT_LENGTH_LIMIT){
+            throw BaseException.CONTENT_LIMIT_EXCEED;
+        }
+        if(hashtagList != null && hashtagList.size() > CommonConstant.HASHTAG_COUNT_LIMIT){
+            throw BaseException.HASHTAG_LIMIT_EXCEED;
+        }
     }
 }

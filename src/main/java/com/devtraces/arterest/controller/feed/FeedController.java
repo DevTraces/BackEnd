@@ -44,10 +44,13 @@ public class FeedController {
     @GetMapping("/list/{nickname}")
     public ApiSuccessResponse<List<FeedResponse>> getFeedList(
         @AuthenticationPrincipal Long userId,
+        @PathVariable String nickname,
         @RequestParam int page,
         @RequestParam(required = false, defaultValue = "10") int pageSize
     ){
-        return ApiSuccessResponse.from(feedreadService.getFeedResponseList(userId, page, pageSize));
+        return ApiSuccessResponse.from(
+            feedreadService.getFeedResponseList(userId, nickname, page, pageSize)
+        );
     }
 
     @GetMapping("/{feedId}")
@@ -57,17 +60,20 @@ public class FeedController {
         return ApiSuccessResponse.from(feedreadService.getOneFeed(userId, feedId));
     }
 
-    @PutMapping("/{feedId}")
+    @PostMapping("/{feedId}")
     public ApiSuccessResponse<FeedUpdateResponse> updateFeed(
         @AuthenticationPrincipal Long userId,
         @RequestParam("content") String content,
         @RequestParam(value = "imageFiles", required = false) List<MultipartFile> imageFileList,
         @RequestParam(value = "hashtags", required = false) List<String> hashtagList,
-        @RequestParam(value = "prevImageUrlList", required = false) List<String> prevImageUrlList,
+        @RequestParam(value = "existingUrlList", required = false) List<String> prevImageUrlList,
+        @RequestParam(value = "indexList", required = false) List<String> indexList,
         @PathVariable Long feedId
     ){
         return ApiSuccessResponse.from(
-            feedService.updateFeed(userId, content, imageFileList, hashtagList, prevImageUrlList, feedId)
+            feedService.updateFeed(
+                userId, content, imageFileList, hashtagList, prevImageUrlList, indexList, feedId
+            )
         );
     }
 

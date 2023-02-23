@@ -1,5 +1,7 @@
 package com.devtraces.arterest.service.auth.util;
 
+import static com.devtraces.arterest.common.jwt.JwtProvider.REFRESH_TOKEN_SUBJECT_PREFIX;
+
 import java.time.Duration;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +13,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Service
 public class TokenRedisUtil {
-	private static final String REFRESH_TOKEN_PREFIX = "RT:";
 	private static final String ACCESS_TOKEN_BLACK_LIST_PREFIX = "AT-BL:";
 
 	private final RedisTemplate<String, String> redisTemplate;
@@ -24,7 +25,7 @@ public class TokenRedisUtil {
 		if (expirationSeconds > 0) {
 			ValueOperations<String, String> values = redisTemplate.opsForValue();
 			values.set(
-				REFRESH_TOKEN_PREFIX + userId,
+				REFRESH_TOKEN_SUBJECT_PREFIX + userId,
 				passwordEncoder.encode(refreshToken),
 				Duration.ofDays(expirationSeconds));
 		}
@@ -32,12 +33,12 @@ public class TokenRedisUtil {
 
 	public boolean hasSameRefreshToken(long userId, String refreshToken) {
 		ValueOperations<String, String> values = redisTemplate.opsForValue();
-		String encodingRefreshToken = values.get(REFRESH_TOKEN_PREFIX + userId);
+		String encodingRefreshToken = values.get(REFRESH_TOKEN_SUBJECT_PREFIX + userId);
 		return passwordEncoder.matches(refreshToken, encodingRefreshToken);
 	}
 
 	public void deleteRefreshTokenBy(long userId) {
-		redisTemplate.delete(REFRESH_TOKEN_PREFIX + userId);
+		redisTemplate.delete(REFRESH_TOKEN_SUBJECT_PREFIX + userId);
 	}
 
 	// 블랙리스트에 해당 토큰이 등록되었는지 확인하기 위해 accessToken을 key로 지정

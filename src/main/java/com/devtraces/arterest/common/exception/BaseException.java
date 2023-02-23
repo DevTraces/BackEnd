@@ -35,9 +35,10 @@ public class BaseException extends RuntimeException {
 	public static final BaseException FOLLOW_LIMIT_EXCEED = new BaseException(ErrorCode.FOLLOW_LIMIT_EXCEED);
 	public static final BaseException FOLLOWING_SELF_NOT_ALLOWED = new BaseException(ErrorCode.FOLLOWING_SELF_NOT_ALLOWED);
 	public static final BaseException DUPLICATED_FOLLOW_OR_LIKE = new BaseException(ErrorCode.DUPLICATED_FOLLOW_OR_LIKE);
+  public static final BaseException ALREADY_EXIST_USER = new BaseException(ErrorCode.ALREADY_EXIST_USER);
 
 
-	private final ErrorCode errorCode;
+    private final ErrorCode errorCode;
 
 	// 의도적인 예외이므로 stack trace 제거 (불필요한 예외처리 비용 제거)
 	@Override

@@ -16,8 +16,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	Boolean existsByNickname(String email);
 	Optional<User> findByEmail(String email);
 	Optional<User> findByNickname(String nickname);
-	Page<User> findByUsername(String username, Pageable pageable);
-	Page<User> findByNickname(String nickname, Pageable pageable);
+	Page<User> findByUsernameStartsWith(String username, Pageable pageable);
+	Page<User> findByNicknameStartsWith(String nickname, Pageable pageable);
 	Optional<User> findByKakaoUserId(long kakaoUserId);
 
 	Slice<User> findAllByIdIn(Collection<Long> idList, PageRequest pageRequest);
