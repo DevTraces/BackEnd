@@ -58,6 +58,7 @@ public class LikeService {
     }
 
     // TODO : AuthenticationPrincipal userId가 실제 좋아요 누른 유저 리스트 가져오기 API에서 사용되지 않음.
+    @Transactional(readOnly = true)
     public List<LikeResponse> getLikedUserList(
         Long userId, Long feedId, int page, int pageSize
     ) {
