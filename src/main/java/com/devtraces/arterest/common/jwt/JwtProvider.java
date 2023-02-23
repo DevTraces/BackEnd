@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class JwtProvider {
 
-	protected static final String REFRESH_TOKEN_SUBJECT_PREFIX = "refresh:";
+	public static final String REFRESH_TOKEN_SUBJECT_PREFIX = "refresh:";
 
 	private final UserDetailsService userDetailsService;
 	private final TokenRedisUtil tokenRedisUtil;
@@ -59,7 +59,7 @@ public class JwtProvider {
 
 		Date refreshTokenExpiredIn = new Date(now.getTime() + REFRESH_TOKEN_EXPIRATION_TIME);
 		String refreshToken = Jwts.builder()
-			.setSubject(REFRESH_TOKEN_SUBJECT_PREFIX + userId)	// refresh token으로 인증인가할 수 없도록 PREFIX 설정
+			.setSubject(REFRESH_TOKEN_SUBJECT_PREFIX + userId)
 			.setIssuedAt(now)
 			.setExpiration(refreshTokenExpiredIn)
 			.signWith(secretKey, SignatureAlgorithm.HS256)

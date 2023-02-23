@@ -26,9 +26,9 @@ public class JwtController {
 
 	@PostMapping("/reissue")
 	public ResponseEntity<ApiSuccessResponse<?>> reissue(
-		@RequestHeader("accessToken") String accessToken,
+		@RequestHeader("authorization") String bearerToken,
 		@CookieValue("refreshToken") String refreshToken) {
-		TokenWithNicknameDto dto = jwtService.reissue(accessToken, refreshToken);
+		TokenWithNicknameDto dto = jwtService.reissue(bearerToken, refreshToken);
 
 		HashMap hashMap = new HashMap();
 		hashMap.put(ACCESS_TOKEN_PREFIX, TOKEN_PREFIX + " " + dto.getAccessToken());

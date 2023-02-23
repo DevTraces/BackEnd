@@ -53,8 +53,7 @@ public class SecurityConfiguration {
 			.authorizeRequests()
 			.antMatchers("/api/auth/sign-up", "/api/auth/email/auth-key",
 				"/api/auth/email/auth-key/check", "/api/auth/sign-in",
-				"/api/oauth/kakao/callback", "/api/auth/password/check",
-				"/api/auth/sign-out", "/api/auth/withdrawal",
+				"/api/oauth/kakao/callback", "/api/auth/password/check", "/api/auth/withdrawal",
 				"/api/users/email/**", "/api/users/nickname/**",
 				"/api/users/password", "/api/tokens/reissue",
 				"/v2/api-docs", "/swagger-resources",
