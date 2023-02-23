@@ -12,6 +12,7 @@ import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,7 +27,10 @@ import org.hibernate.envers.AuditOverride;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AuditOverride(forClass = BaseEntity.class)
-@Table(name = "follow", indexes = @Index(name = "following_id_index", columnList = "following_id"))
+@Table(
+    name = "follow", indexes = @Index(name = "following_id_index", columnList = "following_id"),
+    uniqueConstraints = @UniqueConstraint(columnNames = { "user_id", "following_id" })
+)
 @Entity
 public class Follow extends BaseEntity {
 

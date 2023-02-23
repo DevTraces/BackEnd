@@ -40,6 +40,10 @@ public class FollowService {
             throw BaseException.FOLLOWING_SELF_NOT_ALLOWED;
         }
 
+        if(followRepository.existsByUserIdAndFollowingId(userId, followingUser.getId())){
+            throw BaseException.DUPLICATED_FOLLOW_OR_LIKE;
+        }
+
         // 유저 엔티티와 팔로우 엔티티는 1:N 관계이므로,
         // 유저 엔티티에는 [그 유저가 팔로우한 다른 유저의 주키 아이디 값을 저장하고 있는 팔로우 엔티티] 리스트가 저장됨.
         // 따라서 특정 유저를 찾아내면 그 유저가 팔로우 하고 있는 다른 유저들의 주키 아이디 값도 얻을 수 있음.
