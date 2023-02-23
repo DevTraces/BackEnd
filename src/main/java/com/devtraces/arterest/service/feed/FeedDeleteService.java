@@ -57,13 +57,8 @@ public class FeedDeleteService {
 		// FeedHashtagMap 테이블에서 관련 정보 모두 삭제.
 		feedHashtagMapRepository.deleteAllByFeedId(feedId);
 
-		// 삭제된 FeedHashtagMap의 feedId에 매핑된 hashtagId가 더이상 FeedHashtagMap에 존재하지 않을 경우,
-		// 해당 hastagId를 Hashtag 테이블에서 삭제함.
-		for (FeedHashtagMap feedHashtagMap : feedHashtagMapList) {
-			if(!feedHashtagMapRepository.existsByHashtag(feedHashtagMap.getHashtag())){
-				hashtagRepository.deleteById(feedHashtagMap.getHashtag().getId());
-			}
-		}
+		// 사용되지 않는 Hashtag 삭제.
+		deleteNotUsingHashtag(feedHashtagMapList);
 
 		// 레디스에서 좋아요 개수 기록한 키-밸류 쌍 삭제.
 		likeNumberCacheRepository.deleteLikeNumberInfo(feedId);
@@ -91,5 +86,15 @@ public class FeedDeleteService {
 
 		// 피드 삭제.
 		feedRepository.deleteById(feedId);
+	}
+
+	void deleteNotUsingHashtag(List<FeedHashtagMap> feedHashtagMapList){
+		// 삭제된 FeedHashtagMap의 feedId에 매핑된 hashtagId가 더이상 FeedHashtagMap에 존재하지 않을 경우,
+		// 해당 hastagId를 Hashtag 테이블에서 삭제함.
+		for (FeedHashtagMap feedHashtagMap : feedHashtagMapList) {
+			if(!feedHashtagMapRepository.existsByHashtag(feedHashtagMap.getHashtag())){
+				hashtagRepository.deleteById(feedHashtagMap.getHashtag().getId());
+			}
+		}
 	}
 }

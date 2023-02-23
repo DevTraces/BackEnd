@@ -14,7 +14,6 @@ import com.devtraces.arterest.model.likecache.LikeNumberCacheRepository;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
 import com.devtraces.arterest.service.s3.S3Service;
-import com.google.gson.Gson;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -36,7 +35,7 @@ public class FeedService {
     private final HashtagRepository hashtagRepository;
     private final FeedHashtagMapRepository feedHashtagMapRepository;
 
-    private final Gson gson;
+    private final FeedDeleteService feedDeleteService;
 
     @Transactional
     public FeedCreateResponse createFeed(
@@ -156,8 +155,16 @@ public class FeedService {
                 }
             }
         }
+
+        // 삭제될 FeedHashtagMap 데이터 목록을 가져옴.
+        List<FeedHashtagMap> feedHashtagMapList = feedHashtagMapRepository.findByFeed(feed);
+
         // 기존에 FeedHashtagMap 엔티티들을 전부 삭제한다.
         feedHashtagMapRepository.deleteAllByFeedId(feedId);
+
+        // 사용되지 않는 Hashtag 삭제.
+        feedDeleteService.deleteNotUsingHashtag(feedHashtagMapList);
+
         // 그 후 입력 받은 값에 따라서 새롭게 저장한다.
         if(hashtagList != null){
             for(String hashtagInputString : hashtagList){
