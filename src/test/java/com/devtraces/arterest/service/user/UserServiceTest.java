@@ -1,5 +1,7 @@
 package com.devtraces.arterest.service.user;
 
+import com.devtraces.arterest.model.follow.Follow;
+import com.devtraces.arterest.model.follow.FollowRepository;
 import com.devtraces.arterest.service.s3.S3Service;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.controller.user.dto.response.EmailCheckResponse;
@@ -19,6 +21,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 import static com.devtraces.arterest.common.exception.ErrorCode.*;
@@ -35,6 +38,8 @@ class UserServiceTest {
     private UserRepository userRepository;
     @Mock
     private FeedRepository feedRepository;
+    @Mock
+    private FollowRepository followRepository;
     @Mock
     private PasswordEncoder passwordEncoder;
     @Mock
@@ -146,25 +151,81 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("사용자 프로필 조회 성공")
-    void success_getProfileByNickname() {
+    @DisplayName("사용자 프로필 조회 성공 - 나를 팔로우하는 유저")
+    void success_getProfileByNickname_USER_FOLLOWING_ME() {
         //given
         String testNickname = "nickname";
         Integer totalFeedNumber = 1;
-        User user = User.builder().id(1L).nickname(testNickname).build();
+        int followerNumber = 0;
+        int followingNumber = 1;
+        int isFollowing = 0;
+        User targetUser = User.builder()
+                .id(2L)
+                .nickname(testNickname)
+                .followList(new ArrayList<>())
+                .build();
+        User user = User.builder()
+                .id(1L)
+                .build();
+        Follow follow = Follow.builder()
+                .id(1L)
+                .user(targetUser)
+                .followingId(2L)
+                .build();
+        targetUser.getFollowList().add(follow);
 
-        given(userRepository.findByNickname(anyString()))
-                .willReturn(Optional.of(user));
-        given(feedRepository.countAllByUserId(1L))
-                .willReturn(totalFeedNumber);
+        given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
+        given(userRepository.findByNickname(anyString())).willReturn(Optional.of(targetUser));
+        given(feedRepository.countAllByUserId(anyLong())).willReturn(totalFeedNumber);
+        given(followRepository.countAllByFollowingId(anyLong())).willReturn(followerNumber);
+        given(followRepository.isFollowing(anyLong(), anyLong())).willReturn(isFollowing);
 
         //when
         ProfileByNicknameResponse response =
-                userService.getProfileByNickname(testNickname);
+                userService.getProfileByNickname(user.getId(), testNickname);
 
         //then
         assertEquals(testNickname, response.getNickname());
         assertEquals(totalFeedNumber, response.getTotalFeedNumber());
+        assertEquals(followerNumber, response.getFollowerNumber());
+        assertEquals(followingNumber, response.getFollowingNumber());
+        assertEquals(false, response.getIsFollowing());
+    }
+
+    @Test
+    @DisplayName("사용자 프로필 조회 성공 - 내가 팔로우하는 유저")
+    void success_getProfileByNickname_USER_I_FOLLOW() {
+        //given
+        String testNickname = "nickname";
+        Integer totalFeedNumber = 1;
+        int followerNumber = 1;
+        int followingNumber = 0;
+        int isFollowing = 1;
+        User user = User.builder()
+                .id(2L)
+                .build();
+        User targetUser = User.builder()
+                .id(1L)
+                .nickname(testNickname)
+                .followList(new ArrayList<>())
+                .build();
+
+        given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
+        given(userRepository.findByNickname(anyString())).willReturn(Optional.of(targetUser));
+        given(feedRepository.countAllByUserId(anyLong())).willReturn(totalFeedNumber);
+        given(followRepository.countAllByFollowingId(anyLong())).willReturn(followerNumber);
+        given(followRepository.isFollowing(anyLong(), anyLong())).willReturn(isFollowing);
+
+        //when
+        ProfileByNicknameResponse response =
+                userService.getProfileByNickname(user.getId(), testNickname);
+
+        //then
+        assertEquals(testNickname, response.getNickname());
+        assertEquals(totalFeedNumber, response.getTotalFeedNumber());
+        assertEquals(followerNumber, response.getFollowerNumber());
+        assertEquals(followingNumber, response.getFollowingNumber());
+        assertEquals(true, response.getIsFollowing());
     }
 
     @Test
@@ -172,6 +233,10 @@ class UserServiceTest {
     void fail_getProfileByNickname_USER_NOT_FOUND() {
         //given
         String testNickname = "nickname";
+        User user = User.builder().id(1L).build();
+
+        given(userRepository.findById(anyLong()))
+                .willReturn(Optional.of(user));
         given(userRepository.findByNickname(anyString()))
                 .willReturn(Optional.empty());
 
@@ -179,7 +244,7 @@ class UserServiceTest {
         BaseException exception =
                 assertThrows(
                         BaseException.class,
-                        () -> userService.getProfileByNickname(testNickname)
+                        () -> userService.getProfileByNickname(user.getId(), testNickname)
                 );
 
         //then
