@@ -26,7 +26,7 @@ public class LikeService {
 
     @Transactional
     public void pressLikeOnFeed(Long userId, Long feedId) {
-        isFeedExists(feedId);
+        validateFeedExistence(feedId);
         // 유니크키 제약조건이 이미 Likes 테이블에 걸려 있지만, 이것만으로는
         // FE에 "중복 좋아요"라는 예외 메시지를 전달하지 못하고 그저 인터널 서버 에러라고만 뜸.
         // TODO 중복 좋아요 및 팔로우에 대한 적절한 예외처리 방법 결정후 수정 필요.
@@ -47,7 +47,7 @@ public class LikeService {
     // TODO 좋아요 취소에 대해서는 따로 알림을 보낼 필요가 없다고 생각됨.
     @Transactional
     public void cancelLikeOnFeed(Long userId, Long feedId) {
-        isFeedExists(feedId);
+        validateFeedExistence(feedId);
         Long prevLikeNumber = likeNumberCacheRepository.getFeedLikeNumber(feedId);
         if (prevLikeNumber == null) { prevLikeNumber = likeRepository.countByFeedId(feedId); }
         if (prevLikeNumber.equals(0L)) { throw BaseException.LIKE_NUMBER_BELLOW_ZERO; }
@@ -62,7 +62,7 @@ public class LikeService {
     public List<LikeResponse> getLikedUserList(
         Long userId, Long feedId, int page, int pageSize
     ) {
-        isFeedExists(feedId);
+        validateFeedExistence(feedId);
         PageRequest pageRequest = PageRequest.of(page, pageSize);
         List<Long> likedUserIdList = likeRepository
             .findAllByFeedIdOrderByCreatedAtDesc(feedId, pageRequest)
@@ -77,7 +77,7 @@ public class LikeService {
         return linkedList;
     }
 
-    private void isFeedExists(Long feedId) {
+    private void validateFeedExistence(Long feedId) {
         if(!feedRepository.existsById(feedId)){
             throw BaseException.FEED_NOT_FOUND;
         }
