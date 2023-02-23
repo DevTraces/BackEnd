@@ -15,7 +15,6 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
 
     Integer countAllByFollowingId(Long followingId);
 
-
     @Query(
             nativeQuery = true,
             value = "select count(*) " +
@@ -23,4 +22,6 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
                     "where f.user_id = :userId and f.following_id = :followingId"
     )
     int isFollowing(Long userId, Long followingId);
+    
+    boolean existsByUserIdAndFollowingId(Long user_id, Long followingId);
 }

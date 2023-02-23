@@ -62,6 +62,7 @@ class FollowServiceTest {
 
         given(userRepository.findById(1L)).willReturn(Optional.of(requestedUser));
         given(userRepository.findByNickname(anyString())).willReturn(Optional.of(targetUser));
+        given(followRepository.existsByUserIdAndFollowingId(anyLong(), anyLong())).willReturn(false);
         given(followRepository.save(any())).willReturn(followEntity);
 
         // when
@@ -70,6 +71,7 @@ class FollowServiceTest {
         // then
         verify(userRepository, times(1)).findById(anyLong());
         verify(userRepository, times(1)).findByNickname(anyString());
+        verify(followRepository, times(1)).existsByUserIdAndFollowingId(1L, 2L);
         verify(followRepository, times(1)).save(any());
     }
 
@@ -136,6 +138,34 @@ class FollowServiceTest {
 
         // then
         assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("팔로우 관계 추가 실패 - 이미 팔로우한 사람 또 팔로우하려 함")
+    void failedCreateFollowRelationDuplicatedFollowRequest(){
+        // given
+        User requestedUser = User.builder()
+            .id(1L)
+            .followList(new ArrayList<>())
+            .build();
+
+        User targetUser = User.builder()
+            .id(2L)
+            .nickname("two")
+            .build();
+
+        given(userRepository.findById(anyLong())).willReturn(Optional.of(requestedUser));
+        given(userRepository.findByNickname(anyString())).willReturn(Optional.of(targetUser));
+        given(followRepository.existsByUserIdAndFollowingId(anyLong(), anyLong())).willReturn(true);
+
+        // when
+        BaseException exception = assertThrows(
+            BaseException.class ,
+            () -> followService.createFollowRelation(1L, "two")
+        );
+
+        // then
+        assertEquals(ErrorCode.DUPLICATED_FOLLOW_OR_LIKE, exception.getErrorCode());
     }
 
     @Test

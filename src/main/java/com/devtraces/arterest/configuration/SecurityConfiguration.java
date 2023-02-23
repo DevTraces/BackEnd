@@ -53,10 +53,13 @@ public class SecurityConfiguration {
 			.authorizeRequests()
 			.antMatchers("/api/auth/sign-up", "/api/auth/email/auth-key",
 				"/api/auth/email/auth-key/check", "/api/auth/sign-in",
-				"/api/oauth/kakao/callback", "/api/auth/password/check",
-				"/api/auth/sign-out", "/api/auth/withdrawal",
+				"/api/oauth/kakao/callback", "/api/auth/password/check", "/api/auth/withdrawal",
 				"/api/users/email/**", "/api/users/nickname/**",
-				"/api/users/password", "/api/tokens/reissue").permitAll()//.hasRole("USER")
+				"/api/users/password", "/api/tokens/reissue",
+				"/v2/api-docs", "/swagger-resources",
+				"/swagger-resources/**", "/configuration/ui",
+				"/configuration/security", "/swagger-ui.html",
+				"/swagger-ui.html/**", "/webjars/**").permitAll()//.hasRole("USER")
 			.anyRequest().authenticated(); // permitAll() 로 하면 JwtAuthenticationEntryPoint 동작안함
 
 		return http.build();
