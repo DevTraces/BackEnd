@@ -1,5 +1,7 @@
 package com.devtraces.arterest.service.auth;
 
+import com.devtraces.arterest.common.type.UserSignUpType;
+import com.devtraces.arterest.common.type.UserStatusType;
 import com.devtraces.arterest.service.auth.util.AuthRedisUtil;
 import com.devtraces.arterest.service.auth.util.TokenRedisUtil;
 import com.devtraces.arterest.service.s3.S3Service;
@@ -23,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @Service
@@ -39,32 +42,40 @@ public class AuthService {
 	private final UserRepository userRepository;
 
 	@Transactional
-	public UserRegistrationResponse register(UserRegistrationRequest request) {
-		uploadAndUpdateImageUrl(request);
-		validateRegistration(request);
+	public UserRegistrationResponse register(
+			String email, String password, String username,
+			String nickname, MultipartFile profileImage, String description
+	) {
+		validateRegistration(email, nickname);
 
-		String encodingPassword = passwordEncoder.encode(request.getPassword());
-		User user = request.toEntity(encodingPassword);
-		User savedUser = userRepository.save(user);
+		String profileImageUrl = "";
+		if (profileImage != null) {
+			profileImageUrl = s3Service.uploadImage(profileImage);
+		}
+
+		User savedUser = userRepository.save(User.builder()
+				.email(email)
+				.password(passwordEncoder.encode(password))
+				.username(username)
+				.nickname(nickname)
+				.profileImageUrl(profileImageUrl)
+				.description(description)
+				.signupType(UserSignUpType.EMAIL)
+				.userStatus(UserStatusType.ACTIVE)
+				.build());
+
 		return UserRegistrationResponse.from(savedUser);
 	}
 
-	private void uploadAndUpdateImageUrl(UserRegistrationRequest request) {
-		if (request.getProfileImage() != null) {
-			String profileImageUrl = s3Service.uploadImage(request.getProfileImage());
-			request.setProfileImageLink(profileImageUrl);
-		}
-	}
-
-	private void validateRegistration(UserRegistrationRequest request) {
-		if (authRedisUtil.notExistsAuthCompletedValue(request.getEmail())) {
+	private void validateRegistration(String email, String nickname) {
+		if (authRedisUtil.notExistsAuthCompletedValue(email)) {
 			throw BaseException.NOT_AUTHENTICATION_YET;
 		}
 
-		if (userRepository.existsByEmail(request.getEmail())) {
+		if (userRepository.existsByEmail(email)) {
 			throw BaseException.ALREADY_EXIST_EMAIL;
 		}
-		if (userRepository.existsByNickname(request.getNickname())) {
+		if (userRepository.existsByNickname(nickname)) {
 			throw BaseException.ALREADY_EXIST_NICKNAME;
 		}
 	}
