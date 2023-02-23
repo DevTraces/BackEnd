@@ -11,12 +11,10 @@ import com.devtraces.arterest.service.auth.AuthService;
 import com.devtraces.arterest.controller.auth.dto.TokenWithNicknameDto;
 import com.devtraces.arterest.service.auth.util.TokenRedisUtil;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-@Slf4j
 @RequiredArgsConstructor
 @Service
 public class JwtService {
@@ -27,27 +25,23 @@ public class JwtService {
 
 	@Transactional
 	public TokenWithNicknameDto reissue(String bearerToken, String refreshToken) {
-		log.error("check 3");
+
 		String accessToken = "";
 		if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(TOKEN_PREFIX)) {
 			accessToken = bearerToken.substring(TOKEN_PREFIX.length() + 1);
 		}
-		log.error("check 4");
 
 		Long userId = Long.parseLong(jwtProvider.getUserId(refreshToken)
 			.replace(REFRESH_TOKEN_SUBJECT_PREFIX, ""));
 		validateTokens(accessToken, refreshToken, userId);
 
-		log.error("check 5");
 		if (!tokenRedisUtil.hasSameRefreshToken(userId, refreshToken)) {
 			throw BaseException.EXPIRED_OR_PREVIOUS_REFRESH_TOKEN;
 		}
 
-		log.error("check 6");
 		User user = userRepository.findById(userId)
 				.orElseThrow(() -> BaseException.USER_NOT_FOUND);
 
-		log.error("check 7");
 		return TokenWithNicknameDto.from(
 				user.getNickname(),
 				jwtProvider.generateAccessTokenAndRefreshToken(userId)
