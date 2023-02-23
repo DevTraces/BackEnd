@@ -56,7 +56,7 @@ public class SecurityConfiguration {
 				"/api/oauth/kakao/callback", "/api/auth/password/check",
 				"/api/auth/sign-out", "/api/auth/withdrawal",
 				"/api/users/email/**", "/api/users/nickname/**",
-				"/api/users/password", "/api/tokens/reissue", "/make-testuser", "/api/follows/**").permitAll()//.hasRole("USER")
+				"/api/users/password", "/api/tokens/reissue").permitAll()//.hasRole("USER")
 			.anyRequest().authenticated(); // permitAll() 로 하면 JwtAuthenticationEntryPoint 동작안함
 
 		return http.build();
