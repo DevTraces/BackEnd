@@ -5,8 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.times;
@@ -25,6 +24,9 @@ import com.devtraces.arterest.controller.auth.dto.response.UserRegistrationRespo
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
 import java.util.Optional;
+
+import com.devtraces.arterest.service.s3.S3Service;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -33,6 +35,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseCookie;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,91 +48,107 @@ class AuthServiceTest {
 	@Mock
 	private MailService mailService;
 	@Mock
-	private AuthRedisUtil searchRedisUtil;
+	private AuthRedisUtil authRedisUtil;
 	@Mock
 	private UserRepository userRepository;
+	@Mock
+	private S3Service s3Service;
 
 	@InjectMocks
 	private AuthService authService;
 
 	@Test
+	@DisplayName("회원가입 성공")
 	void testRegister() {
+		String email = "example@gmail.com";
+		String password = "password";
+		String nickname = "example";
+		String username = "김공공";
+		MockMultipartFile profileImage =
+				new MockMultipartFile("profileImage", "profileImage".getBytes());
+		String description = "description";
+		String encodingPassword = "encodingPassword";
+		String profileImageUrl = "profileImageUrl";
 		User mockUser = User.builder()
-			.email("test@gmail.com")
-			.password("encoding-password")
-			.nickname("test")
-			.username("김검사")
-			.signupType(UserSignUpType.EMAIL)
-			.userStatus(UserStatusType.ACTIVE)
-			.build();
-		given(searchRedisUtil.notExistsAuthCompletedValue(anyString()))
+				.email(email)
+				.password(encodingPassword)
+				.nickname(nickname)
+				.username(username)
+				.signupType(UserSignUpType.EMAIL)
+				.userStatus(UserStatusType.ACTIVE)
+				.build();
+
+		given(authRedisUtil.notExistsAuthCompletedValue(anyString()))
 			.willReturn(false);
 		given(userRepository.existsByEmail(anyString()))
 			.willReturn(false);
 		given(userRepository.existsByNickname(anyString()))
 			.willReturn(false);
+		given(s3Service.uploadImage(profileImage))
+				.willReturn(profileImageUrl);
 		given(passwordEncoder.encode(anyString()))
-			.willReturn("encodingpassword");
-		given(userRepository.save(ArgumentMatchers.any(User.class)))
+			.willReturn(encodingPassword);
+		given(userRepository.save(any()))
 			.willReturn(mockUser);
+
 		ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
 
-		UserRegistrationRequest request = UserRegistrationRequest.builder()
-			.email("example@gmail.com")
-			.password("password")
-			.nickname("example")
-			.username("김공공")
-			.build();
-		UserRegistrationResponse response = authService.register(request);
+		authService.register(
+				email, password, username, nickname, profileImage, description
+		);
 
 		verify(userRepository, times(1)).save(captor.capture());
 		User savedUser = captor.getValue();
-		assertEquals("example@gmail.com", savedUser.getEmail());
-		assertEquals("encodingpassword", savedUser.getPassword());
-		assertEquals("example", savedUser.getNickname());
-		assertEquals("김공공", savedUser.getUsername());
+		assertEquals(email, savedUser.getEmail());
+		assertEquals(encodingPassword, savedUser.getPassword());
+		assertEquals(nickname, savedUser.getNickname());
+		assertEquals(username, savedUser.getUsername());
 		assertEquals(UserSignUpType.EMAIL, savedUser.getSignupType());
 		assertEquals(UserStatusType.ACTIVE, savedUser.getUserStatus());
 	}
 
-	// 이미 가입된 이메일의 경우
 	@Test
+	@DisplayName("회원가입 실패 - 이미 가입된 이메일인 경우")
 	void testRegisterByRegisteredUser() {
-		given(searchRedisUtil.notExistsAuthCompletedValue(anyString()))
+		String email = "example@gmail.com";
+		String password = "password";
+		String nickname = "example";
+		String username = "김공공";
+		MockMultipartFile profileImage =
+				new MockMultipartFile("profileImage", "profileImage".getBytes());
+		String description = "description";
+
+		given(authRedisUtil.notExistsAuthCompletedValue(anyString()))
 			.willReturn(false);
 		given(userRepository.existsByEmail(anyString()))
 			.willReturn(true);
 
-		UserRegistrationRequest request = UserRegistrationRequest.builder()
-			.email("example@gmail.com")
-			.password("password")
-			.nickname("example")
-			.username("김공공")
-			.build();
 		BaseException exception = assertThrows(BaseException.class,
-			() -> authService.register(request));
+			() -> authService.register(email, password, username, nickname, profileImage, description));
 
 		assertEquals(BaseException.ALREADY_EXIST_EMAIL, exception);
 	}
 
-	// 중복된 닉네임인 경우
 	@Test
+	@DisplayName("회원가입 실패 - 중복된 닉네임인 경우")
 	void testRegisterByDuplicatedNickname() {
-		given(searchRedisUtil.notExistsAuthCompletedValue(anyString()))
+		String email = "example@gmail.com";
+		String password = "password";
+		String nickname = "example";
+		String username = "김공공";
+		MockMultipartFile profileImage =
+				new MockMultipartFile("profileImage", "profileImage".getBytes());
+		String description = "description";
+
+		given(authRedisUtil.notExistsAuthCompletedValue(anyString()))
 			.willReturn(false);
 		given(userRepository.existsByEmail(anyString()))
 			.willReturn(false);
 		given(userRepository.existsByNickname(anyString()))
 			.willReturn(true);
 
-		UserRegistrationRequest request = UserRegistrationRequest.builder()
-			.email("example@gmail.com")
-			.password("password")
-			.nickname("example")
-			.username("김공공")
-			.build();
 		BaseException exception = assertThrows(BaseException.class,
-			() -> authService.register(request));
+			() -> authService.register(email, password, username, nickname, profileImage, description));
 
 		assertEquals(BaseException.ALREADY_EXIST_NICKNAME, exception);
 	}
@@ -141,7 +160,7 @@ class AuthServiceTest {
 		willDoNothing()
 			.given(mailService).sendMail(anyString(), anyString(), anyString());
 		willDoNothing()
-			.given(searchRedisUtil).setAuthKeyValue(anyString(), anyString());
+			.given(authRedisUtil).setAuthKeyValue(anyString(), anyString());
 
 		authService.sendMailWithAuthKey("example@gmail.com");
 	}
@@ -173,12 +192,12 @@ class AuthServiceTest {
 	void checkAuthKeyWhenCorrect() {
 		given(userRepository.existsByEmail(anyString()))
 			.willReturn(false);
-		given(searchRedisUtil.getAuthKeyValue(anyString()))
+		given(authRedisUtil.getAuthKeyValue(anyString()))
 			.willReturn("010101");
 		willDoNothing()
-			.given(searchRedisUtil).deleteAuthKeyValue(anyString());
+			.given(authRedisUtil).deleteAuthKeyValue(anyString());
 		willDoNothing()
-			.given(searchRedisUtil).setAuthCompletedValue(anyString());
+			.given(authRedisUtil).setAuthCompletedValue(anyString());
 
 		boolean isCorrect = authService.checkAuthKey("example@gmail.com", "010101");
 
@@ -190,7 +209,7 @@ class AuthServiceTest {
 	void checkAuthKeyWhenNotCorrect() {
 		given(userRepository.existsByEmail(anyString()))
 			.willReturn(false);
-		given(searchRedisUtil.getAuthKeyValue(anyString()))
+		given(authRedisUtil.getAuthKeyValue(anyString()))
 			.willReturn("111111");
 
 		boolean isCorrect = authService.checkAuthKey("example@gmail.com", "010101");

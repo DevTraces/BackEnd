@@ -48,7 +48,7 @@ public class AuthService {
 	) {
 		validateRegistration(email, nickname);
 
-		String profileImageUrl = "";
+		String profileImageUrl = null;
 		if (profileImage != null) {
 			profileImageUrl = s3Service.uploadImage(profileImage);
 		}
