@@ -14,17 +14,15 @@ import com.devtraces.arterest.controller.auth.dto.response.UserRegistrationRespo
 import com.devtraces.arterest.service.auth.AuthService;
 import java.util.HashMap;
 import javax.validation.Valid;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 
 import com.devtraces.arterest.controller.auth.dto.TokenWithNicknameDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @RestController
@@ -35,8 +33,19 @@ public class AuthController {
 	public static final String ACCESS_TOKEN_PREFIX = "accessToken";
 
 	@PostMapping("sign-up")
-	public ApiSuccessResponse<UserRegistrationResponse> signUp(@ModelAttribute @Valid UserRegistrationRequest request) {
-		UserRegistrationResponse response = authService.register(request);
+	public ApiSuccessResponse<UserRegistrationResponse> signUp(
+			@RequestParam @Email(message = "이메일 형식이 올바르지 않습니다.") String email,
+			@RequestParam @NotBlank(message = "비밀번호 입력은 필수입니다.") String password,
+			@RequestParam @NotBlank(message = "username 입력은 필수입니다.") String username,
+			@RequestParam @NotBlank(message = "nickname 입력은 필수입니다.") String nickname,
+			@RequestParam MultipartFile profileImage,
+			@RequestParam String description
+			) {
+		UserRegistrationResponse response = authService.register(
+				email, password,
+				username, nickname,
+				profileImage, description
+		);
 		return ApiSuccessResponse.from(response);
 	}
 
