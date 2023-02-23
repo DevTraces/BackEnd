@@ -34,6 +34,7 @@ public class BaseException extends RuntimeException {
 	public static final BaseException FAILED_SEND_EMAIL = new BaseException(ErrorCode.FAILED_SEND_EMAIL);
 	public static final BaseException FOLLOW_LIMIT_EXCEED = new BaseException(ErrorCode.FOLLOW_LIMIT_EXCEED);
 	public static final BaseException FOLLOWING_SELF_NOT_ALLOWED = new BaseException(ErrorCode.FOLLOWING_SELF_NOT_ALLOWED);
+	public static final BaseException DUPLICATED_FOLLOW_OR_LIKE = new BaseException(ErrorCode.DUPLICATED_FOLLOW_OR_LIKE);
 
 
 	private final ErrorCode errorCode;
