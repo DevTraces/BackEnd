@@ -33,6 +33,11 @@ public class OauthService {
         UserInfoFromKakaoDto userInfoFromKakaoDto =
                 createKakaoUser(accessTokenFromKakao);
 
+        return kakaoSignUpOrSignIn(userInfoFromKakaoDto);
+    }
+
+    public TokenWithNicknameDto kakaoSignUpOrSignIn(UserInfoFromKakaoDto userInfoFromKakaoDto) {
+
         Optional<User> optionalUser =
                 userRepository.findByNickname(userInfoFromKakaoDto.getNickname());
 
@@ -121,7 +126,7 @@ public class OauthService {
         if(hasEmail && jsonEmailElement != null) {
             email = jsonEmailElement.getAsString();
         }
-        
+
         return UserInfoFromKakaoDto.builder()
                 .kakaoUserId(kakaoUserId)
                 .email(email)
