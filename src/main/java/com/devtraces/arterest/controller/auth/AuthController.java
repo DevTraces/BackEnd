@@ -23,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.util.annotation.Nullable;
 
 @RequiredArgsConstructor
 @RestController
@@ -38,8 +39,8 @@ public class AuthController {
 			@RequestParam @NotBlank(message = "비밀번호 입력은 필수입니다.") String password,
 			@RequestParam @NotBlank(message = "username 입력은 필수입니다.") String username,
 			@RequestParam @NotBlank(message = "nickname 입력은 필수입니다.") String nickname,
-			@RequestParam MultipartFile profileImage,
-			@RequestParam String description
+			@RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
+			@RequestParam @Nullable String description
 			) {
 		UserRegistrationResponse response = authService.register(
 				email, password,
