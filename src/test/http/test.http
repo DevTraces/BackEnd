@@ -78,10 +78,7 @@ Content-Type: application/json
 DELETE http://localhost:8080/api/feeds/1/replies/1/rereplies/1/1
 
 
-### 테스트 유저 생성
-POST http://localhost:8080/make-testuser
-
-### make test user - 테스트 유저 1~4번 생성.
+### 테스트 유저 생성 & 초기 작업 진행.
 POST http://localhost:8080/make-testuser
 
 ### 팔로우 관계 설정 / 1>2 - OK
@@ -107,3 +104,44 @@ GET http://localhost:8080/api/follows/follower/two?userId=1&page=0
 
 ### 팔로우 관계 제거 : 1번이 3번을 언팔로우 했다. - OK
 DELETE http://localhost:8080/api/follows/three?userId=1
+
+
+
+
+
+
+### 테스트 유저 생성 & 초기 작업 진행.
+POST http://localhost:8080/make-testuser
+
+### 1번 유저가 피드에 좋아요 누름 - OK
+POST http://localhost:8080/api/like/1?userId=1
+
+### 2번 유저가 피드에 좋아요 누름 - OK
+POST http://localhost:8080/api/like/1?userId=2
+
+### 3번 유저가 피드에 좋아요 누름 - OK
+POST http://localhost:8080/api/like/1?userId=3
+
+### 4번 유저가 피드에 좋아요 누름 - OK
+POST http://localhost:8080/api/like/1?userId=4
+
+### 5번 유저가 피드에 좋아요 누름 - OK
+POST http://localhost:8080/api/like/1?userId=5
+
+### 페이지 사이즈 3으로 놓고 좋아요 누른 유저들 조회 0 페이지 조회. - OK
+GET http://localhost:8080/api/feeds/like/1?userId=1&page=0&pageSize=3
+
+### 페이지 사이즈 3으로 놓고 좋아요 누른 유저들 조회 1 페이지 조회. - OK
+GET http://localhost:8080/api/feeds/like/1?userId=1&page=1&pageSize=3
+
+### 1번이 좋아요 취소. - OK
+DELETE http://localhost:8080/api/like/1?userId=1
+
+### 2번이 좋아요 취소. - OK
+DELETE http://localhost:8080/api/like/1?userId=2
+
+### 피드 1개 읽기 - 좋아요 개수 잘 들어오나? - OK
+GET http://localhost:8080/api/feeds/1?userId=6
+
+### 피드 리스트로 읽기 - 좋아요 개수 잘 들어오나? - OK
+GET http://localhost:8080/api/feeds/list/six?userId=6&page=0
