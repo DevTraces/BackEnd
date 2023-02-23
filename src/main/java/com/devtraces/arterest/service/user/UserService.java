@@ -1,5 +1,6 @@
 package com.devtraces.arterest.service.user;
 
+import com.devtraces.arterest.model.follow.FollowRepository;
 import com.devtraces.arterest.service.s3.S3Service;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.exception.ErrorCode;
@@ -23,6 +24,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final FeedRepository feedRepository;
+    private final FollowRepository followRepository;
     private final PasswordEncoder passwordEncoder;
     private final S3Service s3Service;
 
@@ -64,16 +66,23 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public ProfileByNicknameResponse getProfileByNickname(String nickname) {
-        User user = userRepository.findByNickname(nickname).orElseThrow(
+    public ProfileByNicknameResponse getProfileByNickname(Long userId, String nickname) {
+        User user = getUserById(userId);
+        User targetUser = userRepository.findByNickname(nickname).orElseThrow(
                 () -> new BaseException(ErrorCode.USER_NOT_FOUND)
         );
 
-        Integer totalFeedNumber = feedRepository.countAllByUserId(user.getId());
+        int totalFeedNumber = feedRepository.countAllByUserId(targetUser.getId());
 
-        // TODO : follow 로직 구현된 후, 팔로우/팔로잉 숫자, 팔로잉 여부 로직 추가 예정
+        Integer followerNumber = followRepository.countAllByFollowingId(targetUser.getId());
+        Integer followingNumber = targetUser.getFollowList().size();
+        boolean isFollowing = followRepository.isFollowing(
+                user.getId(), targetUser.getId()) == 0 ? false : true;
 
-        return ProfileByNicknameResponse.from(user, totalFeedNumber);
+        return ProfileByNicknameResponse.from(
+                targetUser, totalFeedNumber,
+                followerNumber, followingNumber, isFollowing
+        );
     }
 
     public UpdateProfileResponse updateProfile(

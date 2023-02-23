@@ -42,7 +42,7 @@ public class UserController {
             @AuthenticationPrincipal Long userId,
             @PathVariable String nickname
     ) {
-        return ApiSuccessResponse.from(userService.getProfileByNickname(nickname));
+        return ApiSuccessResponse.from(userService.getProfileByNickname(userId, nickname));
     }
 
     @PostMapping("/profile/{nickname}")
