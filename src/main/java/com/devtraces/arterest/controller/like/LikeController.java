@@ -1,13 +1,17 @@
 package com.devtraces.arterest.controller.like;
 
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
+import com.devtraces.arterest.controller.like.dto.response.LikeResponse;
 import com.devtraces.arterest.service.like.LikeService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -33,6 +37,18 @@ public class LikeController {
     ){
         likeService.cancelLikeOnFeed(userId, feedId);
         return ApiSuccessResponse.NO_DATA_RESPONSE;
+    }
+
+    @GetMapping("/feeds/like/{feedId}")
+    public ApiSuccessResponse<List<LikeResponse>> getLikedUserList(
+        @AuthenticationPrincipal Long userId,
+        @PathVariable Long feedId,
+        @RequestParam int page,
+        @RequestParam(required = false, defaultValue = "10") int pageSize
+    ){
+        return ApiSuccessResponse.from(
+            likeService.getLikedUserList(userId, feedId, page, pageSize)
+        );
     }
 
 }
