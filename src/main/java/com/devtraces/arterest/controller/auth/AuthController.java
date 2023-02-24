@@ -13,6 +13,7 @@ import com.devtraces.arterest.controller.auth.dto.request.UserRegistrationReques
 import com.devtraces.arterest.controller.auth.dto.response.UserRegistrationResponse;
 import com.devtraces.arterest.service.auth.AuthService;
 import java.util.HashMap;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.Email;
@@ -77,7 +78,7 @@ public class AuthController {
 		hashMap.put(ACCESS_TOKEN_PREFIX, TOKEN_PREFIX + " " + dto.getAccessToken());
 		hashMap.put("nickname", dto.getNickname());
 
-		response.addHeader("Cookie", dto.getCookie().toString());
+		response.addHeader("Set-Cookie", dto.getCookie().toString());
 
 		return ResponseEntity.ok()
 				.body(ApiSuccessResponse.from(hashMap));
