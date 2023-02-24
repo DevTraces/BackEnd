@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface FeedRepository extends JpaRepository<Feed, Long> {
 
-    Slice<Feed> findAllByUserId(Long authorId, PageRequest pageRequest);
+    Slice<Feed> findAllByUserIdOrderByCreatedAtDesc(Long authorId, PageRequest pageRequest);
 
     Integer countAllByUserId(Long userId);
 

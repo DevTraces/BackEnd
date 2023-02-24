@@ -35,7 +35,9 @@ public class FeedReadService {
 		Set<Long> bookmarkedFeedSet = getBookmarkedFeedSet(userId);
 		Long targetUserId = userRepository.findByNickname(nickname)
 			.orElseThrow(() -> BaseException.USER_NOT_FOUND).getId();
-		return feedRepository.findAllByUserId(targetUserId, PageRequest.of(page, pageSize)).stream().map(
+		return feedRepository
+			.findAllByUserIdOrderByCreatedAtDesc(targetUserId, PageRequest.of(page, pageSize))
+			.stream().map(
 			feed -> {
 				Long likeNumber = getOrCacheLikeNumber(feed.getId(), feed);
 				return FeedResponse.from(feed, likedFeedSet, likeNumber, bookmarkedFeedSet);
