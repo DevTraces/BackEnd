@@ -67,20 +67,20 @@ class FeedServiceTest {
         imageFileList.add(multipartFile);
 
         User user = User.builder()
-            .id(1L)
-            .build();
+                .id(1L)
+                .build();
 
         Hashtag hashtagEntity = Hashtag.builder()
-            .id(1L)
-            .hashtagString("#potato")
-            .build();
+                .id(1L)
+                .hashtagString("#potato")
+                .build();
 
         Feed feed = Feed.builder()
-            .id(1L)
-            .user(user)
-            .content(content)
-            .imageUrls("urlString,")
-            .build();
+                .id(1L)
+                .user(user)
+                .content(content)
+                .imageUrls("urlString,")
+                .build();
 
         given(userRepository.findById(1L)).willReturn(Optional.of(user));
         given(s3Service.uploadImage(multipartFile)).willReturn("urlString");
@@ -113,20 +113,20 @@ class FeedServiceTest {
         imageFileList.add(multipartFile);
 
         User user = User.builder()
-            .id(1L)
-            .build();
+                .id(1L)
+                .build();
 
         Hashtag hashtagEntity = Hashtag.builder()
-            .id(1L)
-            .hashtagString("#potato")
-            .build();
+                .id(1L)
+                .hashtagString("#potato")
+                .build();
 
         Feed feed = Feed.builder()
-            .id(1L)
-            .user(user)
-            .content(content)
-            .imageUrls("urlString,")
-            .build();
+                .id(1L)
+                .user(user)
+                .content(content)
+                .imageUrls("urlString,")
+                .build();
 
         given(userRepository.findById(1L)).willReturn(Optional.of(user));
         given(s3Service.uploadImage(multipartFile)).willReturn("urlString");
@@ -166,8 +166,8 @@ class FeedServiceTest {
 
         // when
         BaseException exception = assertThrows(
-            BaseException.class ,
-            () -> feedService.createFeed(1L, content, imageFileList, hashtagList)
+                BaseException.class ,
+                () -> feedService.createFeed(1L, content, imageFileList, hashtagList)
         );
 
         // then
@@ -192,8 +192,8 @@ class FeedServiceTest {
 
         // when
         BaseException exception = assertThrows(
-            BaseException.class ,
-            () -> feedService.createFeed(1L, content, imageFileList, hashtagList)
+                BaseException.class ,
+                () -> feedService.createFeed(1L, content, imageFileList, hashtagList)
         );
 
         // then
@@ -207,7 +207,7 @@ class FeedServiceTest {
         String content = "게시물 내용";
 
         List<String> hashtagList = new ArrayList<>();
-            hashtagList.add("#potato");
+        hashtagList.add("#potato");
 
         MultipartFile multipartFile = new MockMultipartFile("file", "fileContent".getBytes());
 
@@ -218,8 +218,8 @@ class FeedServiceTest {
 
         // when
         BaseException exception = assertThrows(
-            BaseException.class ,
-            () -> feedService.createFeed(1L, content, imageFileList, hashtagList)
+                BaseException.class ,
+                () -> feedService.createFeed(1L, content, imageFileList, hashtagList)
         );
 
         // then
@@ -244,8 +244,8 @@ class FeedServiceTest {
 
         // when
         BaseException exception = assertThrows(
-            BaseException.class ,
-            () -> feedService.createFeed(1L, content, imageFileList, hashtagList)
+                BaseException.class ,
+                () -> feedService.createFeed(1L, content, imageFileList, hashtagList)
         );
 
         // then
@@ -273,26 +273,26 @@ class FeedServiceTest {
         indexList.add("0");
 
         User user = User.builder()
-            .id(1L)
-            .build();
+                .id(1L)
+                .build();
 
         Hashtag hashtagEntity = Hashtag.builder()
-            .id(1L)
-            .hashtagString("#potato")
-            .build();
+                .id(1L)
+                .hashtagString("#potato")
+                .build();
 
         Feed feed = Feed.builder()
-            .id(1L)
-            .user(user)
-            .content(content)
-            .imageUrls("urlString,")
-            .build();
+                .id(1L)
+                .user(user)
+                .content(content)
+                .imageUrls("urlString,")
+                .build();
 
         FeedHashtagMap feedHashtagMap = FeedHashtagMap.builder()
-            .id(1L)
-            .feed(feed)
-            .hashtag(hashtagEntity)
-            .build();
+                .id(1L)
+                .feed(feed)
+                .hashtag(hashtagEntity)
+                .build();
 
         given(feedRepository.findById(1L)).willReturn(Optional.of(feed));
         doNothing().when(s3Service).deleteImage("urlString");
@@ -336,26 +336,26 @@ class FeedServiceTest {
         indexList.add("0");
 
         User user = User.builder()
-            .id(1L)
-            .build();
+                .id(1L)
+                .build();
 
         Hashtag hashtagEntity = Hashtag.builder()
-            .id(1L)
-            .hashtagString("#potato")
-            .build();
+                .id(1L)
+                .hashtagString("#potato")
+                .build();
 
         Feed feed = Feed.builder()
-            .id(1L)
-            .user(user)
-            .content(content)
-            .imageUrls("urlString,")
-            .build();
+                .id(1L)
+                .user(user)
+                .content(content)
+                .imageUrls("urlString,")
+                .build();
 
         FeedHashtagMap feedHashtagMap = FeedHashtagMap.builder()
-            .id(1L)
-            .feed(feed)
-            .hashtag(hashtagEntity)
-            .build();
+                .id(1L)
+                .feed(feed)
+                .hashtag(hashtagEntity)
+                .build();
 
         given(feedRepository.findById(1L)).willReturn(Optional.of(feed));
         doNothing().when(s3Service).deleteImage("urlString");
@@ -510,13 +510,13 @@ class FeedServiceTest {
         imageFileList.add(multipartFile);
 
         User user = User.builder()
-            .id(2L)
-            .build();
+                .id(2L)
+                .build();
 
         Feed feed = Feed.builder()
-            .id(1L)
-            .user(user)
-            .build();
+                .id(1L)
+                .user(user)
+                .build();
 
         given(feedRepository.findById(1L)).willReturn(Optional.of(feed));
 

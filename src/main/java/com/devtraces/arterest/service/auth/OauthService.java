@@ -31,7 +31,12 @@ public class OauthService {
     public TokenWithNicknameDto oauthKakaoSignIn(String accessTokenFromKakao) {
         // kakao 서버에 액세스 토큰 보낸 뒤 사용자 정보 가져오기
         UserInfoFromKakaoDto userInfoFromKakaoDto =
-                createKakaoUser(accessTokenFromKakao);
+                getUserInfoFromKakao(accessTokenFromKakao);
+
+        return kakaoSignUpOrSignIn(userInfoFromKakaoDto);
+    }
+
+    public TokenWithNicknameDto kakaoSignUpOrSignIn(UserInfoFromKakaoDto userInfoFromKakaoDto) {
 
         Optional<User> optionalUser =
                 userRepository.findByNickname(userInfoFromKakaoDto.getNickname());
@@ -60,7 +65,7 @@ public class OauthService {
     }
 
     // 카카오 서버로 요청하는 함수
-    private UserInfoFromKakaoDto createKakaoUser(String accessTokenFromKakao) {
+    private UserInfoFromKakaoDto getUserInfoFromKakao(String accessTokenFromKakao) {
 
         String requestURL = "https://kapi.kakao.com/v2/user/me";
 
@@ -97,7 +102,7 @@ public class OauthService {
     }
 
     // 카카오 서버로부터 받은 정보 파싱
-    private static UserInfoFromKakaoDto parseResponseToJson(String result
+    private UserInfoFromKakaoDto parseResponseToJson(String result
     ) throws IOException {
 
         // Gson 라이브러리로 JSON 파싱
@@ -125,11 +130,22 @@ public class OauthService {
         return UserInfoFromKakaoDto.builder()
                 .kakaoUserId(kakaoUserId)
                 .email(email)
-                .username(nickname)
-                .nickname(nickname)
+                .username(nickname) // 카카오에서 nickname을 username으로 사용하기로 함
+                .nickname(generateRandomNickname())
                 .profileImageUrl(profileImageUrl)
                 .description("나에 대한 설명을 추가해주세요!")
                 .build();
+    }
+
+    private String generateRandomNickname() {
+        String randomNickname = "";
+        do {
+            for (int i = 0; i < 30; i++) {
+                randomNickname += (char) ((int) (Math.random() * 25) + 97);
+            }
+        } while (userRepository.existsByNickname(randomNickname));
+
+        return randomNickname;
     }
 
     private User getSavedUser(UserInfoFromKakaoDto userInfoFromKakaoDto, long kakaoUserId) {
