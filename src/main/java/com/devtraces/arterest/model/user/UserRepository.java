@@ -1,6 +1,7 @@
 package com.devtraces.arterest.model.user;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -21,4 +22,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	Optional<User> findByKakaoUserId(long kakaoUserId);
 
 	Slice<User> findAllByIdIn(Collection<Long> idList, PageRequest pageRequest);
+
+	List<User> findAllByIdIn(Collection<Long> id);
 }
