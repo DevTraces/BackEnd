@@ -86,6 +86,7 @@ public class JwtProvider {
 			.httpOnly(true)
 			.path("/")
 			.maxAge(CREATE_AGE)
+			.domain("https://front-end-git-feat-following-devtraces.vercel.app/")
 //			.secure(false)
 //			.sameSite(SameSite.NONE.attributeValue())
 			.build();
