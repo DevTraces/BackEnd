@@ -86,7 +86,7 @@ public class JwtProvider {
 			.httpOnly(true)
 			.path("/")
 			.maxAge(CREATE_AGE)
-			.domain("localhost:3000")
+//			.domain("localhost:3000")
 //			.secure(false)
 //			.sameSite(SameSite.NONE.attributeValue())
 			.build();
