@@ -2,7 +2,6 @@ package com.devtraces.arterest.common.constant;
 
 import com.devtraces.arterest.model.feed.Feed;
 import com.devtraces.arterest.model.reply.Reply;
-import java.time.LocalDateTime;
 import java.util.Comparator;
 
 public class ComparatorUtil {

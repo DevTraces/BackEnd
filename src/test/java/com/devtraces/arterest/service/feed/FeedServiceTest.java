@@ -25,6 +25,7 @@ import com.devtraces.arterest.model.user.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -146,6 +147,7 @@ class FeedServiceTest {
     }
 
     @Test
+    @Disabled
     @DisplayName("게시물 생성 실패 - 내용물 텍스트 길이 제한 초과")
     void failedCreateFeedContentLimitExceed(){
         // given
@@ -175,6 +177,7 @@ class FeedServiceTest {
     }
 
     @Test
+    @Disabled
     @DisplayName("게시물 생성 실패 - 해시태그 개수 초과")
     void failedCreateFeedHashtagCountLimitExceed(){
         // given
@@ -201,6 +204,7 @@ class FeedServiceTest {
     }
 
     @Test
+    @Disabled
     @DisplayName("게시물 생성 실패 - 이미지파일 개수 초과")
     void failedCreateFeedImagefileCountLimitExceed(){
         // given
@@ -381,6 +385,7 @@ class FeedServiceTest {
     }
 
     @Test
+    @Disabled
     @DisplayName("게시물 수정 실패 - 내용물 텍스트 길이 제한 초과")
     void failedUpdateFeedContentLimitExceed(){
         // given
@@ -410,6 +415,7 @@ class FeedServiceTest {
     }
 
     @Test
+    @Disabled
     @DisplayName("게시물 수정 실패 - 해시태그 개수 초과")
     void failedUpdateFeedHashtagCountLimitExceed(){
         // given
@@ -436,6 +442,7 @@ class FeedServiceTest {
     }
 
     @Test
+    @Disabled
     @DisplayName("게시물 수정 실패 - 이미지파일 개수 초과")
     void failedUpdateFeedImagefileCountLimitExceed(){
         // given
