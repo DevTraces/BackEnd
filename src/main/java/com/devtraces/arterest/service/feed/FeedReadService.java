@@ -1,5 +1,7 @@
 package com.devtraces.arterest.service.feed;
 
+import com.devtraces.arterest.common.constant.ComparatorUtil;
+import com.devtraces.arterest.common.constant.ComparatorUtil.LatestFeedFirstComparator;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.controller.feed.dto.response.FeedResponse;
 import com.devtraces.arterest.model.bookmark.BookmarkRepository;
@@ -37,7 +39,8 @@ public class FeedReadService {
 			.orElseThrow(() -> BaseException.USER_NOT_FOUND).getId();
 		return feedRepository
 			.findAllByUserIdOrderByCreatedAtDesc(targetUserId, PageRequest.of(page, pageSize))
-			.stream().map(
+			.getContent().stream().sorted(new LatestFeedFirstComparator())
+			.map(
 			feed -> {
 				Long likeNumber = getOrCacheLikeNumber(feed.getId(), feed);
 				return FeedResponse.from(feed, likedFeedSet, likeNumber, bookmarkedFeedSet);

@@ -1,6 +1,8 @@
 package com.devtraces.arterest.service.reply;
 
 import com.devtraces.arterest.common.constant.CommonConstant;
+import com.devtraces.arterest.common.constant.ComparatorUtil;
+import com.devtraces.arterest.common.constant.ComparatorUtil.LatestReplyFirstComparator;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.model.feed.Feed;
 import com.devtraces.arterest.model.feed.FeedRepository;
@@ -12,6 +14,7 @@ import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
 import com.devtraces.arterest.controller.reply.dto.request.ReplyRequest;
 import com.devtraces.arterest.controller.reply.dto.response.ReplyResponse;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -55,9 +58,15 @@ public class ReplyService {
 
     @Transactional(readOnly = true)
     public List<ReplyResponse> getReplyList(Long feedId, Integer page, Integer pageSize) {
-        return replyRepository
+        List<ReplyResponse> responseList = replyRepository
             .findAllByFeedIdOrderByCreatedAtDesc(feedId, PageRequest.of(page, pageSize))
-            .getContent().stream().map(ReplyResponse::from).collect(Collectors.toList());
+            .getContent().stream().sorted(new LatestReplyFirstComparator())
+            .map(ReplyResponse::from).collect(Collectors.toList());
+        LinkedList<ReplyResponse> result = new LinkedList<>();
+        for(ReplyResponse response : responseList){
+            result.addFirst(response);
+        }
+        return result;
     }
 
     @Transactional
