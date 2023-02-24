@@ -46,14 +46,22 @@ public class LikeNumberCacheRepository {
 
     // 좋아요 숫자를 += 1 한다.
     public void plusOneLike(Long feedId){
-        String key = getKey(feedId);
-        template.opsForValue().increment(key);
+        try {
+            String key = getKey(feedId);
+            template.opsForValue().increment(key);
+        } catch (Exception e) {
+            log.error("캐시서버에서 좋아요 개수 1 증가 기록 실패");
+        }
     }
 
     // 좋아요 숫자를 -= 1 한다.
     public void minusOneLike(Long feedId){
-        String key = getKey(feedId);
-        template.opsForValue().decrement(key);
+        try {
+            String key = getKey(feedId);
+            template.opsForValue().decrement(key);
+        } catch (Exception e) {
+            log.error("캐시서버에서 좋아요 개수 1 감소 기록 실패");
+        }
     }
 
     // 좋아요 숫자를 기록한 키-밸류 쌍을 삭제한다.
