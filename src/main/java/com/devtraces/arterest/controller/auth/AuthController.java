@@ -21,6 +21,7 @@ import javax.validation.constraints.NotBlank;
 
 import com.devtraces.arterest.controller.auth.dto.TokenWithNicknameDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -78,7 +79,7 @@ public class AuthController {
 		hashMap.put(ACCESS_TOKEN_PREFIX, TOKEN_PREFIX + " " + dto.getAccessToken());
 		hashMap.put("nickname", dto.getNickname());
 
-		response.addHeader("Set-Cookie", dto.getCookie().toString());
+		response.setHeader(HttpHeaders.SET_COOKIE, dto.getCookie().toString());
 
 		return ResponseEntity.ok()
 				.body(ApiSuccessResponse.from(hashMap));
