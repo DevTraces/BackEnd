@@ -85,6 +85,7 @@ public class JwtProvider {
 			.sameSite("None")
 			.httpOnly(true)
 			.secure(false)
+			.domain("localhost")
 			.build();
 
 		return cookie;
