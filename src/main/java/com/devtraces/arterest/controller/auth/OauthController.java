@@ -6,6 +6,7 @@ import com.devtraces.arterest.service.auth.OauthService;
 import java.util.HashMap;
 
 import com.devtraces.arterest.controller.auth.dto.TokenWithNicknameDto;
+import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,7 +26,10 @@ public class OauthController {
     private final OauthService oauthService;
 
     @PostMapping("/kakao/callback")
-    public ResponseEntity<ApiSuccessResponse<?>> oauthKakaoSignIn(@RequestBody OauthKakaoSignInRequest request) {
+    public ResponseEntity<ApiSuccessResponse<?>> oauthKakaoSignIn(
+        @RequestBody OauthKakaoSignInRequest request,
+        HttpServletResponse response
+    ) {
         TokenWithNicknameDto dto =
                 oauthService.oauthKakaoSignIn(request.getAccessTokenFromKakao());
 
@@ -33,8 +37,9 @@ public class OauthController {
         hashMap.put(ACCESS_TOKEN_PREFIX, TOKEN_PREFIX + " " + dto.getAccessToken());
         hashMap.put("nickname", dto.getNickname());
 
+        response.addCookie(dto.getCookie());
+
         return ResponseEntity.ok()
-            .header(SET_COOKIE, dto.getResponseCookie().toString())
             .body(ApiSuccessResponse.from(hashMap));
     }
 }
