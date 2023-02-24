@@ -68,13 +68,8 @@ public class LikeService {
             .findAllByFeedIdOrderByCreatedAtDesc(feedId, pageRequest)
             .getContent().stream().map(Likes::getUserId).collect(Collectors.toList());
 
-        List<LikeResponse> resultList = userRepository.findAllByIdIn(likedUserIdList).stream()
+        return userRepository.findAllByIdIn(likedUserIdList).stream()
             .map(LikeResponse::from).collect(Collectors.toList());
-        LinkedList<LikeResponse> linkedList = new LinkedList<>();
-        for(LikeResponse response : resultList){
-            linkedList.addFirst(response);
-        }
-        return linkedList;
     }
 
     private void validateFeedExistence(Long feedId) {
