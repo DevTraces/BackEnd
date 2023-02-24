@@ -85,7 +85,7 @@ public class JwtProvider {
 		ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
 			.httpOnly(true)
 			.path("/")
-			.maxAge(CREATE_AGE)
+//			.maxAge(CREATE_AGE)
 //			.domain("localhost:3000")
 //			.secure(true)
 //			.sameSite(SameSite.NONE.attributeValue())
