@@ -49,11 +49,10 @@ public class UserController {
     public ApiSuccessResponse<?> updateProfile(
             @AuthenticationPrincipal Long userId,
             @PathVariable String nickname,
-            @RequestParam @Nullable String updateUsername,
-            @RequestParam @Nullable String updateNickname,
-            @RequestParam @Nullable String updateDescription,
-            @RequestParam @Nullable MultipartFile updateProfileImage
-
+            @RequestParam(value = "username") String updateUsername,
+            @RequestParam(value = "nickname") String updateNickname,
+            @RequestParam(value = "description") String updateDescription,
+            @RequestParam(value = "profileImage") @Nullable MultipartFile updateProfileImage
     ) {
         return ApiSuccessResponse.from(
                 userService.updateProfile(
