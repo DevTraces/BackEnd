@@ -83,7 +83,7 @@ public class JwtProvider {
 		ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
 			.path("/")
 //			.sameSite("None")
-			.httpOnly(true)
+			.httpOnly(false)
 			.secure(false)
 			.build();
 
