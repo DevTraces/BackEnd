@@ -16,6 +16,7 @@ import java.util.Date;
 import javax.servlet.http.Cookie;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.server.Cookie.SameSite;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Component;
 public class JwtProvider {
 
 	public static final String REFRESH_TOKEN_SUBJECT_PREFIX = "refresh:";
+	private static final int CREATE_AGE = 7 * 24 * 60 * 60;
 
 	private final UserDetailsService userDetailsService;
 	private final TokenRedisUtil tokenRedisUtil;
@@ -81,10 +83,11 @@ public class JwtProvider {
 //		cookie.setPath("/");
 
 		ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+			.httpOnly(true)
 			.path("/")
-//			.sameSite("None")
-			.httpOnly(false)
-			.secure(false)
+			.maxAge(CREATE_AGE)
+//			.secure(false)
+//			.sameSite(SameSite.NONE.attributeValue())
 			.build();
 
 		return cookie;
