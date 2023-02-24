@@ -13,12 +13,15 @@ import com.devtraces.arterest.controller.auth.dto.request.UserRegistrationReques
 import com.devtraces.arterest.controller.auth.dto.response.UserRegistrationResponse;
 import com.devtraces.arterest.service.auth.AuthService;
 import java.util.HashMap;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
 import com.devtraces.arterest.controller.auth.dto.TokenWithNicknameDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +33,7 @@ import reactor.util.annotation.Nullable;
 @RequestMapping("/api/auth")
 public class AuthController {
 	private final AuthService authService;
-	public static final String SET_COOKIE = "Cookie";
+	public static final String SET_COOKIE = "Set-Cookie";
 	public static final String ACCESS_TOKEN_PREFIX = "accessToken";
 
 	@PostMapping("sign-up")
@@ -63,7 +66,10 @@ public class AuthController {
 	}
 
 	@PostMapping("/sign-in")
-	public ResponseEntity<ApiSuccessResponse<?>> signIn(@RequestBody @Valid SignInRequest request) {
+	public ResponseEntity<ApiSuccessResponse<?>> signIn(
+		@RequestBody @Valid SignInRequest request,
+		HttpServletResponse response
+	) {
 		TokenWithNicknameDto dto = authService.signInAndGenerateJwtToken(
 				request.getEmail(),
 				request.getPassword()
@@ -73,8 +79,9 @@ public class AuthController {
 		hashMap.put(ACCESS_TOKEN_PREFIX, TOKEN_PREFIX + " " + dto.getAccessToken());
 		hashMap.put("nickname", dto.getNickname());
 
+		response.setHeader(HttpHeaders.SET_COOKIE, dto.getCookie().toString());
+
 		return ResponseEntity.ok()
-				.header(SET_COOKIE, dto.getResponseCookie().toString())
 				.body(ApiSuccessResponse.from(hashMap));
 	}
 

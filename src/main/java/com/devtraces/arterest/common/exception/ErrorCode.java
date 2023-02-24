@@ -25,6 +25,7 @@ public enum ErrorCode {
 	HASHTAG_LIMIT_EXCEED(HttpStatus.BAD_REQUEST, "HASHTAG_LIMIT_EXCEED", "해시태그는 10개를 초과하여 입력할 수 없습니다."),
 	IMAGE_FILE_COUNT_LIMIT_EXCEED(HttpStatus.BAD_REQUEST, "IMAGE_FILE_COUNT_LIMIT_EXCEED", "이미지 파일의 개수는 15개를 초과할 수 없습니다."),
 	NULL_AND_EMPTY_STRING_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "NULL_AND_EMPTY_STRING_NOT_ALLOWED", "빈 문자열 입력은 불가능합니다."),
+	LIKE_NUMBER_BELLOW_ZERO(HttpStatus.BAD_REQUEST, "LIKE_NUMBER_BELLOW_ZERO", "좋아요 개수가 0 입니다."),
   
 	/* 401 */
 	ACCESS_DENIED(HttpStatus.UNAUTHORIZED, "ACCESS_DENIED", "유효한 인증 정보가 아닙니다."),
@@ -47,7 +48,6 @@ public enum ErrorCode {
 	FAILED_CACHE_PUT_OPERATION(HttpStatus.INTERNAL_SERVER_ERROR, "FAILED_CACHE_PUT_OPERATION", "캐시서버에 값을 등록하는 것에 실패했습니다."),
 	FAILED_SEND_EMAIL(HttpStatus.INTERNAL_SERVER_ERROR, "FAILED_SEND_EMAIL", "메일 전송에 실패했습니다."),
 	DUPLICATED_FOLLOW_OR_LIKE(HttpStatus.INTERNAL_SERVER_ERROR, "DUPLICATED_FOLLOW_OR_LIKE", "이미 팔로우 또는 좋아요를 하였습니다.");
-
 
 	private final HttpStatus httpStatus;
 	private final String code;

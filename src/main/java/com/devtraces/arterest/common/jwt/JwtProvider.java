@@ -13,8 +13,10 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import java.security.Key;
 import java.util.Date;
+import javax.servlet.http.Cookie;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.server.Cookie.SameSite;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Component;
 public class JwtProvider {
 
 	public static final String REFRESH_TOKEN_SUBJECT_PREFIX = "refresh:";
+	private static final int CREATE_AGE = 7 * 24 * 60 * 60;
 
 	private final UserDetailsService userDetailsService;
 	private final TokenRedisUtil tokenRedisUtil;
@@ -69,17 +72,26 @@ public class JwtProvider {
 
 		return TokenDto.builder()
 			.accessToken(accessToken)
-			.responseCookie(generateCookie(refreshToken))
+			.cookie(generateCookie(refreshToken))
 			.build();
 	}
 
 	private ResponseCookie generateCookie(String refreshToken) {
-		return ResponseCookie.from("refreshToken", refreshToken)
+//		Cookie cookie = new Cookie("refreshToken", refreshToken);
+//
+//		cookie.setHttpOnly(true);
+//		cookie.setPath("/");
+
+		ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
 			.httpOnly(true)
-			.secure(true)
-			.sameSite("None")
-			.path("/refresh-token")
+			.path("/")
+//			.maxAge(CREATE_AGE)
+//			.domain("localhost:3000")
+//			.secure(true)
+//			.sameSite(SameSite.NONE.attributeValue())
 			.build();
+
+		return cookie;
 	}
 
 	// JWT 토큰에서 인증 정보 조회

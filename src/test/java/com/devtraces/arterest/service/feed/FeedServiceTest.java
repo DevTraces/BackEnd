@@ -401,8 +401,8 @@ class FeedServiceTest {
 
         // when
         BaseException exception = assertThrows(
-                BaseException.class ,
-                () -> feedService.updateFeed(1L, content, imageFileList, hashtagList, null, null, 1L)
+            BaseException.class ,
+            () -> feedService.updateFeed(1L, content, imageFileList, hashtagList, null, null, 1L)
         );
 
         // then
@@ -427,8 +427,8 @@ class FeedServiceTest {
 
         // when
         BaseException exception = assertThrows(
-                BaseException.class ,
-                () -> feedService.updateFeed(1L, content, imageFileList, hashtagList, null, null, 1L)
+            BaseException.class ,
+            () -> feedService.updateFeed(1L, content, imageFileList, hashtagList, null, null, 1L)
         );
 
         // then
@@ -461,8 +461,8 @@ class FeedServiceTest {
 
         // when
         BaseException exception = assertThrows(
-                BaseException.class ,
-                () -> feedService.updateFeed(1L, content, imageFileList, hashtagList, prevImageInfoList, indexList, 1L)
+            BaseException.class ,
+            () -> feedService.updateFeed(1L, content, imageFileList, hashtagList, prevImageInfoList, indexList, 1L)
         );
 
         // then
@@ -487,8 +487,8 @@ class FeedServiceTest {
 
         // when
         BaseException exception = assertThrows(
-                BaseException.class ,
-                () -> feedService.updateFeed(1L, content, imageFileList, hashtagList, null, null, 1L)
+            BaseException.class ,
+            () -> feedService.updateFeed(1L, content, imageFileList, hashtagList, null, null, 1L)
         );
 
         // then
@@ -522,8 +522,8 @@ class FeedServiceTest {
 
         // when
         BaseException exception = assertThrows(
-                BaseException.class ,
-                () -> feedService.updateFeed(1L, content, imageFileList, hashtagList, null, null, 1L)
+            BaseException.class ,
+            () -> feedService.updateFeed(1L, content, imageFileList, hashtagList, null, null, 1L)
         );
 
         // then
