@@ -40,7 +40,7 @@ public class JwtController {
 		hashMap.put(ACCESS_TOKEN_PREFIX, TOKEN_PREFIX + " " + dto.getAccessToken());
 		hashMap.put("nickname", dto.getNickname());
 
-		response.addCookie(dto.getCookie());
+		response.addHeader("Cookie", dto.getCookie().toString());
 
 		return ResponseEntity.ok()
 			.body(ApiSuccessResponse.from(hashMap));

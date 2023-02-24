@@ -4,6 +4,7 @@ import javax.servlet.http.Cookie;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import org.springframework.http.ResponseCookie;
 
 @Getter
 @Builder
@@ -11,6 +12,6 @@ import lombok.Getter;
 public class TokenDto {
 
 	private String accessToken;
-	private Cookie cookie;
+	private ResponseCookie cookie;
 
 }

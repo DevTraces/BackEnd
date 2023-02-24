@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.http.ResponseCookie;
 
 @Getter
 @AllArgsConstructor
@@ -16,7 +17,7 @@ public class TokenWithNicknameDto {
 
     private String nickname;
     private String accessToken;
-    private Cookie cookie;
+    private ResponseCookie cookie;
 
     public static TokenWithNicknameDto from(String nickname, TokenDto tokenDto) {
         return TokenWithNicknameDto.builder()
