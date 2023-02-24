@@ -87,8 +87,8 @@ public class JwtProvider {
 			.path("/")
 			.maxAge(CREATE_AGE)
 //			.domain("localhost:3000")
-			.secure(true)
-			.sameSite(SameSite.NONE.attributeValue())
+//			.secure(true)
+//			.sameSite(SameSite.NONE.attributeValue())
 			.build();
 
 		return cookie;
