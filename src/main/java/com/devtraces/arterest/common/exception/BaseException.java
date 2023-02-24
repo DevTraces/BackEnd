@@ -15,7 +15,6 @@ public class BaseException extends RuntimeException {
 	public static final BaseException CONTENT_LIMIT_EXCEED = new BaseException(ErrorCode.CONTENT_LIMIT_EXCEED);
 	public static final BaseException USER_INFO_NOT_MATCH = new BaseException(ErrorCode.USER_INFO_NOT_MATCH);
 	public static final BaseException WRONG_EMAIL_OR_PASSWORD = new BaseException(ErrorCode.WRONG_EMAIL_OR_PASSWORD);
-
 	public static final BaseException WRONG_BEFORE_PASSWORD = new BaseException(ErrorCode.WRONG_BEFORE_PASSWORD);
 	public static final BaseException NOT_EXPIRED_ACCESS_TOKEN = new BaseException(ErrorCode.NOT_EXPIRED_ACCESS_TOKEN);
   public static final BaseException INVALID_IMAGE_EXTENSION = new BaseException(ErrorCode.INVALID_IMAGE_EXTENSION);
@@ -36,9 +35,10 @@ public class BaseException extends RuntimeException {
 	public static final BaseException FOLLOWING_SELF_NOT_ALLOWED = new BaseException(ErrorCode.FOLLOWING_SELF_NOT_ALLOWED);
 	public static final BaseException DUPLICATED_FOLLOW_OR_LIKE = new BaseException(ErrorCode.DUPLICATED_FOLLOW_OR_LIKE);
 	public static final BaseException LIKE_NUMBER_BELLOW_ZERO = new BaseException(ErrorCode.LIKE_NUMBER_BELLOW_ZERO);
+  public static final BaseException ALREADY_EXIST_USER = new BaseException(ErrorCode.ALREADY_EXIST_USER);
 
 
-	private final ErrorCode errorCode;
+    private final ErrorCode errorCode;
 
 	// 의도적인 예외이므로 stack trace 제거 (불필요한 예외처리 비용 제거)
 	@Override
