@@ -33,7 +33,7 @@ import reactor.util.annotation.Nullable;
 @RequestMapping("/api/auth")
 public class AuthController {
 	private final AuthService authService;
-	public static final String SET_COOKIE = "Cookie";
+	public static final String SET_COOKIE = "Set-Cookie";
 	public static final String ACCESS_TOKEN_PREFIX = "accessToken";
 
 	@PostMapping("sign-up")
