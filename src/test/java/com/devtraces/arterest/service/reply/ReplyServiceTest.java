@@ -173,13 +173,13 @@ class ReplyServiceTest {
 
         Slice<Reply> slice = new PageImpl<>(replyList);
 
-        given(replyRepository.findAllByFeedId(1L, PageRequest.of(0, 10))).willReturn(slice);
+        given(replyRepository.findAllByFeedIdOrderByCreatedAtDesc(1L, PageRequest.of(0, 10))).willReturn(slice);
 
         // when
         List<ReplyResponse> replyResponseList = replyService.getReplyList(1L, 0, 10);
 
         // then
-        verify(replyRepository, times(1)).findAllByFeedId(1L, PageRequest.of(0, 10));
+        verify(replyRepository, times(1)).findAllByFeedIdOrderByCreatedAtDesc(1L, PageRequest.of(0, 10));
         assertEquals(replyResponseList.size(), 1);
     }
 
