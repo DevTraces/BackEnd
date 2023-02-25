@@ -75,12 +75,21 @@ public class NoticeService {
             Long sendUserId, Long feedId,
             Long replyId, Long reReplyId
     ) {
+        User sendUser = getUser(sendUserId);
         Feed feed = getFeed(feedId);
         Reply reply = getReply(replyId);
-        User sendUser = getUser(sendUserId);
         Rereply reReply = getReReply(reReplyId);
 
         // feed 주인에게 알림 저장
+        saveNoticeForFeedOwner(sendUser, feed, reply, reReply);
+
+        // 댓글 주인에게 알림 저장
+        saveNoticeForReplyOwner(sendUser, feed, reply, reReply);
+    }
+
+    public void saveNoticeForFeedOwner(
+            User sendUser, Feed feed, Reply reply, Rereply reReply
+    ) {
         noticeRepository.save(
                 buildReReplyNotice(
                         feed.getUser().getId(), // 대댓글 달린 피드 주인
@@ -92,8 +101,11 @@ public class NoticeService {
                         NoticeTarget.POST // 피드 주인을 대상으로 함
                 )
         );
+    }
 
-        // 댓글 주인에게 알림 저장
+    public void saveNoticeForReplyOwner(
+            User sendUser, Feed feed, Reply reply, Rereply reReply
+    ) {
         noticeRepository.save(
                 buildReReplyNotice(
                         reply.getUser().getId(), // 대댓글 달린 댓글 주인
