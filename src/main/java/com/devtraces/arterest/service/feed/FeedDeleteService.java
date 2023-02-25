@@ -83,9 +83,9 @@ public class FeedDeleteService {
 		}*/
 
 		// 댓글 삭제
-		replyRepository.deleteAllByIdIn(
+		/*replyRepository.deleteAllByIdIn(
 			feed.getReplyList().stream().map(Reply::getId).collect(Collectors.toList())
-		);
+		);*/
 
 		// 피드 삭제.
 		// feedRepository.deleteById(feedId);
