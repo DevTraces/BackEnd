@@ -8,6 +8,7 @@ import java.util.HashMap;
 import com.devtraces.arterest.controller.auth.dto.TokenWithNicknameDto;
 import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,7 +38,7 @@ public class OauthController {
         hashMap.put(ACCESS_TOKEN_PREFIX, TOKEN_PREFIX + " " + dto.getAccessToken());
         hashMap.put("nickname", dto.getNickname());
 
-        response.addHeader("Cookie", dto.getCookie().toString());
+        response.setHeader(HttpHeaders.SET_COOKIE, dto.getCookie().toString());
 
         return ResponseEntity.ok()
             .body(ApiSuccessResponse.from(hashMap));

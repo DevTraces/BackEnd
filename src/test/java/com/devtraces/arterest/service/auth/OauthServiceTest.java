@@ -67,7 +67,7 @@ class OauthServiceTest {
 
         TokenDto tokenDto = TokenDto.builder()
                 .accessToken("accessToken")
-                .responseCookie(
+                .cookie(
                         ResponseCookie.from("refreshToken", "refresh-token")
                                 .build()
                 )
@@ -125,7 +125,7 @@ class OauthServiceTest {
 
         TokenDto tokenDto = TokenDto.builder()
                 .accessToken("accessToken")
-                .responseCookie(
+                .cookie(
                         ResponseCookie.from("refreshToken", "refresh-token")
                                 .build()
                 )
@@ -142,7 +142,7 @@ class OauthServiceTest {
 
         //then
         assertEquals(tokenDto.getAccessToken(), response.getAccessToken());
-        assertEquals(tokenDto.getResponseCookie(), response.getResponseCookie());
+        assertEquals(tokenDto.getCookie(), response.getCookie());
         assertEquals(user.getNickname(), response.getNickname());
     }
 

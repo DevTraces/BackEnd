@@ -77,16 +77,11 @@ public class JwtProvider {
 	}
 
 	private ResponseCookie generateCookie(String refreshToken) {
-//		Cookie cookie = new Cookie("refreshToken", refreshToken);
-//
-//		cookie.setHttpOnly(true);
-//		cookie.setPath("/");
 
 		ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
 			.httpOnly(true)
 			.path("/")
 //			.maxAge(CREATE_AGE)
-//			.domain("localhost:3000")
 //			.secure(true)
 //			.sameSite(SameSite.NONE.attributeValue())
 			.build();

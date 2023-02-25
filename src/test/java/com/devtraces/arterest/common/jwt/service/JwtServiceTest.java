@@ -37,7 +37,7 @@ class JwtServiceTest {
 	void testReissue() {
 		TokenDto mockTokenDto = TokenDto.builder()
 			.accessToken("access-token2")
-			.responseCookie(ResponseCookie.from("freshToken", "refresh-token2").build())
+			.cookie(ResponseCookie.from("freshToken", "refresh-token2").build())
 			.build();
 		given(jwtProvider.getUserId(anyString()))
 			.willReturn("1");
@@ -53,7 +53,7 @@ class JwtServiceTest {
 		TokenWithNicknameDto dto = jwtService.reissue("access-token", "refresh-token");
 
 		assertEquals("access-token2", dto.getAccessToken());
-		assertEquals("refresh-token2", dto.getResponseCookie().getValue());
+		assertEquals("refresh-token2", dto.getCookie().getValue());
 	}
 
 	// 유효하지 않은 토큰인 경우
