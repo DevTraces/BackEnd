@@ -40,7 +40,7 @@ public class SearchService {
 
 	// 1분 간격으로 게시물 테이블의 모든 해시태그를 파싱하여, Trie 구조로 redis 에 저장함.
 	@Transactional
-//	@Scheduled(cron = "0 * * * * *")
+	@Scheduled(cron = "0 * * * * *")
 	public void createAutoCompleteWords() {
 		List<Hashtag> hashtagList = hashtagRepository.findAll();
 		saveAllHashtags(hashtagList);
