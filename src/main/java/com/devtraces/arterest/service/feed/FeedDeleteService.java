@@ -70,7 +70,7 @@ public class FeedDeleteService {
 		likeRepository.deleteAllByFeedId(feedId);*/
 
 		// 북마크 테이블에서 정보 모두 삭제
-		bookmarkRepository.deleteAllByFeedId(feedId);
+		// bookmarkRepository.deleteAllByFeedId(feedId);
 
 		// 대댓글 삭제
 		for(Reply reply : feed.getReplyList()){
