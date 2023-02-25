@@ -30,26 +30,24 @@ public class FeedDeleteService {
 	private final LikeRepository likeRepository;
 	private final BookmarkRepository bookmarkRepository;
 	private final LikeNumberCacheRepository likeNumberCacheRepository;
-	private final S3Service s3Service;
 	private final FeedHashtagMapRepository feedHashtagMapRepository;
 	private final HashtagRepository hashtagRepository;
 
-	// TODO 스프링 @Async를 사용해서 비동기 멀티 스레딩으로 처리하면 응답지연시간 최소화 가능.
 	@Transactional
 	public void deleteFeed(Long userId, Long feedId){
-		Feed feed = feedRepository.findById(feedId).orElseThrow(
+		/*Feed feed = feedRepository.findById(feedId).orElseThrow(
 			() -> BaseException.FEED_NOT_FOUND
 		);
 		if(!Objects.equals(feed.getUser().getId(), userId)){
 			throw BaseException.USER_INFO_NOT_MATCH;
-		}
+		}*/
 
-		// S3에 올려놨던 사진들을 전부 삭제한다.
+		/*// S3에 올려놨던 사진들을 전부 삭제한다.
 		if(!feed.getImageUrls().equals("")){
 			for(String deleteTargetUrl : feed.getImageUrls().split(",")){
 				s3Service.deleteImage(deleteTargetUrl);
 			}
-		}
+		}*/
 		
 		// 삭제될 FeedHashtagMap 데이터 목록을 가져옴.
 		List<FeedHashtagMap> feedHashtagMapList = feedHashtagMapRepository.findByFeed(feed);
