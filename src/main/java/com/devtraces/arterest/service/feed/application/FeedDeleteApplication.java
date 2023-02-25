@@ -7,6 +7,7 @@ import com.devtraces.arterest.model.likecache.LikeNumberCacheRepository;
 import com.devtraces.arterest.service.feed.FeedDeleteService;
 import com.devtraces.arterest.service.feed.FeedReadService;
 import com.devtraces.arterest.service.hashtag.HashtagService;
+import com.devtraces.arterest.service.like.LikeService;
 import com.devtraces.arterest.service.s3.S3Service;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ public class FeedDeleteApplication {
     private final FeedReadService feedReadService;
     private final S3Service s3Service;
     private final HashtagService hashtagService;
+    private final LikeService likeService;
 
     // TODO 스프링 @Async를 사용해서 비동기 멀티 스레딩으로 처리하면 응답지연시간 최소화 가능.
     @Transactional
@@ -40,6 +42,9 @@ public class FeedDeleteApplication {
 
         // 해시태그 관련 정보들을 전부 삭제한다.
         hashtagService.deleteHashtagRelatedData(feed);
+
+        // 좋아요 관련 정보들을 전부 삭제한다.
+        likeService.deleteLikeRelatedData(feedId);
 
         // 피드 삭제.
         feedDeleteService.deleteFeedEntity(feedId);

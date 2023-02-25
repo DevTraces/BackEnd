@@ -63,11 +63,11 @@ public class FeedDeleteService {
 		// 사용되지 않는 Hashtag 삭제.
 		deleteNotUsingHashtag(feedHashtagMapList);*/
 
-		// 레디스에서 좋아요 개수 기록한 키-밸류 쌍 삭제.
+		/*// 레디스에서 좋아요 개수 기록한 키-밸류 쌍 삭제.
 		likeNumberCacheRepository.deleteLikeNumberInfo(feedId);
 
 		// 좋아요 테이블에서 정보 모두 삭제
-		likeRepository.deleteAllByFeedId(feedId);
+		likeRepository.deleteAllByFeedId(feedId);*/
 
 		// 북마크 테이블에서 정보 모두 삭제
 		bookmarkRepository.deleteAllByFeedId(feedId);
