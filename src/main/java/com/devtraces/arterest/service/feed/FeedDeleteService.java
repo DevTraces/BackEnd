@@ -73,14 +73,14 @@ public class FeedDeleteService {
 		// bookmarkRepository.deleteAllByFeedId(feedId);
 
 		// 대댓글 삭제
-		for(Reply reply : feed.getReplyList()){
+		/*for(Reply reply : feed.getReplyList()){
 			if(reply.getRereplyList().size() > 0){
 				rereplyRepository.deleteAllByIdIn(
 					reply.getRereplyList().stream().map(Rereply::getId)
 						.collect(Collectors.toList())
 				);
 			}
-		}
+		}*/
 
 		// 댓글 삭제
 		replyRepository.deleteAllByIdIn(

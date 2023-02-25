@@ -2,6 +2,7 @@ package com.devtraces.arterest.service.rereply;
 
 import com.devtraces.arterest.common.constant.CommonConstant;
 import com.devtraces.arterest.common.exception.BaseException;
+import com.devtraces.arterest.model.feed.Feed;
 import com.devtraces.arterest.model.reply.Reply;
 import com.devtraces.arterest.model.reply.ReplyRepository;
 import com.devtraces.arterest.model.rereply.Rereply;
@@ -80,6 +81,18 @@ public class RereplyService {
             throw BaseException.USER_INFO_NOT_MATCH;
         }
         rereplyRepository.deleteById(rereplyId);
+    }
+
+    @Transactional
+    public void deleteAllFeedRelatedRereply(Feed feed){
+        for(Reply reply : feed.getReplyList()){
+            if(reply.getRereplyList().size() > 0){
+                rereplyRepository.deleteAllByIdIn(
+                    reply.getRereplyList().stream().map(Rereply::getId)
+                        .collect(Collectors.toList())
+                );
+            }
+        }
     }
 
     private void validateRereplyRequest(RereplyRequest rereplyRequest) {
