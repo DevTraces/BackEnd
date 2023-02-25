@@ -2,8 +2,6 @@ package com.devtraces.arterest.service.feed.application;
 
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.model.feed.Feed;
-import com.devtraces.arterest.model.feed.FeedRepository;
-import com.devtraces.arterest.model.likecache.LikeNumberCacheRepository;
 import com.devtraces.arterest.service.bookmark.BookmarkService;
 import com.devtraces.arterest.service.feed.FeedDeleteService;
 import com.devtraces.arterest.service.feed.FeedReadService;
