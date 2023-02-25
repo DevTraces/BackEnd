@@ -208,7 +208,7 @@ public class FeedService {
         return FeedUpdateResponse.from( feedRepository.save(feed), hashtagList, content );
     }
 
-    private static void validateContentAndHashtagList(String content, List<String> hashtagList) {
+    private void validateContentAndHashtagList(String content, List<String> hashtagList) {
         if(content.length() > CommonConstant.CONTENT_LENGTH_LIMIT){
             throw BaseException.CONTENT_LIMIT_EXCEED;
         }

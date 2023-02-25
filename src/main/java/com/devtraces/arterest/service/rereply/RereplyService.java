@@ -29,12 +29,7 @@ public class RereplyService {
     @Transactional
     public RereplyResponse createRereply(
         Long userId, Long feedId, Long replyId, RereplyRequest rereplyRequest) {
-        if(rereplyRequest.getContent() == null || rereplyRequest.getContent().equals("")){
-            throw BaseException.NULL_AND_EMPTY_STRING_NOT_ALLOWED;
-        }
-        if(rereplyRequest.getContent().length() > CommonConstant.CONTENT_LENGTH_LIMIT){
-            throw BaseException.CONTENT_LIMIT_EXCEED;
-        }
+        validateRereplyRequest(rereplyRequest);
         User authorUser = userRepository.findById(userId).orElseThrow(
             () -> BaseException.USER_NOT_FOUND
         );
@@ -65,12 +60,7 @@ public class RereplyService {
     public RereplyResponse updateRereply(
         Long userId, Long feedId, Long rereplyId, RereplyRequest rereplyRequest
     ) {
-        if(rereplyRequest.getContent() == null || rereplyRequest.getContent().equals("")){
-            throw BaseException.NULL_AND_EMPTY_STRING_NOT_ALLOWED;
-        }
-        if(rereplyRequest.getContent().length() > CommonConstant.CONTENT_LENGTH_LIMIT){
-            throw BaseException.CONTENT_LIMIT_EXCEED;
-        }
+        validateRereplyRequest(rereplyRequest);
         Rereply rereply = rereplyRepository.findById(rereplyId).orElseThrow(
             () -> BaseException.REREPLY_NOT_FOUND
         );
@@ -90,5 +80,14 @@ public class RereplyService {
             throw BaseException.USER_INFO_NOT_MATCH;
         }
         rereplyRepository.deleteById(rereplyId);
+    }
+
+    private void validateRereplyRequest(RereplyRequest rereplyRequest) {
+        if(rereplyRequest.getContent() == null || rereplyRequest.getContent().equals("")){
+            throw BaseException.NULL_AND_EMPTY_STRING_NOT_ALLOWED;
+        }
+        if(rereplyRequest.getContent().length() > CommonConstant.CONTENT_LENGTH_LIMIT){
+            throw BaseException.CONTENT_LIMIT_EXCEED;
+        }
     }
 }

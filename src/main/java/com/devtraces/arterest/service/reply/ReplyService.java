@@ -31,9 +31,7 @@ public class ReplyService {
 
     @Transactional
     public ReplyResponse createReply(Long userId, Long feedId, ReplyRequest replyRequest) {
-        if(replyRequest.getContent() == null || replyRequest.getContent().equals("")){
-            throw BaseException.NULL_AND_EMPTY_STRING_NOT_ALLOWED;
-        }
+        validateReplyRequest(replyRequest);
         if(replyRequest.getContent().length() > CommonConstant.CONTENT_LENGTH_LIMIT){
             throw BaseException.CONTENT_LIMIT_EXCEED;
         }
@@ -61,9 +59,7 @@ public class ReplyService {
 
     @Transactional
     public ReplyResponse updateReply(Long userId, Long replyId, ReplyRequest replyRequest) {
-        if(replyRequest.getContent() == null || replyRequest.getContent().equals("")){
-            throw BaseException.NULL_AND_EMPTY_STRING_NOT_ALLOWED;
-        }
+        validateReplyRequest(replyRequest);
         if(replyRequest.getContent().length() > CommonConstant.CONTENT_LENGTH_LIMIT){
             throw BaseException.CONTENT_LIMIT_EXCEED;
         }
@@ -96,5 +92,11 @@ public class ReplyService {
 
         // 댓글을 삭제한다.
         replyRepository.deleteById(replyId);
+    }
+
+    private static void validateReplyRequest(ReplyRequest replyRequest) {
+        if(replyRequest.getContent() == null || replyRequest.getContent().equals("")){
+            throw BaseException.NULL_AND_EMPTY_STRING_NOT_ALLOWED;
+        }
     }
 }
