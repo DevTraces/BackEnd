@@ -53,7 +53,8 @@ public class ReplyService {
 
     @Transactional(readOnly = true)
     public List<ReplyResponse> getReplyList(Long feedId, Integer page, Integer pageSize) {
-        return replyRepository.findAllByFeedId(feedId, PageRequest.of(page, pageSize))
+        return replyRepository
+            .findAllByFeedIdOrderByCreatedAtDesc(feedId, PageRequest.of(page, pageSize))
             .getContent().stream().map(ReplyResponse::from).collect(Collectors.toList());
     }
 
