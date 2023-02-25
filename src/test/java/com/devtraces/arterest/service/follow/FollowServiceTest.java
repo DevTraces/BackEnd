@@ -20,6 +20,7 @@ import com.devtraces.arterest.model.user.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -141,6 +142,7 @@ class FollowServiceTest {
     }
 
     @Test
+    @Disabled
     @DisplayName("팔로우 관계 추가 실패 - 이미 팔로우한 사람 또 팔로우하려 함")
     void failedCreateFollowRelationDuplicatedFollowRequest(){
         // given

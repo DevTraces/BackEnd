@@ -28,8 +28,7 @@ import org.hibernate.envers.AuditOverride;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AuditOverride(forClass = BaseEntity.class)
 @Table(
-    name = "follow", indexes = @Index(name = "following_id_index", columnList = "following_id"),
-    uniqueConstraints = @UniqueConstraint(columnNames = { "user_id", "following_id" })
+    name = "follow", indexes = @Index(name = "following_id_index", columnList = "following_id")
 )
 @Entity
 public class Follow extends BaseEntity {

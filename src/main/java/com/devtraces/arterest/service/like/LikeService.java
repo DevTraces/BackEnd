@@ -27,21 +27,17 @@ public class LikeService {
     @Transactional
     public void pressLikeOnFeed(Long userId, Long feedId) {
         validateFeedExistence(feedId);
-        // 유니크키 제약조건이 이미 Likes 테이블에 걸려 있지만, 이것만으로는
-        // FE에 "중복 좋아요"라는 예외 메시지를 전달하지 못하고 그저 인터널 서버 에러라고만 뜸.
-        // TODO 중복 좋아요 및 팔로우에 대한 적절한 예외처리 방법 결정후 수정 필요.
-        if(likeRepository.existsByUserIdAndFeedId(userId, feedId)){
-            throw BaseException.DUPLICATED_FOLLOW_OR_LIKE;
+        if(!likeRepository.existsByUserIdAndFeedId(userId, feedId)){
+            // 중복 좋아요가 아닌 경우에만 실제 좋아요 요청이 처리 됨.
+            // 예외를 던지지 않게 함.
+            likeRepository.save(
+                Likes.builder()
+                    .feedId(feedId)
+                    .userId(userId)
+                    .build()
+            );
+            likeNumberCacheRepository.plusOneLike(feedId);
         }
-
-        likeRepository.save(
-            Likes.builder()
-                .feedId(feedId)
-                .userId(userId)
-                .build()
-        );
-
-        likeNumberCacheRepository.plusOneLike(feedId);
     }
 
     // TODO 좋아요 취소에 대해서는 따로 알림을 보낼 필요가 없다고 생각됨.
@@ -57,7 +53,6 @@ public class LikeService {
         likeNumberCacheRepository.minusOneLike(feedId);
     }
 
-    // TODO : AuthenticationPrincipal userId가 실제 좋아요 누른 유저 리스트 가져오기 API에서 사용되지 않음.
     @Transactional(readOnly = true)
     public List<LikeResponse> getLikedUserList(
         Long userId, Long feedId, int page, int pageSize
