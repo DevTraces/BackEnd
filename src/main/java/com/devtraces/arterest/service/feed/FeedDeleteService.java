@@ -34,6 +34,11 @@ public class FeedDeleteService {
 	private final HashtagRepository hashtagRepository;
 
 	@Transactional
+	public void deleteFeedEntity(Long feedId){
+		feedRepository.deleteById(feedId);
+	}
+
+	@Transactional
 	public void deleteFeed(Long userId, Long feedId){
 		/*Feed feed = feedRepository.findById(feedId).orElseThrow(
 			() -> BaseException.FEED_NOT_FOUND

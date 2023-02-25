@@ -28,7 +28,7 @@ public class HashtagService {
         deleteNotUsingHashtag(feedHashtagMapList);
     }
 
-    void deleteNotUsingHashtag(List<FeedHashtagMap> feedHashtagMapList){
+    public void deleteNotUsingHashtag(List<FeedHashtagMap> feedHashtagMapList){
         // 삭제된 FeedHashtagMap의 feedId에 매핑된 hashtagId가 더이상 FeedHashtagMap에 존재하지 않을 경우,
         // 해당 hastagId를 Hashtag 테이블에서 삭제함.
         for (FeedHashtagMap feedHashtagMap : feedHashtagMapList) {

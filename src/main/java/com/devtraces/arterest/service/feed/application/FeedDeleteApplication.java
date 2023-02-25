@@ -3,6 +3,9 @@ package com.devtraces.arterest.service.feed.application;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.model.feed.Feed;
 import com.devtraces.arterest.model.feed.FeedRepository;
+import com.devtraces.arterest.model.likecache.LikeNumberCacheRepository;
+import com.devtraces.arterest.service.feed.FeedDeleteService;
+import com.devtraces.arterest.service.feed.FeedReadService;
 import com.devtraces.arterest.service.hashtag.HashtagService;
 import com.devtraces.arterest.service.s3.S3Service;
 import java.util.Objects;
@@ -14,16 +17,16 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class FeedDeleteApplication {
 
-    private final FeedRepository feedRepository;
+    private final FeedDeleteService feedDeleteService;
+    private final FeedReadService feedReadService;
     private final S3Service s3Service;
     private final HashtagService hashtagService;
 
     // TODO 스프링 @Async를 사용해서 비동기 멀티 스레딩으로 처리하면 응답지연시간 최소화 가능.
     @Transactional
     public void deleteFeed(Long userId, Long feedId){
-        Feed feed = feedRepository.findById(feedId).orElseThrow(
-            () -> BaseException.FEED_NOT_FOUND
-        );
+        Feed feed = feedReadService.getOneFeedEntity(feedId);
+
         if(!Objects.equals(feed.getUser().getId(), userId)){
             throw BaseException.USER_INFO_NOT_MATCH;
         }
@@ -39,7 +42,7 @@ public class FeedDeleteApplication {
         hashtagService.deleteHashtagRelatedData(feed);
 
         // 피드 삭제.
-        feedRepository.deleteById(feedId);
+        feedDeleteService.deleteFeedEntity(feedId);
     }
 
 }
