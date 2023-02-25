@@ -35,9 +35,11 @@ public class FeedReadService {
 		Set<Long> bookmarkedFeedSet = getBookmarkedFeedSet(userId);
 		Long targetUserId = userRepository.findByNickname(nickname)
 			.orElseThrow(() -> BaseException.USER_NOT_FOUND).getId();
-		return feedRepository.findAllByUserId(targetUserId, PageRequest.of(page, pageSize)).stream().map(
+		return feedRepository
+			.findAllByUserIdOrderByCreatedAtDesc(targetUserId, PageRequest.of(page, pageSize))
+			.getContent().stream().map(
 			feed -> {
-				Long likeNumber = getOrCacheLikeNumber(feed.getId(), feed);
+				Long likeNumber = getOrCacheLikeNumber(feed);
 				return FeedResponse.from(feed, likedFeedSet, likeNumber, bookmarkedFeedSet);
 			}
 		).collect(Collectors.toList());
@@ -48,7 +50,7 @@ public class FeedReadService {
 		Set<Long> likedFeedSet = getLikedFeedSet(userId);
 		Set<Long> bookmarkedFeedSet = getBookmarkedFeedSet(userId);
 		Feed feed = feedRepository.findById(feedId).orElseThrow(() -> BaseException.FEED_NOT_FOUND);
-		Long likeNumber = getOrCacheLikeNumber(feedId, feed);
+		Long likeNumber = getOrCacheLikeNumber(feed);
 
 		return FeedResponse.from(
 			feed, likedFeedSet, likeNumber, bookmarkedFeedSet
@@ -56,10 +58,10 @@ public class FeedReadService {
 	}
 
 	// 피드 별 좋아요 개수는 레디스를 먼저 보게 만들고, 그게 불가능 할때만 Like 테이블에서 찾도록 한다.
-	private Long getOrCacheLikeNumber(Long feedId, Feed feed) {
-		Long likeNumber = likeNumberCacheRepository.getFeedLikeNumber(feedId);
+	private Long getOrCacheLikeNumber(Feed feed) {
+		Long likeNumber = likeNumberCacheRepository.getFeedLikeNumber(feed.getId());
 		if(likeNumber == null) {
-			likeNumber = likeRepository.countByFeedId(feedId);
+			likeNumber = likeRepository.countByFeedId(feed.getId());
 			likeNumberCacheRepository.setLikeNumber(feed.getId(), likeNumber);
 		}
 		return likeNumber;
