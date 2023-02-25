@@ -19,14 +19,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "likes", indexes = @Index(name = "user_id_index", columnList = "user_id"),
-    uniqueConstraints={
-        @UniqueConstraint(
-            name="feed_id_user_id_unique",
-            columnNames={"feed_id", "user_id"}
-        )
-    }
-)
+@Table(name = "likes", indexes = @Index(name = "user_id_index", columnList = "user_id"))
 @Entity
 public class Likes extends BaseEntity {
 
