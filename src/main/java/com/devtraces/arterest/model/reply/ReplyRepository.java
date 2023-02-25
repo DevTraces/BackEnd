@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ReplyRepository extends JpaRepository<Reply, Long> {
 
-    Slice<Reply> findAllByFeedId(Long feedId, PageRequest pageRequest);
+    Slice<Reply> findAllByFeedIdOrderByCreatedAtDesc(Long feedId, PageRequest pageRequest);
 
     void deleteAllByIdIn(Collection<Long> id);
 

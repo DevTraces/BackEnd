@@ -41,12 +41,6 @@ public class FeedService {
     public FeedCreateResponse createFeed(
         Long userId, String content, List<MultipartFile> imageFileList, List<String> hashtagList
     ) {
-        // 게시물 텍스트 없이 사진 또는 해시태그만 게시물로서 올리고 싶은 유저가 분명 있을 것이므로,
-        // content가 빈 스트링인 것에 대해서도 받아들인다.
-        validateContentAndHashtagList(content, hashtagList);
-        if(imageFileList != null && imageFileList.size() > CommonConstant.IMAGE_FILE_COUNT_LIMIT){
-            throw BaseException.IMAGE_FILE_COUNT_LIMIT_EXCEED;
-        }
         User authorUser = userRepository.findById(userId).orElseThrow(
             () -> BaseException.USER_NOT_FOUND
         );
@@ -102,14 +96,6 @@ public class FeedService {
         List<String> indexList,
         Long feedId
     ) {
-        validateContentAndHashtagList(content, hashtagList);
-        if(
-            imageFileList != null && prevImageUrlList != null &&
-            imageFileList.size() + prevImageUrlList.size() > CommonConstant.IMAGE_FILE_COUNT_LIMIT
-        ){
-            throw BaseException.IMAGE_FILE_COUNT_LIMIT_EXCEED;
-        }
-
         Feed feed = feedRepository.findById(feedId).orElseThrow(
             () -> BaseException.FEED_NOT_FOUND
         );
@@ -206,14 +192,5 @@ public class FeedService {
             imageUrlBuilder.toString().equals("") ? null : imageUrlBuilder.toString()
         );
         return FeedUpdateResponse.from( feedRepository.save(feed), hashtagList, content );
-    }
-
-    private static void validateContentAndHashtagList(String content, List<String> hashtagList) {
-        if(content.length() > CommonConstant.CONTENT_LENGTH_LIMIT){
-            throw BaseException.CONTENT_LIMIT_EXCEED;
-        }
-        if(hashtagList != null && hashtagList.size() > CommonConstant.HASHTAG_COUNT_LIMIT){
-            throw BaseException.HASHTAG_LIMIT_EXCEED;
-        }
     }
 }

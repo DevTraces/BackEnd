@@ -11,17 +11,12 @@ import com.devtraces.arterest.model.bookmark.Bookmark;
 import com.devtraces.arterest.model.bookmark.BookmarkRepository;
 import com.devtraces.arterest.model.feed.Feed;
 import com.devtraces.arterest.model.feed.FeedRepository;
-import com.devtraces.arterest.model.feedhashtagmap.FeedHashtagMapRepository;
-import com.devtraces.arterest.model.hashtag.HashtagRepository;
 import com.devtraces.arterest.model.like.LikeRepository;
 import com.devtraces.arterest.model.like.Likes;
 import com.devtraces.arterest.model.likecache.LikeNumberCacheRepository;
 import com.devtraces.arterest.model.reply.Reply;
-import com.devtraces.arterest.model.reply.ReplyRepository;
-import com.devtraces.arterest.model.rereply.RereplyRepository;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
-import com.devtraces.arterest.service.s3.S3Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -82,7 +77,7 @@ class FeedReadServiceTest {
 
         Slice<Feed> slice = new PageImpl<>(feedList);
 
-        given(feedRepository.findAllByUserId(1L, PageRequest.of(0, 10))).willReturn(slice);
+        given(feedRepository.findAllByUserIdOrderByCreatedAtDesc(1L, PageRequest.of(0, 10))).willReturn(slice);
         given(userRepository.findByNickname("dongvin99")).willReturn(Optional.of(user));
         given(likeNumberCacheRepository.getFeedLikeNumber(1L)).willReturn(0L);
         //given(likeRepository.countByFeedId(1L)).willReturn(0L);
@@ -92,7 +87,7 @@ class FeedReadServiceTest {
 
         //then
         verify(likeNumberCacheRepository, times(1)).getFeedLikeNumber(1L);
-        verify(feedRepository, times(1)).findAllByUserId(1L, PageRequest.of(0, 10));
+        verify(feedRepository, times(1)).findAllByUserIdOrderByCreatedAtDesc(1L, PageRequest.of(0, 10));
         assertEquals(feedResponseList.size(), 1);
     }
 
@@ -127,7 +122,7 @@ class FeedReadServiceTest {
 
         Slice<Feed> slice = new PageImpl<>(feedList);
 
-        given(feedRepository.findAllByUserId(1L, PageRequest.of(0, 10))).willReturn(slice);
+        given(feedRepository.findAllByUserIdOrderByCreatedAtDesc(1L, PageRequest.of(0, 10))).willReturn(slice);
         given(userRepository.findByNickname("dongvin99")).willReturn(Optional.of(user));
         given(likeNumberCacheRepository.getFeedLikeNumber(1L)).willReturn(null);
         given(likeRepository.countByFeedId(1L)).willReturn(0L);
@@ -140,7 +135,7 @@ class FeedReadServiceTest {
         verify(likeNumberCacheRepository, times(1)).getFeedLikeNumber(1L);
         verify(likeRepository, times(1)).countByFeedId(1L);
         verify(likeNumberCacheRepository, times(1)).setLikeNumber(1L, 0L);
-        verify(feedRepository, times(1)).findAllByUserId(1L, PageRequest.of(0, 10));
+        verify(feedRepository, times(1)).findAllByUserIdOrderByCreatedAtDesc(1L, PageRequest.of(0, 10));
         assertEquals(feedResponseList.size(), 1);
     }
 
