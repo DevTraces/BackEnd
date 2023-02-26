@@ -120,7 +120,7 @@ public class NoticeService {
         );
     }
 
-    public NumberOfNoticeResponse getNumberOfNotices(Long noticeOwnerId) {
+    public NumberOfNoticeResponse getNumberOfNotice(Long noticeOwnerId) {
         return NumberOfNoticeResponse.from(
                 noticeRepository.countAllByNoticeOwnerId(noticeOwnerId)
         );

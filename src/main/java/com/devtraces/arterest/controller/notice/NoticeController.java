@@ -20,6 +20,6 @@ public class NoticeController {
     public ApiSuccessResponse<NumberOfNoticeResponse> getNumberOfNotices(
             @AuthenticationPrincipal Long userId
     ) {
-        return ApiSuccessResponse.from(noticeService.getNumberOfNotices(userId));
+        return ApiSuccessResponse.from(noticeService.getNumberOfNotice(userId));
     }
 }
