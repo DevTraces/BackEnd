@@ -9,12 +9,15 @@ import com.devtraces.arterest.model.rereply.Rereply;
 import com.devtraces.arterest.model.user.User;
 import lombok.*;
 import org.hibernate.envers.AuditOverride;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Getter
 @Builder
-@AuditOverride(forClass = BaseEntity.class)
+@EntityListeners(value = {AuditingEntityListener.class})
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
@@ -48,4 +51,7 @@ public class Notice extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private NoticeTarget noticeTarget;
+
+    @CreatedDate
+    private LocalDateTime createdAt;
 }
