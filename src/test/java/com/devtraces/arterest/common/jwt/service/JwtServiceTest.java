@@ -1,6 +1,7 @@
 package com.devtraces.arterest.common.jwt.service;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -9,9 +10,8 @@ import static org.mockito.BDDMockito.willDoNothing;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.jwt.JwtProvider;
 import com.devtraces.arterest.common.jwt.dto.TokenDto;
-import com.devtraces.arterest.service.auth.util.AuthRedisUtil;
-import com.devtraces.arterest.service.auth.AuthService;
 import com.devtraces.arterest.controller.auth.dto.TokenWithNicknameDto;
+import com.devtraces.arterest.service.auth.AuthService;
 import com.devtraces.arterest.service.auth.util.TokenRedisUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
