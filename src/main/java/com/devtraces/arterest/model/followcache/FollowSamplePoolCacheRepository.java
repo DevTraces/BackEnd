@@ -1,8 +1,9 @@
 package com.devtraces.arterest.model.followcache;
 
+import static com.devtraces.arterest.model.followcache.FollowRecommendCacheRepository.getLongs;
+
 import com.devtraces.arterest.common.constant.CommonConstant;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -33,14 +34,7 @@ public class FollowSamplePoolCacheRepository {
     // 레디스에 저장돼 있는 리스트를 반환한다.
     public List<Long> getSampleList(){
         try {
-            Long size = template.opsForList().size(key);
-            if(size != null){
-                List<String> listFromRedis = template.opsForList().range(key, 0, size);
-                assert listFromRedis != null;
-                return listFromRedis.stream().map(Long::valueOf).collect(Collectors.toList());
-            } else {
-                return null;
-            }
+            return getLongs(template, key);
         } catch (Exception e){
             log.error("레디스로부터 팔로우 샘플 리스트 획득 실패");
             return null;
