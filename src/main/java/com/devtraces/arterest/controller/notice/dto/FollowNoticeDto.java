@@ -1,5 +1,6 @@
-package com.devtraces.arterest.controller.notice.dto.response;
+package com.devtraces.arterest.controller.notice.dto;
 
+import com.devtraces.arterest.controller.notice.dto.response.NoticeListResponse;
 import com.devtraces.arterest.model.notice.Notice;
 import com.devtraces.arterest.model.user.User;
 import lombok.*;
@@ -20,7 +21,7 @@ public class FollowNoticeDto extends NoticeListResponse {
 
     private String createdAt;
 
-    public static FollowNoticeDto followNotice(Notice notice, boolean isFollowing) {
+    public static FollowNoticeDto convertToFollowNotice(Notice notice, boolean isFollowing) {
         User user = notice.getUser();
 
         return FollowNoticeDto.builder()

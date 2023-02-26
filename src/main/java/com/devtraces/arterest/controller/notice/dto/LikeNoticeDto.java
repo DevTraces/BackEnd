@@ -23,7 +23,7 @@ public class LikeNoticeDto extends NoticeListResponse {
 
     private String createdAt;
 
-    public static LikeNoticeDto likeNotice(Notice notice) {
+    public static LikeNoticeDto convertToLikeNotice(Notice notice) {
         Feed feed = notice.getFeed();
 
         return LikeNoticeDto.builder()

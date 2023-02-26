@@ -1,5 +1,6 @@
-package com.devtraces.arterest.controller.notice.dto.response;
+package com.devtraces.arterest.controller.notice.dto;
 
+import com.devtraces.arterest.controller.notice.dto.response.NoticeListResponse;
 import com.devtraces.arterest.model.feed.Feed;
 import com.devtraces.arterest.model.notice.Notice;
 import com.devtraces.arterest.model.reply.Reply;
@@ -25,7 +26,7 @@ public class ReplyNoticeDto extends NoticeListResponse {
 
     private String createdAt;
 
-    public static ReplyNoticeDto replyNotice(Notice notice) {
+    public static ReplyNoticeDto convertToReplyNotice(Notice notice) {
         User user = notice.getUser();
         Feed feed = notice.getFeed();
         Reply reply = notice.getReply();

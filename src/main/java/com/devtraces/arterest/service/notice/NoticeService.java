@@ -5,10 +5,10 @@ import com.devtraces.arterest.common.type.NoticeTarget;
 import com.devtraces.arterest.common.type.NoticeType;
 import com.devtraces.arterest.controller.notice.dto.LikeNoticeDto;
 import com.devtraces.arterest.controller.notice.dto.response.NoticeListResponse;
-import com.devtraces.arterest.controller.notice.dto.response.FollowNoticeDto;
+import com.devtraces.arterest.controller.notice.dto.FollowNoticeDto;
 import com.devtraces.arterest.controller.notice.dto.NumberOfNoticeResponse;
-import com.devtraces.arterest.controller.notice.dto.response.ReplyNoticeDto;
-import com.devtraces.arterest.controller.notice.dto.response.RereplyNoticeDto;
+import com.devtraces.arterest.controller.notice.dto.ReplyNoticeDto;
+import com.devtraces.arterest.controller.notice.dto.RereplyNoticeDto;
 import com.devtraces.arterest.model.feed.Feed;
 import com.devtraces.arterest.model.feed.FeedRepository;
 import com.devtraces.arterest.model.follow.FollowRepository;
@@ -145,7 +145,7 @@ public class NoticeService {
             NoticeType noticeType = notice.getNoticeType();
 
             if (noticeType.equals(NoticeType.LIKE)) {
-                noticeListResponse.add(LikeNoticeDto.likeNotice(notice));
+                noticeListResponse.add(LikeNoticeDto.convertToLikeNotice(notice));
             }
 
             if (noticeType.equals(NoticeType.FOLLOW)) {
@@ -155,16 +155,16 @@ public class NoticeService {
                                 noticeOwnerId, notice.getUser().getId()) != 0;
 
                 noticeListResponse.add(
-                        FollowNoticeDto.followNotice(notice, isFollowing)
+                        FollowNoticeDto.convertToFollowNotice(notice, isFollowing)
                 );
             }
 
             if (noticeType.equals(NoticeType.REPLY)) {
-                noticeListResponse.add(ReplyNoticeDto.replyNotice(notice));
+                noticeListResponse.add(ReplyNoticeDto.convertToReplyNotice(notice));
             }
 
             if (noticeType.equals(NoticeType.REREPLY)) {
-                noticeListResponse.add(RereplyNoticeDto.rereplyNotice(notice));
+                noticeListResponse.add(RereplyNoticeDto.convertToRereplyNotice(notice));
             }
         }
 
