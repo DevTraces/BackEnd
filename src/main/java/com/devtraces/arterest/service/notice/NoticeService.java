@@ -3,9 +3,15 @@ package com.devtraces.arterest.service.notice;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.type.NoticeTarget;
 import com.devtraces.arterest.common.type.NoticeType;
+import com.devtraces.arterest.controller.notice.dto.LikeNoticeDto;
+import com.devtraces.arterest.controller.notice.dto.response.NoticeListResponse;
+import com.devtraces.arterest.controller.notice.dto.response.FollowNoticeDto;
 import com.devtraces.arterest.controller.notice.dto.NumberOfNoticeResponse;
+import com.devtraces.arterest.controller.notice.dto.response.ReplyNoticeDto;
+import com.devtraces.arterest.controller.notice.dto.response.RereplyNoticeDto;
 import com.devtraces.arterest.model.feed.Feed;
 import com.devtraces.arterest.model.feed.FeedRepository;
+import com.devtraces.arterest.model.follow.FollowRepository;
 import com.devtraces.arterest.model.notice.Notice;
 import com.devtraces.arterest.model.notice.NoticeRepository;
 import com.devtraces.arterest.model.reply.Reply;
@@ -17,6 +23,9 @@ import com.devtraces.arterest.model.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class NoticeService {
@@ -26,6 +35,7 @@ public class NoticeService {
     private final FeedRepository feedRepository;
     private final ReplyRepository replyRepository;
     private final RereplyRepository rereplyRepository;
+    private final FollowRepository followRepository;
 
     public void createLikeNotice(
             Long sendUserId, Long feedId
@@ -124,6 +134,41 @@ public class NoticeService {
         return NumberOfNoticeResponse.from(
                 noticeRepository.countAllByNoticeOwnerId(noticeOwnerId)
         );
+    }
+
+    public List<NoticeListResponse> getNoticeList(Long noticeOwnerId) {
+        List<Notice> noticesOfNoticeOwner =
+                noticeRepository.findALlByNoticeOwnerId(noticeOwnerId);
+
+        List<NoticeListResponse> noticeListResponse = new ArrayList<>();
+        for (Notice notice : noticesOfNoticeOwner) {
+            NoticeType noticeType = notice.getNoticeType();
+
+            if (noticeType.equals(NoticeType.LIKE)) {
+                noticeListResponse.add(LikeNoticeDto.likeNotice(notice));
+            }
+
+            if (noticeType.equals(NoticeType.FOLLOW)) {
+                // 요청 보낸 사람을 내가 팔로우 중인지 아닌지
+                boolean isFollowing =
+                        followRepository.isFollowing(
+                                noticeOwnerId, notice.getUser().getId()) != 0;
+
+                noticeListResponse.add(
+                        FollowNoticeDto.followNotice(notice, isFollowing)
+                );
+            }
+
+            if (noticeType.equals(NoticeType.REPLY)) {
+                noticeListResponse.add(ReplyNoticeDto.replyNotice(notice));
+            }
+
+            if (noticeType.equals(NoticeType.REREPLY)) {
+                noticeListResponse.add(RereplyNoticeDto.rereplyNotice(notice));
+            }
+        }
+
+        return noticeListResponse;
     }
 
     private User getUser(Long userId) {
