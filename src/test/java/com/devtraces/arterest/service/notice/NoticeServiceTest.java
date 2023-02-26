@@ -4,6 +4,7 @@ import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.exception.ErrorCode;
 import com.devtraces.arterest.common.type.NoticeTarget;
 import com.devtraces.arterest.common.type.NoticeType;
+import com.devtraces.arterest.controller.notice.dto.NumberOfNoticeResponse;
 import com.devtraces.arterest.model.feed.Feed;
 import com.devtraces.arterest.model.feed.FeedRepository;
 import com.devtraces.arterest.model.notice.Notice;
@@ -532,5 +533,22 @@ class NoticeServiceTest {
 
         //then
         assertEquals(ErrorCode.REREPLY_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    void success_getNumberOfNotice() {
+        //given
+        Long noticeOwnerId = 1L;
+
+        Integer numberOfNotice = 10;
+        given(noticeRepository.countAllByNoticeOwnerId(anyLong()))
+                .willReturn(numberOfNotice);
+
+        //when
+        NumberOfNoticeResponse response =
+                noticeService.getNumberOfNotice(noticeOwnerId);
+
+        //then
+        assertEquals(numberOfNotice, response.getNoticeNumber());
     }
 }
