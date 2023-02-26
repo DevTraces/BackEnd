@@ -3,6 +3,7 @@ package com.devtraces.arterest.service.notice;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.type.NoticeTarget;
 import com.devtraces.arterest.common.type.NoticeType;
+import com.devtraces.arterest.controller.notice.dto.NumberOfNoticeResponse;
 import com.devtraces.arterest.model.feed.Feed;
 import com.devtraces.arterest.model.feed.FeedRepository;
 import com.devtraces.arterest.model.notice.Notice;
@@ -116,6 +117,12 @@ public class NoticeService {
                         NoticeType.REREPLY,
                         NoticeTarget.REPLY // 댓글 주인을 대상으로 함
                 )
+        );
+    }
+
+    public NumberOfNoticeResponse getNumberOfNotices(Long noticeOwnerId) {
+        return NumberOfNoticeResponse.from(
+                noticeRepository.countAllByNoticeOwnerId(noticeOwnerId)
         );
     }
 
