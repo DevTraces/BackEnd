@@ -5,8 +5,10 @@ import com.devtraces.arterest.common.exception.ErrorCode;
 import com.devtraces.arterest.common.type.NoticeTarget;
 import com.devtraces.arterest.common.type.NoticeType;
 import com.devtraces.arterest.controller.notice.dto.NumberOfNoticeResponse;
+import com.devtraces.arterest.controller.notice.dto.response.NoticeListResponse;
 import com.devtraces.arterest.model.feed.Feed;
 import com.devtraces.arterest.model.feed.FeedRepository;
+import com.devtraces.arterest.model.follow.FollowRepository;
 import com.devtraces.arterest.model.notice.Notice;
 import com.devtraces.arterest.model.notice.NoticeRepository;
 import com.devtraces.arterest.model.reply.Reply;
@@ -23,10 +25,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static com.devtraces.arterest.common.type.NoticeTarget.*;
 import static com.devtraces.arterest.common.type.NoticeType.*;
+import static com.devtraces.arterest.common.type.NoticeType.REPLY;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
@@ -46,6 +52,8 @@ class NoticeServiceTest {
     private ReplyRepository replyRepository;
     @Mock
     private RereplyRepository rereplyRepository;
+    @Mock
+    private FollowRepository followRepository;
     @InjectMocks
     private NoticeService noticeService;
 
@@ -102,7 +110,7 @@ class NoticeServiceTest {
         Notice notice = Notice.builder()
                 .noticeOwnerId(ownerUser.getId())
                 .user(user)
-                .noticeType(noticeType)
+                .noticeType(FOLLOW)
                 .build();
         given(noticeRepository.save(any())).willReturn(notice);
 
@@ -136,7 +144,7 @@ class NoticeServiceTest {
         Reply reply = Reply.builder().id(replyId).build();
         given(replyRepository.findById(anyLong())).willReturn(Optional.of(reply));
 
-        NoticeType noticeType = NoticeType.REPLY;
+        NoticeType noticeType = REPLY;
 
         Notice notice = Notice.builder()
                 .noticeOwnerId(feed.getUser().getId())
@@ -157,7 +165,7 @@ class NoticeServiceTest {
         assertEquals(sendUserId, captor.getValue().getUser().getId());
         assertEquals(feedId, captor.getValue().getFeed().getId());
         assertEquals(replyId, captor.getValue().getReply().getId());
-        assertEquals(NoticeType.REPLY, captor.getValue().getNoticeType());
+        assertEquals(REPLY, captor.getValue().getNoticeType());
     }
 
     @Test
@@ -264,8 +272,13 @@ class NoticeServiceTest {
     @DisplayName("좋아요 알림 생성 실패 - 존재하지 않는 사용자")
     void fail_createLikeNotice_USER_NOT_FOUND() {
         //given
-        Long sendUserId = 1L;
+        Long sendUserId = 35242L;
+
+        Long noticeOwnerId = 1L;
         Long feedId = 2L;
+        User ownerUser = User.builder().id(noticeOwnerId).build();
+        Feed feed = Feed.builder().id(feedId).user(ownerUser).build();
+        given(feedRepository.findById(anyLong())).willReturn(Optional.of(feed));
 
         given(userRepository.findById(anyLong())).willReturn(Optional.empty());
 
@@ -550,5 +563,244 @@ class NoticeServiceTest {
 
         //then
         assertEquals(numberOfNotice, response.getNoticeNumber());
+    }
+
+    @Test
+    @DisplayName("알림 리스트 조회 성공 - 좋아요 - 내 게시물에 좋아요 누름")
+    void success_getNoticeList_LIKE() {
+        //given
+        Long noticeOwnerId = 1L;
+        User noticeOwner = User.builder()
+                .id(noticeOwnerId)
+                .build();
+
+        Integer numberOfNotices = 1;
+
+        User likeOwner = User.builder()
+                .id(325L)
+                .nickname("likeNickname")
+                .profileImageUrl("likeProfileImageUrl")
+                .build();
+        Feed feed = Feed.builder()
+                .id(32409L)
+                .user(noticeOwner)
+                .imageUrls("first, second, third")
+                .content("feedContent")
+                .build();
+
+        List<Notice> noticeList = new ArrayList<>();
+        noticeList.add(Notice.builder()
+                .noticeOwnerId(noticeOwner.getId())
+                .user(likeOwner)
+                .feed(feed)
+                .noticeType(LIKE)
+                .createdAt(LocalDateTime.now())
+                .build());
+
+        given(noticeRepository.findALlByNoticeOwnerId(anyLong()))
+                .willReturn(noticeList);
+
+        //when
+        List<NoticeListResponse> responseList =
+                noticeService.getNoticeList(noticeOwnerId);
+
+        //then
+        assertEquals(numberOfNotices, responseList.size());
+    }
+
+    @Test
+    @DisplayName("알림 리스트 조회 성공 - 팔로우 - 내가 팔로우하는 사람이 팔로우 요청")
+    void success_getNoticeList_FOLLOW_ISFOLLOWING_TRUE() {
+        //given
+        Long noticeOwnerId = 1L;
+
+        Integer numberOfNotices = 1;
+
+        User followerUser = User.builder()
+                .id(325L)
+                .nickname("followerNickname")
+                .profileImageUrl("followerProfileImageUrl")
+                .build();
+
+        given(followRepository.isFollowing(anyLong(), anyLong()))
+                .willReturn(1);
+
+        List<Notice> noticeList = new ArrayList<>();
+        noticeList.add(Notice.builder()
+                .noticeOwnerId(noticeOwnerId)
+                .user(followerUser)
+                .noticeType(FOLLOW)
+                .createdAt(LocalDateTime.now())
+                .build());
+
+        given(noticeRepository.findALlByNoticeOwnerId(anyLong()))
+                .willReturn(noticeList);
+
+        //when
+        List<NoticeListResponse> responseList =
+                noticeService.getNoticeList(noticeOwnerId);
+
+        //then
+        assertEquals(numberOfNotices, responseList.size());
+    }
+
+    @Test
+    @DisplayName("알림 리스트 조회 성공 - 팔로우 - 내가 팔로우하지 않는 사람이 팔로우 요청")
+    void success_getNoticeList_FOLLOW_ISFOLLOWING_FALSE() {
+        //given
+        Long noticeOwnerId = 1L;
+
+        Integer numberOfNotices = 1;
+
+        User followerUser = User.builder()
+                .id(325L)
+                .nickname("followerNickname")
+                .profileImageUrl("followerProfileImageUrl")
+                .build();
+
+        given(followRepository.isFollowing(anyLong(), anyLong()))
+                .willReturn(0);
+
+        List<Notice> noticeList = new ArrayList<>();
+        noticeList.add(Notice.builder()
+                .noticeOwnerId(noticeOwnerId)
+                .user(followerUser)
+                .noticeType(FOLLOW)
+                .createdAt(LocalDateTime.now())
+                .build());
+
+        given(noticeRepository.findALlByNoticeOwnerId(anyLong()))
+                .willReturn(noticeList);
+
+        //when
+        List<NoticeListResponse> responseList =
+                noticeService.getNoticeList(noticeOwnerId);
+
+        //then
+        assertEquals(numberOfNotices, responseList.size());
+    }
+
+    @Test
+    @DisplayName("알림 리스트 조회 성공 - 댓글 - 내가 작성한 피드에 댓글 추가됨")
+    void success_getNoticeList_REPLY() {
+        //given
+        Long noticeOwnerId = 1L;
+        User noticeOwner = User.builder()
+                .id(noticeOwnerId)
+                .build();
+
+        Integer numberOfNotices = 1;
+
+        User replyOwner = User.builder()
+                .id(325L)
+                .nickname("replyNickname")
+                .profileImageUrl("replyProfileImageUrl")
+                .build();
+        Feed feed = Feed.builder()
+                .id(32409L)
+                .user(noticeOwner)
+                .imageUrls("first, second, third")
+                .content("feedContent")
+                .build();
+        Reply reply = Reply.builder()
+                .id(34792L)
+                .user(replyOwner)
+                .feed(feed)
+                .content("replyContent")
+                .build();
+
+        List<Notice> noticeList = new ArrayList<>();
+        noticeList.add(Notice.builder()
+                .noticeOwnerId(noticeOwnerId)
+                .user(replyOwner)
+                .feed(feed)
+                .reply(reply)
+                .noticeType(REPLY)
+                .createdAt(LocalDateTime.now())
+                .build());
+
+        given(noticeRepository.findALlByNoticeOwnerId(anyLong()))
+                .willReturn(noticeList);
+
+        //when
+        List<NoticeListResponse> responseList =
+                noticeService.getNoticeList(noticeOwnerId);
+
+        //then
+        assertEquals(numberOfNotices, responseList.size());
+    }
+
+    @Test
+    @DisplayName("알림 리스트 조회 성공 - 대댓글 - 내가 작성한 피드 혹은 댓글에 대댓글 추가됨")
+    void success_getNoticeList_REREPLY() {
+        //given
+        Long noticeOwnerId = 1L;
+        User feedOwner = User.builder()
+                .id(noticeOwnerId)
+                .build();
+
+        Integer numberOfNotices = 2;
+
+        User replyOwner = User.builder()
+                .id(325L)
+                .nickname("replyNickname")
+                .profileImageUrl("replyProfileImageUrl")
+                .build();
+        User rereplyOwner = User.builder().id(9383L)
+                .nickname("rereplyNickname")
+                .profileImageUrl("rereplyProfileImageUrl")
+                .build();
+
+        Feed feed = Feed.builder()
+                .id(32409L)
+                .user(feedOwner)
+                .imageUrls("first, second, third")
+                .content("feedContent")
+                .build();
+        Reply reply = Reply.builder()
+                .id(34792L)
+                .user(replyOwner)
+                .feed(feed)
+                .content("replyContent")
+                .build();
+        Rereply rereply = Rereply.builder()
+                .id(483729L)
+                .user(rereplyOwner)
+                .reply(reply)
+                .content("rereplyContent")
+                .build();
+
+        List<Notice> noticeList = new ArrayList<>();
+        LocalDateTime createdAt = LocalDateTime.now();
+        noticeList.add(Notice.builder()
+                .noticeOwnerId(noticeOwnerId)
+                .user(feedOwner)
+                .feed(feed)
+                .reply(reply)
+                .rereply(rereply)
+                .noticeType(REREPLY)
+                .noticeTarget(POST)
+                .createdAt(createdAt)
+                .build());
+        noticeList.add(Notice.builder()
+                .noticeOwnerId(noticeOwnerId)
+                .user(replyOwner)
+                .feed(feed)
+                .reply(reply)
+                .rereply(rereply)
+                .noticeType(REREPLY)
+                .noticeTarget(NoticeTarget.REPLY)
+                .createdAt(createdAt)
+                .build());
+
+        given(noticeRepository.findALlByNoticeOwnerId(anyLong()))
+                .willReturn(noticeList);
+
+        //when
+        List<NoticeListResponse> responseList =
+                noticeService.getNoticeList(noticeOwnerId);
+
+        //then
+        assertEquals(numberOfNotices, responseList.size());
     }
 }
