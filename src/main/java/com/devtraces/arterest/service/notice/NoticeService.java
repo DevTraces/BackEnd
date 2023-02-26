@@ -34,7 +34,7 @@ public class NoticeService {
         noticeRepository.save(
                 Notice.builder()
                         .noticeOwnerId(feed.getUser().getId()) // 좋아요 누른 피드의 주인
-                        .sendUser(getUser(sendUserId)) // 좋아요 누른 사용자
+                        .user(getUser(sendUserId)) // 좋아요 누른 사용자
                         .feed(feed)
                         .noticeType(NoticeType.LIKE)
                         .build()
@@ -49,7 +49,7 @@ public class NoticeService {
         noticeRepository.save(
                 Notice.builder()
                         .noticeOwnerId(ownerUser.getId()) // 팔로우 당한 사람
-                        .sendUser(getUser(sendUserId)) // 팔로우 한 사람
+                        .user(getUser(sendUserId)) // 팔로우 한 사람
                         .noticeType(NoticeType.FOLLOW)
                         .build()
         );
@@ -63,7 +63,7 @@ public class NoticeService {
         noticeRepository.save(
                 Notice.builder()
                         .noticeOwnerId(feed.getUser().getId()) // 댓글 단 피드의 주인
-                        .sendUser(getUser(sendUserId)) // 댓글 단 사람
+                        .user(getUser(sendUserId)) // 댓글 단 사람
                         .feed(feed)
                         .reply(getReply(replyId))
                         .noticeType(NoticeType.REPLY)
@@ -147,7 +147,7 @@ public class NoticeService {
     ) {
         return Notice.builder()
                 .noticeOwnerId(ownerUserId)
-                .sendUser(sendUser)
+                .user(sendUser)
                 .feed(feed)
                 .reply(reply)
                 .rereply(reReply)

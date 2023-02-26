@@ -29,7 +29,7 @@ public class Notice extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User sendUser; // 알림을 발생시킨 유저
+    private User user; // 알림을 발생시킨 유저
 
     @ManyToOne
     @JoinColumn(name = "feed_id")
