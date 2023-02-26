@@ -1,6 +1,6 @@
 package com.devtraces.arterest.model.followcache;
 
-import static com.devtraces.arterest.model.followcache.FollowRecommendCacheRepository.getLongs;
+import static com.devtraces.arterest.model.followcache.FollowRecommendationCacheRepository.getLongs;
 
 import com.devtraces.arterest.common.constant.CommonConstant;
 import java.util.List;

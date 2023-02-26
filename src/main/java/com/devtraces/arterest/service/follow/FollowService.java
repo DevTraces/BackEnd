@@ -5,13 +5,19 @@ import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.controller.follow.dto.response.FollowResponse;
 import com.devtraces.arterest.model.follow.Follow;
 import com.devtraces.arterest.model.follow.FollowRepository;
-import com.devtraces.arterest.model.followcache.FollowRecommendCacheRepository;
+import com.devtraces.arterest.model.followcache.FollowRecommendationCacheRepository;
 import com.devtraces.arterest.model.followcache.FollowSamplePoolCacheRepository;
+import com.devtraces.arterest.model.recommendation.FollowRecommendation;
+import com.devtraces.arterest.model.recommendation.FollowRecommendationRepository;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +33,8 @@ public class FollowService {
     private final FollowRepository followRepository;
     private final UserRepository userRepository;
     private final FollowSamplePoolCacheRepository followSamplePoolCacheRepository;
-    private final FollowRecommendCacheRepository followRecommendCacheRepository;
+    private final FollowRecommendationCacheRepository followRecommendationCacheRepository;
+    private final FollowRecommendationRepository followRecommendationRepository;
 
     @Transactional
     public void createFollowRelation(Long userId, String nickname) {
@@ -130,6 +137,43 @@ public class FollowService {
             .ifPresent(
                 follow -> followSamplePoolCacheRepository.pushSample(follow.getFollowingId())
             );
+    }
+
+    // 매 정각마다 followSamplePoolCacheRepository를 통해 레디스에 저장된
+    // 팔로우 추천 대상 유저 선별용 샘플 리스트의 내용을 바탕으로
+    // 최근 1시간 이내에 팔로우를 많이 받은 상위 일정 수 만큼의 유저들의 주키 아이디 값 리스트를 캐시해 둔다.
+    // 캐시서버가 다운되었을 경우를 대비하여 DB에도 저장해 둔다.
+    @Scheduled(cron = CommonConstant.INITIALIZE_RECOMMENDATION_LIST_TO_REDIS_CONE_STRING)
+    public void initializeFollowRecommendationTargetUserIdListToCacheServer(){
+        List<Long> sampleList = followSamplePoolCacheRepository.getSampleList();
+        if(sampleList != null){
+            Map<Long, Integer> userIdToCountMap = new HashMap<>();
+            for(long id : sampleList){
+                userIdToCountMap.put(id, userIdToCountMap.getOrDefault(id, 0)+1);
+            }
+
+            PriorityQueue<Map.Entry<Long, Integer>> priorityQueue = new PriorityQueue<>(
+                (x,y) -> (y.getValue() - x.getValue())
+            );
+            for(Map.Entry<Long, Integer> entry : userIdToCountMap.entrySet()){
+                priorityQueue.offer(entry);
+            }
+
+            List<Long> recommendationList = new ArrayList<>();
+            for(int i=1; i<= CommonConstant.FOLLOW_RECOMMENDATION_LIST_SIZE; i++){
+                if(!priorityQueue.isEmpty()){
+                    recommendationList.add(priorityQueue.poll().getKey());
+                } else break;
+            }
+
+            followRecommendationCacheRepository.updateRecommendationTargetUserIdList(recommendationList);
+
+            followRecommendationRepository.save(
+                FollowRecommendation.builder()
+                    .followRecommendationTargetUsers(recommendationList.toString())
+                    .build()
+            );
+        }
     }
 
     private User findUserById(Long userId){

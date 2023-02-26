@@ -11,13 +11,13 @@ import org.springframework.stereotype.Repository;
 @Slf4j
 @Repository
 @RequiredArgsConstructor
-public class FollowRecommendCacheRepository {
+public class FollowRecommendationCacheRepository {
 
     private final RedisTemplate<String, String> template;
     private final String key = CommonConstant.REDIS_FOLLOW_RECOMMENDATION_LIST_KEY;
 
     // DB로부터 특정 유저가 팔로우한 사람들의 주키 아이디 값 리스트를 받아서 레디스에 저장한다.
-    public void setRecommendationTargetUserIdList(List<Long> recommendationList) {
+    public void updateRecommendationTargetUserIdList(List<Long> recommendationList) {
         try {
             template.delete(key);
             for(Long id : recommendationList){
