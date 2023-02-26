@@ -5,14 +5,18 @@ import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.controller.follow.dto.response.FollowResponse;
 import com.devtraces.arterest.model.follow.Follow;
 import com.devtraces.arterest.model.follow.FollowRepository;
+import com.devtraces.arterest.model.followcache.FollowRecommendCacheRepository;
+import com.devtraces.arterest.model.followcache.FollowSamplePoolCacheRepository;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +26,8 @@ public class FollowService {
 
     private final FollowRepository followRepository;
     private final UserRepository userRepository;
+    private final FollowSamplePoolCacheRepository followSamplePoolCacheRepository;
+    private final FollowRecommendCacheRepository followRecommendCacheRepository;
 
     @Transactional
     public void createFollowRelation(Long userId, String nickname) {
@@ -112,6 +118,18 @@ public class FollowService {
     public void deleteFollowRelation(Long userId, String nickname) {
         User unfollowTargetUser = findUserByNickname(nickname);
         followRepository.deleteByUserIdAndFollowingId(userId, unfollowTargetUser.getId());
+    }
+
+    // 팔로우 테이블의 가장 마지막 레코드(== 가장 최근 팔로우)를 찾아낸 후 캐시해 둠.
+    // 매 6초마다 가장 최신 팔로우 정보를 캐시해두므로, 1시간이면 팔로우 추천 유저 후보 결정을 위한
+    // 600 개의 샘플을 레디스 리스트에 저장해 둘 수 있다.
+    @Scheduled(cron = CommonConstant.PUSH_SAMPLE_TO_REDIS_CRON_STRING)
+    public void pushFollowSampleToCacheServer(){
+        Optional<Follow> optionalLatestFollow = followRepository.findTopByOrderByIdDesc();
+        optionalLatestFollow
+            .ifPresent(
+                follow -> followSamplePoolCacheRepository.pushSample(follow.getFollowingId())
+            );
     }
 
     private User findUserById(Long userId){
