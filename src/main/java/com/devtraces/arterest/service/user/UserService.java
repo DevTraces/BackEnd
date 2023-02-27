@@ -11,6 +11,7 @@ import com.devtraces.arterest.model.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
@@ -111,6 +112,16 @@ public class UserService {
         user.setProfileImageUrl(s3Service.uploadImage(profileImage));
 
         return UpdateProfileImageResponse.from(userRepository.save(user));
+    }
+
+    // 프로필 이미지 삭제는 사용자의 프로필 이미지를 null로 수정하는 것으로 진행
+    public void deleteProfileImage(Long userId, String nickname) {
+        User user = getUserById(userId);
+
+        if (!user.getNickname().equals(nickname)) { throw BaseException.FORBIDDEN; }
+
+        user.setProfileImageUrl(null);
+        userRepository.save(user);
     }
 
     private User getUserById(Long userId) {
