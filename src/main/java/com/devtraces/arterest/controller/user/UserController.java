@@ -2,6 +2,8 @@ package com.devtraces.arterest.controller.user;
 
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
 import com.devtraces.arterest.controller.user.dto.request.PasswordUpdateRequest;
+import com.devtraces.arterest.controller.user.dto.request.UpdateProfileRequest;
+import com.devtraces.arterest.controller.user.dto.response.UpdateProfileResponse;
 import com.devtraces.arterest.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -45,24 +47,19 @@ public class UserController {
         return ApiSuccessResponse.from(userService.getProfileByNickname(userId, nickname));
     }
 
-    @PostMapping("/profile/{nickname}")
-    public ApiSuccessResponse<?> updateProfile(
+    @PatchMapping("/profile/{nickname}")
+    public ApiSuccessResponse<UpdateProfileResponse> updateProfile(
             @AuthenticationPrincipal Long userId,
             @PathVariable String nickname,
-            @RequestParam @Nullable String updateUsername,
-            @RequestParam @Nullable String updateNickname,
-            @RequestParam @Nullable String updateDescription,
-            @RequestParam @Nullable MultipartFile updateProfileImage
-
+            @RequestBody UpdateProfileRequest request
     ) {
         return ApiSuccessResponse.from(
                 userService.updateProfile(
                         userId,
                         nickname,
-                        updateUsername,
-                        updateNickname,
-                        updateDescription,
-                        updateProfileImage
+                        request.getUsername(),
+                        request.getNickname(),
+                        request.getDescription()
                 )
         );
     }

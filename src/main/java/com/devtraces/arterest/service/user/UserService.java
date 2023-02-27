@@ -26,7 +26,6 @@ public class UserService {
     private final FeedRepository feedRepository;
     private final FollowRepository followRepository;
     private final PasswordEncoder passwordEncoder;
-    private final S3Service s3Service;
 
     public EmailCheckResponse checkEmail(String email) {
 
@@ -88,7 +87,7 @@ public class UserService {
     public UpdateProfileResponse updateProfile(
             Long userId, String nickname,
             String updateUsername, String updateNickname,
-            String updateDescription, MultipartFile updateProfileImage
+            String updateDescription
             ) {
         User user = getUserById(userId);
 
@@ -100,10 +99,6 @@ public class UserService {
         if (updateNickname != null) { user.setNickname(updateNickname); }
 
         if (updateDescription != null) { user.setDescription(updateDescription); }
-
-        if (updateProfileImage != null) {
-            user.setProfileImageUrl(s3Service.uploadImage(updateProfileImage));
-        }
 
         return UpdateProfileResponse.from(userRepository.save(user));
     }
