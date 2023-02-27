@@ -259,16 +259,13 @@ class UserServiceTest {
         String updateUsername = "updateUsername";
         String updateNickname = "updateNickname";
         String updateDescription = "updateDescription";
-        String updateProfileImageUrl = "updateProfileImageUrl";
-        MultipartFile multipartFile =
-                new MockMultipartFile("file", "fileContent".getBytes());
+
         User user = User.builder()
                 .id(1L)
                 .nickname(nickname)
                 .build();
 
         given(userRepository.findById(user.getId())).willReturn(Optional.of(user));
-        given(s3Service.uploadImage(multipartFile)).willReturn(updateProfileImageUrl);
         given(userRepository.save(any())).willReturn(user);
 
         ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
@@ -276,7 +273,7 @@ class UserServiceTest {
         //when
        userService.updateProfile(
                 user.getId(), nickname, updateUsername,
-                updateNickname, updateDescription, multipartFile
+                updateNickname, updateDescription
         );
 
         //then
@@ -295,8 +292,6 @@ class UserServiceTest {
         String updateUsername = "updateUsername";
         String updateNickname = "updateNickname";
         String updateDescription = "updateDescription";
-        MultipartFile multipartFile =
-                new MockMultipartFile("file", "fileContent".getBytes());
 
         given(userRepository.findById(anyLong())).willReturn(Optional.empty());
 
@@ -304,7 +299,7 @@ class UserServiceTest {
         BaseException exception = assertThrows(BaseException.class,
                 () -> userService.updateProfile(
                         anyLong(), nickname, updateUsername,
-                        updateNickname, updateDescription, multipartFile
+                        updateNickname, updateDescription
                 )
         );
 
@@ -321,8 +316,7 @@ class UserServiceTest {
         String updateUsername = "updateUsername";
         String updateNickname = "updateNickname";
         String updateDescription = "updateDescription";
-        MultipartFile multipartFile =
-                new MockMultipartFile("file", "fileContent".getBytes());
+
         User notOwner = User.builder()
                 .id(2L)
                 .nickname(notOwnerNickname)
@@ -334,7 +328,7 @@ class UserServiceTest {
         BaseException exception = assertThrows(BaseException.class,
                 () -> userService.updateProfile(
                         notOwner.getId(), ownerNickname, updateUsername,
-                        updateNickname, updateDescription, multipartFile
+                        updateNickname, updateDescription
                 )
         );
 
