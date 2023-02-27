@@ -1,5 +1,8 @@
 package com.devtraces.arterest.common.jwt.controller;
 
+import static com.devtraces.arterest.common.jwt.JwtProvider.ACCESS_TOKEN_COOKIE_NAME;
+import static com.devtraces.arterest.common.jwt.JwtProvider.REFRESH_TOKEN_COOKIE_NAME;
+
 import com.devtraces.arterest.common.jwt.service.JwtService;
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
 import com.devtraces.arterest.controller.auth.dto.TokenWithNicknameDto;
@@ -25,7 +28,7 @@ public class JwtController {
 
 	@PostMapping("/reissue")
 	public ResponseEntity<ApiSuccessResponse<?>> reissue(
-		@CookieValue("refreshToken") String refreshToken,
+		@CookieValue(REFRESH_TOKEN_COOKIE_NAME) String refreshToken,
 		HttpServletResponse response
 	) {
 		TokenWithNicknameDto dto = jwtService.reissue(refreshToken);
