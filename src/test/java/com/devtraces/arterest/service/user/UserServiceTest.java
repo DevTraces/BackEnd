@@ -55,7 +55,7 @@ class UserServiceTest {
 
         EmailCheckResponse response = userService.checkEmail(email);
 
-        assertEquals(true, response.isDuplicatedEmail());
+        assertTrue(response.isDuplicatedEmail());
     }
 
     @Test
@@ -66,7 +66,7 @@ class UserServiceTest {
 
         EmailCheckResponse response = userService.checkEmail(email);
 
-        assertEquals(false, response.isDuplicatedEmail());
+        assertFalse(response.isDuplicatedEmail());
     }
 
     @Test
@@ -78,7 +78,7 @@ class UserServiceTest {
 
         NicknameCheckResponse response = userService.checkNickname(nickname);
 
-        assertEquals(true, response.isDuplicatedNickname());
+        assertTrue(response.isDuplicatedNickname());
     }
 
     @Test
@@ -89,7 +89,7 @@ class UserServiceTest {
 
         NicknameCheckResponse response = userService.checkNickname(nickname);
 
-        assertEquals(false, response.isDuplicatedNickname());
+        assertFalse(response.isDuplicatedNickname());
     }
 
     @Test
@@ -408,6 +408,71 @@ class UserServiceTest {
                                 ownerNickname,
                                 profileImage
                         )
+                );
+
+        //then
+        assertEquals(FORBIDDEN, exception.getErrorCode());
+    }
+
+    @Test
+    void success_deleteProfileImage() {
+        //given
+        Long userId = 1L;
+        String nickname = "nickname";
+        User user = User.builder().id(userId).nickname(nickname).build();
+        given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
+        given(userRepository.save(any())).willReturn(user);
+
+        ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+
+        //when
+        userService.deleteProfileImage(userId, nickname);
+
+        //then
+        verify(userRepository, times(1)).save(captor.capture());
+        assertNull(captor.getValue().getProfileImageUrl());
+    }
+
+    @Test
+    @DisplayName("프로필 이미지 삭제 실패 - 존재하지 않는 사용자")
+    void fail_deleteProfileImage_USER_NOT_FOUND() {
+        //given
+        Long userId = 1L;
+        String nickname = "nickname";
+        given(userRepository.findById(anyLong())).willReturn(Optional.empty());
+
+        //when
+        BaseException exception =
+                assertThrows(
+                        BaseException.class,
+                        () -> userService.deleteProfileImage(
+                                userId,
+                                nickname
+                        )
+                );
+
+        //then
+        assertEquals(USER_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("프로필 이미지 삭제 실패 - 다른 사람의 프로필 이미지 삭제")
+    void fail_deleteProfileImage_FORBIDDEN() {
+        //given
+        String ownerNickname = "ownerNickname";
+
+        Long notOwnerId = 2L;
+        String notOwnerNickname = "notOwnerNickname";
+        User notOwner = User.builder().id(notOwnerId).nickname(notOwnerNickname).build();
+        given(userRepository.findById(anyLong())).willReturn(Optional.of(notOwner));
+
+        //when
+        BaseException exception =
+                assertThrows(
+                        BaseException.class,
+                        () -> userService.deleteProfileImage(
+                                notOwnerId,
+                                ownerNickname)
                 );
 
         //then

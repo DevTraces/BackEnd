@@ -77,4 +77,13 @@ public class UserController {
                 userService.updateProfileImage(userId, nickname, profileImage)
         );
     }
+
+    @DeleteMapping("/profile/images/{nickname}")
+    public ApiSuccessResponse<?> deleteProfileImage(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable String nickname
+    ) {
+        userService.deleteProfileImage(userId, nickname);
+        return ApiSuccessResponse.NO_DATA_RESPONSE;
+    }
 }

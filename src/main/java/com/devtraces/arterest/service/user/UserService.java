@@ -74,7 +74,7 @@ public class UserService {
         Integer followerNumber = followRepository.countAllByFollowingId(targetUser.getId());
         Integer followingNumber = targetUser.getFollowList().size();
         boolean isFollowing = followRepository.isFollowing(
-                user.getId(), targetUser.getId()) == 0 ? false : true;
+                user.getId(), targetUser.getId()) != 0;
 
         return ProfileByNicknameResponse.from(
                 targetUser, totalFeedNumber,
@@ -113,10 +113,18 @@ public class UserService {
         return UpdateProfileImageResponse.from(userRepository.save(user));
     }
 
+    // 프로필 이미지 삭제는 사용자의 프로필 이미지를 null로 수정하는 것으로 진행
+    public void deleteProfileImage(Long userId, String nickname) {
+        User user = getUserById(userId);
+
+        if (!user.getNickname().equals(nickname)) { throw BaseException.FORBIDDEN; }
+
+        user.setProfileImageUrl(null);
+        userRepository.save(user);
+    }
+
     private User getUserById(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> BaseException.USER_NOT_FOUND
-        );
-        return user;
+        return userRepository.findById(userId).orElseThrow(
+                () -> BaseException.USER_NOT_FOUND);
     }
 }
