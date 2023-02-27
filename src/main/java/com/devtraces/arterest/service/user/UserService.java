@@ -11,7 +11,6 @@ import com.devtraces.arterest.model.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
@@ -75,7 +74,7 @@ public class UserService {
         Integer followerNumber = followRepository.countAllByFollowingId(targetUser.getId());
         Integer followingNumber = targetUser.getFollowList().size();
         boolean isFollowing = followRepository.isFollowing(
-                user.getId(), targetUser.getId()) == 0 ? false : true;
+                user.getId(), targetUser.getId()) != 0;
 
         return ProfileByNicknameResponse.from(
                 targetUser, totalFeedNumber,
@@ -125,9 +124,7 @@ public class UserService {
     }
 
     private User getUserById(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> BaseException.USER_NOT_FOUND
-        );
-        return user;
+        return userRepository.findById(userId).orElseThrow(
+                () -> BaseException.USER_NOT_FOUND);
     }
 }
