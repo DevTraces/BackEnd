@@ -108,7 +108,9 @@ public class UserService {
 
         if (!user.getNickname().equals(nickname)) { throw BaseException.FORBIDDEN; }
 
-        return UpdateProfileImageResponse.from(s3Service.uploadImage(profileImage));
+        user.setProfileImageUrl(s3Service.uploadImage(profileImage));
+
+        return UpdateProfileImageResponse.from(userRepository.save(user));
     }
 
     private User getUserById(Long userId) {

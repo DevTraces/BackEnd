@@ -1,5 +1,6 @@
 package com.devtraces.arterest.controller.user.dto.response;
 
+import com.devtraces.arterest.model.user.User;
 import lombok.*;
 
 @Getter
@@ -10,9 +11,9 @@ public class UpdateProfileImageResponse {
 
     private String profileImageUrl;
 
-    public static UpdateProfileImageResponse from(String profileImageUrl) {
+    public static UpdateProfileImageResponse from(User user) {
         return UpdateProfileImageResponse.builder()
-                .profileImageUrl(profileImageUrl)
+                .profileImageUrl(user.getProfileImageUrl())
                 .build();
     }
 }
