@@ -24,6 +24,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -597,12 +598,16 @@ class NoticeServiceTest {
                 .createdAt(LocalDateTime.now())
                 .build());
 
-        given(noticeRepository.findALlByNoticeOwnerId(anyLong()))
-                .willReturn(noticeList);
+        PageImpl<Notice> notices = new PageImpl<>(noticeList);
+
+        int page = 1;
+        int pageSize = 10;
+        given(noticeRepository.findALlByNoticeOwnerId(anyLong(), any()))
+                .willReturn(notices);
 
         //when
         List<NoticeListResponse> responseList =
-                noticeService.getNoticeList(noticeOwnerId);
+                noticeService.getNoticeList(noticeOwnerId, page, pageSize);
 
         //then
         assertEquals(numberOfNotices, responseList.size());
@@ -633,12 +638,15 @@ class NoticeServiceTest {
                 .createdAt(LocalDateTime.now())
                 .build());
 
-        given(noticeRepository.findALlByNoticeOwnerId(anyLong()))
-                .willReturn(noticeList);
+        int page = 1;
+        int pageSize = 10;
+        PageImpl<Notice> notices = new PageImpl<>(noticeList);
+        given(noticeRepository.findALlByNoticeOwnerId(anyLong(), any()))
+                .willReturn(notices);
 
         //when
         List<NoticeListResponse> responseList =
-                noticeService.getNoticeList(noticeOwnerId);
+                noticeService.getNoticeList(noticeOwnerId, page, pageSize);
 
         //then
         assertEquals(numberOfNotices, responseList.size());
@@ -669,12 +677,15 @@ class NoticeServiceTest {
                 .createdAt(LocalDateTime.now())
                 .build());
 
-        given(noticeRepository.findALlByNoticeOwnerId(anyLong()))
-                .willReturn(noticeList);
+        int page = 1;
+        int pageSize = 10;
+        PageImpl<Notice> notices = new PageImpl<>(noticeList);
+        given(noticeRepository.findALlByNoticeOwnerId(anyLong(), any()))
+                .willReturn(notices);
 
         //when
         List<NoticeListResponse> responseList =
-                noticeService.getNoticeList(noticeOwnerId);
+                noticeService.getNoticeList(noticeOwnerId, page, pageSize);
 
         //then
         assertEquals(numberOfNotices, responseList.size());
@@ -719,12 +730,15 @@ class NoticeServiceTest {
                 .createdAt(LocalDateTime.now())
                 .build());
 
-        given(noticeRepository.findALlByNoticeOwnerId(anyLong()))
-                .willReturn(noticeList);
+        int page = 1;
+        int pageSize = 10;
+        PageImpl<Notice> notices = new PageImpl<>(noticeList);
+        given(noticeRepository.findALlByNoticeOwnerId(anyLong(), any()))
+                .willReturn(notices);
 
         //when
         List<NoticeListResponse> responseList =
-                noticeService.getNoticeList(noticeOwnerId);
+                noticeService.getNoticeList(noticeOwnerId, page, pageSize);
 
         //then
         assertEquals(numberOfNotices, responseList.size());
@@ -793,12 +807,15 @@ class NoticeServiceTest {
                 .createdAt(createdAt)
                 .build());
 
-        given(noticeRepository.findALlByNoticeOwnerId(anyLong()))
-                .willReturn(noticeList);
+        int page = 1;
+        int pageSize = 10;
+        PageImpl<Notice> notices = new PageImpl<>(noticeList);
+        given(noticeRepository.findALlByNoticeOwnerId(anyLong(), any()))
+                .willReturn(notices);
 
         //when
         List<NoticeListResponse> responseList =
-                noticeService.getNoticeList(noticeOwnerId);
+                noticeService.getNoticeList(noticeOwnerId, page, pageSize);
 
         //then
         assertEquals(numberOfNotices, responseList.size());
