@@ -17,9 +17,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -316,7 +314,6 @@ class UserServiceTest {
         String updateUsername = "updateUsername";
         String updateNickname = "updateNickname";
         String updateDescription = "updateDescription";
-
         User notOwner = User.builder()
                 .id(2L)
                 .nickname(notOwnerNickname)

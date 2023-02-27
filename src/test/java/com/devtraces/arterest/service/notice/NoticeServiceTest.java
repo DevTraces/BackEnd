@@ -65,7 +65,7 @@ class NoticeServiceTest {
 
         Notice notice = Notice.builder()
                 .noticeOwnerId(feed.getUser().getId())
-                .sendUser(user)
+                .user(user)
                 .feed(feed)
                 .noticeType(noticeType)
                 .build();
@@ -79,7 +79,7 @@ class NoticeServiceTest {
         //then
         verify(noticeRepository, times(1)).save(captor.capture());
         assertEquals(noticeOwnerId, captor.getValue().getNoticeOwnerId());
-        assertEquals(sendUserId, captor.getValue().getSendUser().getId());
+        assertEquals(sendUserId, captor.getValue().getUser().getId());
         assertEquals(feedId, captor.getValue().getFeed().getId());
         assertEquals(LIKE, captor.getValue().getNoticeType());
     }
@@ -100,7 +100,7 @@ class NoticeServiceTest {
 
         Notice notice = Notice.builder()
                 .noticeOwnerId(ownerUser.getId())
-                .sendUser(user)
+                .user(user)
                 .noticeType(noticeType)
                 .build();
         given(noticeRepository.save(any())).willReturn(notice);
@@ -113,7 +113,7 @@ class NoticeServiceTest {
         //then
         verify(noticeRepository, times(1)).save(captor.capture());
         assertEquals(noticeOwnerId, captor.getValue().getNoticeOwnerId());
-        assertEquals(sendUserId, captor.getValue().getSendUser().getId());
+        assertEquals(sendUserId, captor.getValue().getUser().getId());
         assertEquals(FOLLOW, captor.getValue().getNoticeType());
     }
 
@@ -139,7 +139,7 @@ class NoticeServiceTest {
 
         Notice notice = Notice.builder()
                 .noticeOwnerId(feed.getUser().getId())
-                .sendUser(user)
+                .user(user)
                 .feed(feed)
                 .noticeType(noticeType)
                 .build();
@@ -153,7 +153,7 @@ class NoticeServiceTest {
         //then
         verify(noticeRepository, times(1)).save(captor.capture());
         assertEquals(noticeOwnerId, captor.getValue().getNoticeOwnerId());
-        assertEquals(sendUserId, captor.getValue().getSendUser().getId());
+        assertEquals(sendUserId, captor.getValue().getUser().getId());
         assertEquals(feedId, captor.getValue().getFeed().getId());
         assertEquals(replyId, captor.getValue().getReply().getId());
         assertEquals(NoticeType.REPLY, captor.getValue().getNoticeType());
@@ -184,7 +184,7 @@ class NoticeServiceTest {
 
         Notice noticeForFeedOwner = Notice.builder()
                 .noticeOwnerId(feed.getUser().getId())
-                .sendUser(sendUser)
+                .user(sendUser)
                 .feed(feed)
                 .reply(reply)
                 .rereply(reReply)
@@ -202,7 +202,7 @@ class NoticeServiceTest {
         //then
         verify(noticeRepository, times(1)).save(captor.capture());
         assertEquals(feedOwnerId, captor.getValue().getNoticeOwnerId());
-        assertEquals(sendUserId, captor.getValue().getSendUser().getId());
+        assertEquals(sendUserId, captor.getValue().getUser().getId());
         assertEquals(feedId, captor.getValue().getFeed().getId());
         assertEquals(replyId, captor.getValue().getReply().getId());
         assertEquals(POST, captor.getValue().getNoticeTarget());
@@ -234,7 +234,7 @@ class NoticeServiceTest {
 
         Notice noticeForReplyOwner = Notice.builder()
                 .noticeOwnerId(reply.getUser().getId())
-                .sendUser(sendUser)
+                .user(sendUser)
                 .feed(feed)
                 .reply(reply)
                 .rereply(reReply)
@@ -252,7 +252,7 @@ class NoticeServiceTest {
         //then
         verify(noticeRepository, times(1)).save(captor.capture());
         assertEquals(replyOwnerId, captor.getValue().getNoticeOwnerId());
-        assertEquals(sendUserId, captor.getValue().getSendUser().getId());
+        assertEquals(sendUserId, captor.getValue().getUser().getId());
         assertEquals(feedId, captor.getValue().getFeed().getId());
         assertEquals(replyId, captor.getValue().getReply().getId());
         assertEquals(NoticeTarget.REPLY, captor.getValue().getNoticeTarget());
