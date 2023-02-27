@@ -7,18 +7,19 @@ import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
 @Service
-public class SearchRedisUtil {
+public class SearchRedisService {
 
 	private final RedisTemplate<String, String> redisTemplate;
+	private final String TRIE_KEY = "trie";
 
 
-	public void setTrieValue(String key, String data) {
+	public void setTrieValue(String data) {
 		ValueOperations<String, String> values = redisTemplate.opsForValue();
-		values.set(key, data);
+		values.set(TRIE_KEY, data);
 	}
 
-	public String getTrieValue(String key) {
+	public String getTrieValue() {
 		ValueOperations<String, String> values = redisTemplate.opsForValue();
-		return values.get(key);
+		return values.get(TRIE_KEY);
 	}
 }

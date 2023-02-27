@@ -7,7 +7,7 @@ import com.devtraces.arterest.controller.search.dto.response.GetUsernameSearchRe
 import com.devtraces.arterest.model.hashtag.Hashtag;
 import com.devtraces.arterest.model.hashtag.HashtagRepository;
 import com.devtraces.arterest.model.user.UserRepository;
-import com.devtraces.arterest.service.search.util.SearchRedisUtil;
+import com.devtraces.arterest.service.search.util.SearchRedisService;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -33,9 +33,9 @@ public class SearchService {
 
 	private final UserRepository userRepository;
 	private final HashtagRepository hashtagRepository;
-	private final Trie trie;
-	private final SearchRedisUtil searchRedisUtil;
-	private final String TRIE_KEY = "trie";
+	private final Trie<String, String> trie;
+	private final SearchRedisService searchRedisService;
+
 
 
 	// 1분 간격으로 게시물 테이블의 모든 해시태그를 파싱하여, Trie 구조로 redis 에 저장함.
@@ -104,15 +104,15 @@ public class SearchService {
 
 		String encodingTrie = Base64.getEncoder().encodeToString(serializedTrie);
 
-		searchRedisUtil.setTrieValue(TRIE_KEY, encodingTrie);
+		searchRedisService.setTrieValue(encodingTrie);
 	}
 
 	// Redis 에 저장된 Trie 자료구조를 역직렬화하여 자동완성된 단어들을 가져옴.
 	public List<String> getAutoCompleteHashtags(String keyword, Integer numberOfWords) {
-		String output = searchRedisUtil.getTrieValue(TRIE_KEY);
+		String output = searchRedisService.getTrieValue();
 
 		byte[] serializedTrie;
-		Trie trie = null;
+		Trie<String, String> trie;
 
 		serializedTrie = Base64.getDecoder().decode(output);
 		try (ByteArrayInputStream bais = new ByteArrayInputStream(serializedTrie)) {
@@ -131,7 +131,7 @@ public class SearchService {
 			throw BaseException.INTERNAL_SERVER_ERROR;
 		}
 
-		return (List<String>) trie.prefixMap(keyword).keySet()
+		return trie.prefixMap(keyword).keySet()
 			.stream()
 			.limit(numberOfWords)
 			.collect(Collectors.toList());
