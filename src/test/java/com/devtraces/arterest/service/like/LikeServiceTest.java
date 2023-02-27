@@ -192,7 +192,7 @@ class LikeServiceTest {
         given(userRepository.findAllByIdIn(userIdList)).willReturn(userEntityList);
 
         //when
-        List<LikeResponse> responseList = likeService.getLikedUserList(1L, 1L, 0, 10);
+        List<LikeResponse> responseList = likeService.getLikedUserList(1L, 0, 10);
 
         //then
         verify(feedRepository, times(1)).existsById(1L);
@@ -210,7 +210,7 @@ class LikeServiceTest {
         // when
         BaseException exception = assertThrows(
             BaseException.class ,
-            () -> likeService.getLikedUserList(1L, 1L, 0, 10)
+            () -> likeService.getLikedUserList(1L, 0, 10)
         );
 
         // then
