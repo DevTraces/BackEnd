@@ -17,6 +17,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.ArrayList;
@@ -276,7 +277,6 @@ class UserServiceTest {
 
         //then
         verify(userRepository, times(1)).save(captor.capture());
-        verify(s3Service, times(1)).uploadImage(any());
         assertEquals(updateUsername, captor.getValue().getUsername());
         assertEquals(updateNickname, captor.getValue().getNickname());
         assertEquals(updateDescription, captor.getValue().getDescription());
@@ -328,6 +328,87 @@ class UserServiceTest {
                         updateNickname, updateDescription
                 )
         );
+
+        //then
+        assertEquals(FORBIDDEN, exception.getErrorCode());
+    }
+
+    @Test
+    void success_updateProfileImage() {
+        //given
+        Long userId = 1L;
+        String nickname = "nickname";
+        User user = User.builder().id(userId).nickname(nickname).build();
+        given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
+        given(userRepository.save(any())).willReturn(user);
+
+        String profileImageUrl = "profileImageUrl";
+        MockMultipartFile profileImage =
+                new MockMultipartFile(
+                        "profileImage", "profileImage".getBytes());
+        given(s3Service.uploadImage(any())).willReturn(profileImageUrl);
+
+        ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+
+        //when
+        userService.updateProfileImage(userId, nickname, profileImage);
+
+        //then
+        verify(userRepository, times(1)).save(captor.capture());
+        assertEquals(profileImageUrl, captor.getValue().getProfileImageUrl());
+    }
+
+    @Test
+    @DisplayName("프로필 이미지 수정 실패 - 존재하지 않는 사용자")
+    void fail_updateProfileImage_USER_NOT_FOUND() {
+        //given
+        Long userId = 1L;
+        String nickname = "nickname";
+        given(userRepository.findById(anyLong())).willReturn(Optional.empty());
+
+        MockMultipartFile profileImage =
+                new MockMultipartFile(
+                        "profileImage", "profileImage".getBytes());
+
+        //when
+        BaseException exception =
+                assertThrows(
+                        BaseException.class,
+                        () -> userService.updateProfileImage(
+                                userId, nickname, profileImage
+                )
+        );
+
+        //then
+        assertEquals(USER_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("프로필 이미지 수정 실패 - 다른 사람의 프로필 이미지 수정")
+    void fail_updateProfileImage_FORBIDDEN() {
+        //given
+        String ownerNickname = "ownerNickname";
+
+        MockMultipartFile profileImage =
+                new MockMultipartFile(
+                        "profileImage", "profileImage".getBytes());
+
+        Long notOwnerId = 2L;
+        String notOwnerNickname = "notOwnerNickname";
+        User notOwner = User.builder().id(notOwnerId).nickname(notOwnerNickname).build();
+        given(userRepository.findById(anyLong())).willReturn(Optional.of(notOwner));
+
+
+        //when
+        BaseException exception =
+                assertThrows(
+                        BaseException.class,
+                        () -> userService.updateProfileImage(
+                                notOwnerId,
+                                ownerNickname,
+                                profileImage
+                        )
+                );
 
         //then
         assertEquals(FORBIDDEN, exception.getErrorCode());
