@@ -25,11 +25,10 @@ public class JwtController {
 
 	@PostMapping("/reissue")
 	public ResponseEntity<ApiSuccessResponse<?>> reissue(
-		@RequestHeader("authorization") String bearerToken,
 		@CookieValue("refreshToken") String refreshToken,
 		HttpServletResponse response
 	) {
-		TokenWithNicknameDto dto = jwtService.reissue(bearerToken, refreshToken);
+		TokenWithNicknameDto dto = jwtService.reissue(refreshToken);
 
 		HashMap hashMap = new HashMap();
 		hashMap.put("nickname", dto.getNickname());

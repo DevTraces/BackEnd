@@ -61,12 +61,12 @@ class JwtProviderTest {
 		TokenDto tokenDto = jwtProvider.generateAccessTokenAndRefreshToken(1L);
 
 		Claims accessTokenBody = Jwts.parserBuilder().setSigningKey(secretKey).build()
-			.parseClaimsJws(tokenDto.getAccessToken()).getBody();
+			.parseClaimsJws(tokenDto.getAccessTokenCookie().getValue()).getBody();
 		assertEquals("1", accessTokenBody.getSubject());
 		assertTrue(accessTokenBody.getExpiration().after(new Date()));
 
 		Claims refreshTokenBody = Jwts.parserBuilder().setSigningKey(secretKey).build()
-			.parseClaimsJws(tokenDto.getCookie().getValue()).getBody();
+			.parseClaimsJws(tokenDto.getRefreshTokenCookie().getValue()).getBody();
 		assertEquals(JwtProvider.REFRESH_TOKEN_SUBJECT_PREFIX + "1", refreshTokenBody.getSubject());
 		assertTrue(refreshTokenBody.getExpiration().after(new Date()));
 	}
@@ -78,7 +78,7 @@ class JwtProviderTest {
 			.willReturn(mockUserDetails);
 
 		TokenDto tokenDto = jwtProvider.generateAccessTokenAndRefreshToken(1L);
-		String accessToken = tokenDto.getAccessToken();
+		String accessToken = tokenDto.getAccessTokenCookie().getValue();
 
 		Authentication authentication = jwtProvider.getAuthentication(accessToken);
 
@@ -88,7 +88,7 @@ class JwtProviderTest {
 	@Test
 	void testGetExpiredDate() {
 		TokenDto tokenDto = jwtProvider.generateAccessTokenAndRefreshToken(1L);
-		String accessToken = tokenDto.getAccessToken();
+		String accessToken = tokenDto.getAccessTokenCookie().getValue();
 
 		Date expiredDate = jwtProvider.getExpiredDate(accessToken);
 
@@ -113,7 +113,7 @@ class JwtProviderTest {
 	@Test
 	void testIsExpiredTokenByNotExpiredToken() {
 		TokenDto tokenDto = jwtProvider.generateAccessTokenAndRefreshToken(1L);
-		String accessToken = tokenDto.getAccessToken();
+		String accessToken = tokenDto.getAccessTokenCookie().getValue();
 
 		boolean isExpiredToken = jwtProvider.isExpiredToken(accessToken);
 

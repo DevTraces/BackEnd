@@ -66,8 +66,11 @@ class OauthServiceTest {
                 .build();
 
         TokenDto tokenDto = TokenDto.builder()
-                .accessToken("accessToken")
-                .cookie(
+                .accessTokenCookie(
+                    ResponseCookie.from("accessToken", "access-token")
+                        .build()
+                )
+                .refreshTokenCookie(
                         ResponseCookie.from("refreshToken", "refresh-token")
                                 .build()
                 )
@@ -124,11 +127,14 @@ class OauthServiceTest {
                 .build();
 
         TokenDto tokenDto = TokenDto.builder()
-                .accessToken("accessToken")
-                .cookie(
-                        ResponseCookie.from("refreshToken", "refresh-token")
-                                .build()
-                )
+            .accessTokenCookie(
+                ResponseCookie.from("accessToken", "access-token")
+                    .build()
+            )
+            .refreshTokenCookie(
+                ResponseCookie.from("refreshToken", "refresh-token")
+                    .build()
+            )
                 .build();
 
         given(userRepository.findByNickname(anyString()))
@@ -141,8 +147,8 @@ class OauthServiceTest {
                 oauthService.kakaoSignUpOrSignIn(dto);
 
         //then
-        assertEquals(tokenDto.getAccessToken(), response.getAccessToken());
-        assertEquals(tokenDto.getCookie(), response.getCookie());
+        assertEquals(tokenDto.getAccessTokenCookie().getValue(), response.getAcceesTokenCookie().getValue());
+        assertEquals(tokenDto.getRefreshTokenCookie().getValue(), response.getRefreshTokenCookie().getValue());
         assertEquals(user.getNickname(), response.getNickname());
     }
 

@@ -78,8 +78,8 @@ public class AuthController {
 		HashMap hashMap = new HashMap();
 		hashMap.put("nickname", dto.getNickname());
 
-		response.setHeader(HttpHeaders.SET_COOKIE, dto.getAcceesTokenCookie().toString());
-		response.setHeader(HttpHeaders.SET_COOKIE, dto.getRefreshTokenCookie().toString());
+		response.addHeader(HttpHeaders.SET_COOKIE, dto.getAcceesTokenCookie().toString());
+		response.addHeader(HttpHeaders.SET_COOKIE, dto.getRefreshTokenCookie().toString());
 
 		return ResponseEntity.ok()
 				.body(ApiSuccessResponse.from(hashMap));
