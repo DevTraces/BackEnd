@@ -1,6 +1,5 @@
 package com.devtraces.arterest.service.feed;
 
-import com.devtraces.arterest.common.constant.CommonConstant;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.controller.feed.dto.response.FeedCreateResponse;
 import com.devtraces.arterest.controller.feed.dto.response.FeedUpdateResponse;
@@ -13,6 +12,7 @@ import com.devtraces.arterest.model.hashtag.HashtagRepository;
 import com.devtraces.arterest.model.likecache.LikeNumberCacheRepository;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
+import com.devtraces.arterest.service.hashtag.HashtagService;
 import com.devtraces.arterest.service.s3.S3Service;
 import java.util.HashSet;
 import java.util.List;
@@ -35,7 +35,7 @@ public class FeedService {
     private final HashtagRepository hashtagRepository;
     private final FeedHashtagMapRepository feedHashtagMapRepository;
 
-    private final FeedDeleteService feedDeleteService;
+    private final HashtagService hashtagService;
 
     @Transactional
     public FeedCreateResponse createFeed(
@@ -149,7 +149,7 @@ public class FeedService {
         feedHashtagMapRepository.deleteAllByFeedId(feedId);
 
         // 사용되지 않는 Hashtag 삭제.
-        feedDeleteService.deleteNotUsingHashtag(feedHashtagMapList);
+        hashtagService.deleteNotUsingHashtag(feedHashtagMapList);
 
         // 그 후 입력 받은 값에 따라서 새롭게 저장한다.
         if(hashtagList != null){
