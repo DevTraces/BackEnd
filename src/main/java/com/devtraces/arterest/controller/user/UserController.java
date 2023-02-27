@@ -3,6 +3,7 @@ package com.devtraces.arterest.controller.user;
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
 import com.devtraces.arterest.controller.user.dto.request.PasswordUpdateRequest;
 import com.devtraces.arterest.controller.user.dto.request.UpdateProfileRequest;
+import com.devtraces.arterest.controller.user.dto.response.UpdateProfileImageResponse;
 import com.devtraces.arterest.controller.user.dto.response.UpdateProfileResponse;
 import com.devtraces.arterest.service.user.UserService;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.util.annotation.Nullable;
+
+import javax.validation.constraints.NotNull;
 
 @RestController
 @RequiredArgsConstructor
@@ -64,4 +67,14 @@ public class UserController {
         );
     }
 
+    @PostMapping("/profile/images/{nickname}")
+    public ApiSuccessResponse<UpdateProfileImageResponse> updateProfileImage(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable String nickname,
+            @RequestParam @NotNull MultipartFile profileImage
+    ) {
+        return ApiSuccessResponse.from(
+                userService.updateProfileImage(userId, nickname, profileImage)
+        );
+    }
 }
