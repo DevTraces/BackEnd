@@ -11,7 +11,7 @@ import org.springframework.http.ResponseCookie;
 @AllArgsConstructor
 public class TokenDto {
 
-	private String accessToken;
-	private ResponseCookie cookie;
+	private ResponseCookie accessTokenCookie;
+	private ResponseCookie refreshTokenCookie;
 
 }

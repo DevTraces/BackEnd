@@ -16,14 +16,14 @@ import org.springframework.http.ResponseCookie;
 public class TokenWithNicknameDto {
 
     private String nickname;
-    private String accessToken;
-    private ResponseCookie cookie;
+    private ResponseCookie acceesTokenCookie;
+    private ResponseCookie refreshTokenCookie;
 
     public static TokenWithNicknameDto from(String nickname, TokenDto tokenDto) {
         return TokenWithNicknameDto.builder()
                 .nickname(nickname)
-                .accessToken(tokenDto.getAccessToken())
-                .cookie(tokenDto.getCookie())
+                .acceesTokenCookie(tokenDto.getAccessTokenCookie())
+                .refreshTokenCookie(tokenDto.getRefreshTokenCookie())
                 .build();
     }
 }
