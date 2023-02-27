@@ -2,12 +2,17 @@ package com.devtraces.arterest.controller.user;
 
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
 import com.devtraces.arterest.controller.user.dto.request.PasswordUpdateRequest;
+import com.devtraces.arterest.controller.user.dto.request.UpdateProfileRequest;
+import com.devtraces.arterest.controller.user.dto.response.UpdateProfileImageResponse;
+import com.devtraces.arterest.controller.user.dto.response.UpdateProfileResponse;
 import com.devtraces.arterest.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.util.annotation.Nullable;
+
+import javax.validation.constraints.NotNull;
 
 @RestController
 @RequiredArgsConstructor
@@ -45,26 +50,31 @@ public class UserController {
         return ApiSuccessResponse.from(userService.getProfileByNickname(userId, nickname));
     }
 
-    @PostMapping("/profile/{nickname}")
-    public ApiSuccessResponse<?> updateProfile(
+    @PatchMapping("/profile/{nickname}")
+    public ApiSuccessResponse<UpdateProfileResponse> updateProfile(
             @AuthenticationPrincipal Long userId,
             @PathVariable String nickname,
-            @RequestParam @Nullable String updateUsername,
-            @RequestParam @Nullable String updateNickname,
-            @RequestParam @Nullable String updateDescription,
-            @RequestParam @Nullable MultipartFile updateProfileImage
-
+            @RequestBody UpdateProfileRequest request
     ) {
         return ApiSuccessResponse.from(
                 userService.updateProfile(
                         userId,
                         nickname,
-                        updateUsername,
-                        updateNickname,
-                        updateDescription,
-                        updateProfileImage
+                        request.getUsername(),
+                        request.getNickname(),
+                        request.getDescription()
                 )
         );
     }
 
+    @PostMapping("/profile/images/{nickname}")
+    public ApiSuccessResponse<UpdateProfileImageResponse> updateProfileImage(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable String nickname,
+            @RequestParam @NotNull MultipartFile profileImage
+    ) {
+        return ApiSuccessResponse.from(
+                userService.updateProfileImage(userId, nickname, profileImage)
+        );
+    }
 }
