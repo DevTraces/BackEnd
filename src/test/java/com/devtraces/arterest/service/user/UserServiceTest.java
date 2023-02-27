@@ -55,7 +55,7 @@ class UserServiceTest {
 
         EmailCheckResponse response = userService.checkEmail(email);
 
-        assertEquals(true, response.isDuplicatedEmail());
+        assertTrue(response.isDuplicatedEmail());
     }
 
     @Test
@@ -66,7 +66,7 @@ class UserServiceTest {
 
         EmailCheckResponse response = userService.checkEmail(email);
 
-        assertEquals(false, response.isDuplicatedEmail());
+        assertFalse(response.isDuplicatedEmail());
     }
 
     @Test
@@ -78,7 +78,7 @@ class UserServiceTest {
 
         NicknameCheckResponse response = userService.checkNickname(nickname);
 
-        assertEquals(true, response.isDuplicatedNickname());
+        assertTrue(response.isDuplicatedNickname());
     }
 
     @Test
@@ -89,7 +89,7 @@ class UserServiceTest {
 
         NicknameCheckResponse response = userService.checkNickname(nickname);
 
-        assertEquals(false, response.isDuplicatedNickname());
+        assertFalse(response.isDuplicatedNickname());
     }
 
     @Test
