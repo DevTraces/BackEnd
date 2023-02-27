@@ -21,6 +21,8 @@ import com.devtraces.arterest.model.rereply.RereplyRepository;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -136,9 +138,15 @@ public class NoticeService {
         );
     }
 
-    public List<NoticeListResponse> getNoticeList(Long noticeOwnerId) {
-        List<Notice> noticesOfNoticeOwner =
-                noticeRepository.findALlByNoticeOwnerId(noticeOwnerId);
+    public List<NoticeListResponse> getNoticeList(
+            Long noticeOwnerId, int page, int pageSize
+    ) {
+
+        Page<Notice> noticesOfNoticeOwner =
+                noticeRepository.findALlByNoticeOwnerId(
+                        noticeOwnerId,
+                        PageRequest.of(page, pageSize)
+                );
 
         List<NoticeListResponse> noticeListResponse = new ArrayList<>();
         for (Notice notice : noticesOfNoticeOwner) {
