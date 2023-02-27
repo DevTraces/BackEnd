@@ -3,7 +3,6 @@ package com.devtraces.arterest.service.notice;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.exception.ErrorCode;
 import com.devtraces.arterest.common.type.NoticeTarget;
-import com.devtraces.arterest.common.type.NoticeType;
 import com.devtraces.arterest.controller.notice.dto.NumberOfNoticeResponse;
 import com.devtraces.arterest.controller.notice.dto.response.NoticeListResponse;
 import com.devtraces.arterest.model.feed.Feed;
@@ -62,7 +61,6 @@ class NoticeServiceTest {
     void success_createLikeNotice() {
         //given
         Long noticeOwnerId = 1L;
-        NoticeType noticeType = LIKE;
 
         Long sendUserId = 342L;
         User user = User.builder().id(sendUserId).build();
@@ -77,7 +75,7 @@ class NoticeServiceTest {
                 .noticeOwnerId(feed.getUser().getId())
                 .user(user)
                 .feed(feed)
-                .noticeType(noticeType)
+                .noticeType(LIKE)
                 .build();
         given(noticeRepository.save(any())).willReturn(notice);
 
@@ -97,7 +95,6 @@ class NoticeServiceTest {
     @Test
     void success_createFollowNotice() {
         //given
-        NoticeType noticeType = FOLLOW;
 
         Long sendUserId = 342L;
         User user = User.builder().id(sendUserId).build();
@@ -145,13 +142,11 @@ class NoticeServiceTest {
         Reply reply = Reply.builder().id(replyId).build();
         given(replyRepository.findById(anyLong())).willReturn(Optional.of(reply));
 
-        NoticeType noticeType = REPLY;
-
         Notice notice = Notice.builder()
                 .noticeOwnerId(feed.getUser().getId())
                 .user(user)
                 .feed(feed)
-                .noticeType(noticeType)
+                .noticeType(REPLY)
                 .build();
         given(noticeRepository.save(any())).willReturn(notice);
 
@@ -190,15 +185,13 @@ class NoticeServiceTest {
         Long reReplyId = 1231L;
         Rereply reReply = Rereply.builder().id(reReplyId).reply(reply).build();
 
-        NoticeType noticeType = REREPLY;
-
         Notice noticeForFeedOwner = Notice.builder()
                 .noticeOwnerId(feed.getUser().getId())
                 .user(sendUser)
                 .feed(feed)
                 .reply(reply)
                 .rereply(reReply)
-                .noticeType(noticeType)
+                .noticeType(REREPLY)
                 .noticeTarget(POST)
                 .build();
 
@@ -240,15 +233,13 @@ class NoticeServiceTest {
         Long reReplyId = 1231L;
         Rereply reReply = Rereply.builder().id(reReplyId).reply(reply).build();
 
-        NoticeType noticeType = REREPLY;
-
         Notice noticeForReplyOwner = Notice.builder()
                 .noticeOwnerId(reply.getUser().getId())
                 .user(sendUser)
                 .feed(feed)
                 .reply(reply)
                 .rereply(reReply)
-                .noticeType(noticeType)
+                .noticeType(REREPLY)
                 .noticeTarget(NoticeTarget.REPLY)
                 .build();
 
