@@ -19,6 +19,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -142,23 +143,23 @@ public class FollowService {
     // 매 정각마다 followSamplePoolCacheRepository를 통해 레디스에 저장된
     // 팔로우 추천 대상 유저 선별용 샘플 리스트의 내용을 바탕으로
     // 최근 1시간 이내에 팔로우를 많이 받은 상위 일정 수 만큼의 유저들의 주키 아이디 값 리스트를 캐시해 둔다.
-    // 캐시서버가 다운되었을 경우를 대비하여 DB에도 저장해 둔다.
+    // 캐시서버가 다운되었을 경우를 대비하여 DB에도 별도의 새로운 테이블을 만들어서 저장해 둔다.
     @Scheduled(cron = CommonConstant.INITIALIZE_RECOMMENDATION_LIST_TO_REDIS_CONE_STRING)
     public void initializeFollowRecommendationTargetUserIdListToCacheServer(){
         List<Long> sampleList = followSamplePoolCacheRepository.getSampleList();
         if(sampleList != null){
-            Map<Long, Integer> userIdToCountMap = new HashMap<>();
-            for(long id : sampleList){
-                userIdToCountMap.put(id, userIdToCountMap.getOrDefault(id, 0)+1);
-            }
+            // 주키 아이디 : 팔로우 받은 횟수 카운트 맵 구성.
+            Map<Long, Integer> userIdToCountMap = sampleList.stream().collect(
+                Collectors.toMap(Function.identity(), e -> 1, Math::addExact)
+            );
 
+            // 맵 내용물 중에서 카운트 높은 횟수 100개 (100개 보다 적다면 중간에 브레이크) 골라내기.
             PriorityQueue<Map.Entry<Long, Integer>> priorityQueue = new PriorityQueue<>(
                 (x,y) -> (y.getValue() - x.getValue())
             );
             for(Map.Entry<Long, Integer> entry : userIdToCountMap.entrySet()){
                 priorityQueue.offer(entry);
             }
-
             List<Long> recommendationList = new ArrayList<>();
             for(int i=1; i<= CommonConstant.FOLLOW_RECOMMENDATION_LIST_SIZE; i++){
                 if(!priorityQueue.isEmpty()){
