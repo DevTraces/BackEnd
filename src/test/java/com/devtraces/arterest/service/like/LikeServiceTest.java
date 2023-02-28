@@ -17,6 +17,7 @@ import com.devtraces.arterest.model.like.Likes;
 import com.devtraces.arterest.model.likecache.LikeNumberCacheRepository;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
+import com.devtraces.arterest.service.notice.NoticeService;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -40,6 +41,8 @@ class LikeServiceTest {
     private LikeNumberCacheRepository likeNumberCacheRepository;
     @Mock
     private FeedRepository feedRepository;
+    @Mock
+    private NoticeService noticeService;
 
     @InjectMocks
     private LikeService likeService;
@@ -58,6 +61,7 @@ class LikeServiceTest {
 
         given(likeRepository.save(any())).willReturn(likeEntity);
         doNothing().when(likeNumberCacheRepository).plusOneLike(1L);
+        doNothing().when(noticeService).createLikeNotice(anyLong(), anyLong());
 
         // when
         likeService.pressLikeOnFeed(1L ,1L);
@@ -66,6 +70,7 @@ class LikeServiceTest {
         verify(feedRepository, times(1)).existsById(1L);
         verify(likeRepository, times(1)).save(any());
         verify(likeNumberCacheRepository, times(1)).plusOneLike(1L);
+        verify(noticeService, times(1)).createLikeNotice(anyLong(), anyLong());
     }
 
     @Test
