@@ -4,6 +4,7 @@ import com.devtraces.arterest.common.type.UserSignUpType;
 import com.devtraces.arterest.model.like.Likes;
 import com.devtraces.arterest.model.user.User;
 import java.time.LocalDateTime;
+import java.util.Set;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,11 +24,14 @@ public class LikeResponse {
     private String nickname;
     private boolean isFollowing;
 
-    public static LikeResponse from(User user){
+    public static LikeResponse from(User user, Set<Long> likedUserIdSet){
         return LikeResponse.builder()
             .profileImageUrl(user.getProfileImageUrl())
             .userName(user.getUsername())
             .nickname(user.getNickname())
+            .isFollowing(
+                likedUserIdSet != null && likedUserIdSet.contains(user.getId())
+            )
             .build();
     }
 

@@ -36,8 +36,7 @@ public class FollowResponse {
 				.nickname(user.getNickname())
 				.description(user.getDescription())
 				.isFollowing(
-					followingUserIdSet == null ? false :
-					followingUserIdSet.contains(user.getId())
+					followingUserIdSet != null && followingUserIdSet.contains(user.getId())
 					)
 				.build();
 		}
