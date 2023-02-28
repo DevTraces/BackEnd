@@ -61,14 +61,15 @@ public class LikeService {
         Long userId, Long feedId, int page, int pageSize
     ) {
         validateFeedExistence(feedId);
-        PageRequest pageRequest = PageRequest.of(page, pageSize);
-        List<Long> likedUserIdList = likeRepository
-            .findAllByFeedIdOrderByCreatedAtDesc(feedId, pageRequest)
-            .getContent().stream().map(Likes::getUserId).collect(Collectors.toList());
 
         User requestedUser = userRepository.findById(userId).orElseThrow(
             () -> BaseException.USER_NOT_FOUND
         );
+
+        PageRequest pageRequest = PageRequest.of(page, pageSize);
+        List<Long> likedUserIdList = likeRepository
+            .findAllByFeedIdOrderByCreatedAtDesc(feedId, pageRequest)
+            .getContent().stream().map(Likes::getUserId).collect(Collectors.toList());
 
         Set<Long> followingUserIdSetOfRequestUser = requestedUser.getFollowList()
             .stream().map(Follow::getFollowingId).collect(Collectors.toSet());

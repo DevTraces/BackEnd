@@ -19,6 +19,7 @@ import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -169,6 +170,7 @@ class LikeServiceTest {
             .profileImageUrl("url1")
             .nickname("dongvin99")
             .username("박동빈")
+            .followList(new ArrayList<>())
             .build();
 
         Likes likeEntity = Likes.builder()
@@ -189,14 +191,16 @@ class LikeServiceTest {
         userEntityList.add(user);
 
         given(likeRepository.findAllByFeedIdOrderByCreatedAtDesc(1L, PageRequest.of(0,10))).willReturn(likeSlice);
+        given(userRepository.findById(1L)).willReturn(Optional.of(user));
         given(userRepository.findAllByIdIn(userIdList)).willReturn(userEntityList);
 
         //when
-        List<LikeResponse> responseList = likeService.getLikedUserList(1L, 0, 10);
+        List<LikeResponse> responseList = likeService.getLikedUserList(1L, 1L, 0, 10);
 
         //then
         verify(feedRepository, times(1)).existsById(1L);
         verify(likeRepository, times(1)).findAllByFeedIdOrderByCreatedAtDesc(1L, PageRequest.of(0, 10));
+        verify(userRepository, times(1)).findById(1L);
         verify(userRepository, times(1)).findAllByIdIn(userIdList);
         assertEquals(responseList.size(), 1);
     }
@@ -210,11 +214,28 @@ class LikeServiceTest {
         // when
         BaseException exception = assertThrows(
             BaseException.class ,
-            () -> likeService.getLikedUserList(1L, 0, 10)
+            () -> likeService.getLikedUserList(1L, 1L, 0, 10)
         );
 
         // then
         assertEquals(ErrorCode.FEED_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("좋아요 누른 사람 리스트 확인 실패 - 유저 엔티티 못 찾음.")
+    void failedGetLikedUserListUserNotFound(){
+        // given
+        given(feedRepository.existsById(anyLong())).willReturn(true);
+        given(userRepository.findById(anyLong())).willReturn(Optional.empty());
+
+        // when
+        BaseException exception = assertThrows(
+            BaseException.class ,
+            () -> likeService.getLikedUserList(1L, 1L, 0, 10)
+        );
+
+        // then
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
