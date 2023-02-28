@@ -13,6 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -70,6 +71,8 @@ public class SearchService {
 		String keyword, Integer page, Integer pageSize) {
 		Pageable pageable = PageRequest.of(page, pageSize);
 
+		if("".equals(keyword)) return new ArrayList<>();
+
 		return userRepository.findByUsernameStartsWith(keyword, pageable)
 			.stream().map(User -> GetUsernameSearchResponse.from(User))
 			.collect(Collectors.toList());
@@ -78,6 +81,8 @@ public class SearchService {
 	public List<GetNicknameSearchResponse> getSearchResultUsingNickname(
 		String keyword, Integer page, Integer pageSize) {
 		Pageable pageable = PageRequest.of(page, pageSize);
+
+		if("".equals(keyword)) return new ArrayList<>();
 
 		return userRepository.findByNicknameStartsWith(keyword, pageable)
 			.stream().map(User -> GetNicknameSearchResponse.from(User))
