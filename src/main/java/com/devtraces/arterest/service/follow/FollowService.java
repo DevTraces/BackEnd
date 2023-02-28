@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import com.devtraces.arterest.service.notice.NoticeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ public class FollowService {
 
     private final FollowRepository followRepository;
     private final UserRepository userRepository;
+    private final NoticeService noticeService;
 
     @Transactional
     public void createFollowRelation(Long userId, String nickname) {
@@ -53,6 +56,7 @@ public class FollowService {
                     .build()
             );
         }
+        noticeService.createFollowNotice(followingUser.getNickname(), followerUser.getId());
     }
 
     /*

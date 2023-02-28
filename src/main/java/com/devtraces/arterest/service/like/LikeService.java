@@ -10,6 +10,8 @@ import com.devtraces.arterest.model.user.UserRepository;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.devtraces.arterest.service.notice.NoticeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,7 @@ public class LikeService {
     private final LikeRepository likeRepository;
     private final LikeNumberCacheRepository likeNumberCacheRepository;
     private final FeedRepository feedRepository;
+    private final NoticeService noticeService;
 
     @Transactional
     public void pressLikeOnFeed(Long userId, Long feedId) {
@@ -37,6 +40,9 @@ public class LikeService {
                     .build()
             );
             likeNumberCacheRepository.plusOneLike(feedId);
+
+            // 피드 주인에게 알림 생성
+            noticeService.createLikeNotice(userId, feedId);
         }
     }
 
