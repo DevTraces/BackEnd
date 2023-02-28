@@ -18,14 +18,14 @@ import lombok.Setter;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class LikeResponse {
 
-    private String profileImageLink;
+    private String profileImageUrl;
     private String userName;
     private String nickname;
     private boolean isFollowing;
 
     public static LikeResponse from(User user){
         return LikeResponse.builder()
-            .profileImageLink(user.getProfileImageUrl())
+            .profileImageUrl(user.getProfileImageUrl())
             .userName(user.getUsername())
             .nickname(user.getNickname())
             .build();
