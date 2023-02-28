@@ -3,12 +3,15 @@ package com.devtraces.arterest.service.like;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.controller.like.dto.response.LikeResponse;
 import com.devtraces.arterest.model.feed.FeedRepository;
+import com.devtraces.arterest.model.follow.Follow;
 import com.devtraces.arterest.model.like.LikeRepository;
 import com.devtraces.arterest.model.like.Likes;
 import com.devtraces.arterest.model.likecache.LikeNumberCacheRepository;
+import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.devtraces.arterest.service.notice.NoticeService;
@@ -61,16 +64,26 @@ public class LikeService {
 
     @Transactional(readOnly = true)
     public List<LikeResponse> getLikedUserList(
-        Long feedId, int page, int pageSize
+        Long userId, Long feedId, int page, int pageSize
     ) {
         validateFeedExistence(feedId);
+
+        User requestedUser = userRepository.findById(userId).orElseThrow(
+            () -> BaseException.USER_NOT_FOUND
+        );
+
         PageRequest pageRequest = PageRequest.of(page, pageSize);
         List<Long> likedUserIdList = likeRepository
             .findAllByFeedIdOrderByCreatedAtDesc(feedId, pageRequest)
             .getContent().stream().map(Likes::getUserId).collect(Collectors.toList());
 
+        Set<Long> followingUserIdSetOfRequestUser = requestedUser.getFollowList()
+            .stream().map(Follow::getFollowingId).collect(Collectors.toSet());
+
         return userRepository.findAllByIdIn(likedUserIdList).stream()
-            .map(LikeResponse::from).collect(Collectors.toList());
+            .map(
+                user -> LikeResponse.from(user, followingUserIdSetOfRequestUser)
+            ).collect(Collectors.toList());
     }
 
     @Transactional

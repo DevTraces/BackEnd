@@ -41,12 +41,13 @@ public class LikeController {
 
     @GetMapping("/feeds/like/{feedId}")
     public ApiSuccessResponse<List<LikeResponse>> getLikedUserList(
+        @AuthenticationPrincipal Long userId,
         @PathVariable Long feedId,
         @RequestParam int page,
         @RequestParam(required = false, defaultValue = "10") int pageSize
     ){
         return ApiSuccessResponse.from(
-            likeService.getLikedUserList(feedId, page, pageSize)
+            likeService.getLikedUserList(userId, feedId, page, pageSize)
         );
     }
 
