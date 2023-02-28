@@ -22,7 +22,7 @@ public class GetNicknameSearchResponse {
 			.userId(user.getId())
 			.username(user.getUsername())
 			.nickname(user.getNickname())
-			.profileImageUrl(user.getProfileImageUrl())
+			.profileImageUrl(user.getProfileImageUrl() == null ? "" : user.getProfileImageUrl())
 			.build();
 	}
 }
