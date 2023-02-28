@@ -2,6 +2,7 @@ package com.devtraces.arterest.service.rereply;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
@@ -10,6 +11,7 @@ import static org.mockito.Mockito.verify;
 
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.exception.ErrorCode;
+import com.devtraces.arterest.model.feed.Feed;
 import com.devtraces.arterest.model.reply.Reply;
 import com.devtraces.arterest.model.reply.ReplyRepository;
 import com.devtraces.arterest.model.rereply.Rereply;
@@ -346,6 +348,37 @@ class RereplyServiceTest {
 
         // then
         assertEquals(ErrorCode.USER_INFO_NOT_MATCH, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("피드 관련 대댓글들 삭제 성공")
+    void successDeleteAllFeedRelatedRereply(){
+        // given
+        Rereply rereply = Rereply.builder()
+            .id(1L)
+            .build();
+
+        Reply reply = Reply.builder()
+            .id(1L)
+            .rereplyList(new ArrayList<>())
+            .build();
+
+        reply.getRereplyList().add(rereply);
+
+        Feed feed = Feed.builder()
+            .id(1L)
+            .replyList(new ArrayList<>())
+            .build();
+
+        feed.getReplyList().add(reply);
+
+        doNothing().when(rereplyRepository).deleteAllByIdIn(anyList());
+
+        // when
+        rereplyService.deleteAllFeedRelatedRereply(feed);
+
+        // then
+        verify(rereplyRepository, times(1)).deleteAllByIdIn(anyList());
     }
 
 }

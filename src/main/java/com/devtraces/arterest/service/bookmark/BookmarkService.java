@@ -55,4 +55,9 @@ public class BookmarkService {
 	public void deleteBookmark(Long userId, Long feedId) {
 		bookmarkRepository.deleteByUserIdAndFeedId(userId, feedId);
 	}
+
+	@Transactional
+	public void deleteAllFeedRelatedBookmark(Long feedId){
+		bookmarkRepository.deleteAllByFeedId(feedId);
+	}
 }

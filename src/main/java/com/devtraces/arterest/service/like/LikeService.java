@@ -67,6 +67,12 @@ public class LikeService {
             .map(LikeResponse::from).collect(Collectors.toList());
     }
 
+    @Transactional
+    public void deleteLikeRelatedData(Long feedId){
+        likeNumberCacheRepository.deleteLikeNumberInfo(feedId);
+        likeRepository.deleteAllByFeedId(feedId);
+    }
+
     private void validateFeedExistence(Long feedId) {
         if(!feedRepository.existsById(feedId)){
             throw BaseException.FEED_NOT_FOUND;

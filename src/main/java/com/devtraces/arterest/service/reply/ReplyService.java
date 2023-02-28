@@ -95,6 +95,13 @@ public class ReplyService {
         replyRepository.deleteById(replyId);
     }
 
+    @Transactional
+    public void deleteAllFeedRelatedReply(Feed feed){
+        replyRepository.deleteAllByIdIn(
+            feed.getReplyList().stream().map(Reply::getId).collect(Collectors.toList())
+        );
+    }
+
     private static void validateReplyRequest(ReplyRequest replyRequest) {
         if(replyRequest.getContent() == null || replyRequest.getContent().equals("")){
             throw BaseException.NULL_AND_EMPTY_STRING_NOT_ALLOWED;

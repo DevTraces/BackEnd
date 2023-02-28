@@ -57,6 +57,13 @@ public class FeedReadService {
 		);
 	}
 
+	@Transactional(readOnly = true)
+	public Feed getOneFeedEntity(Long feedId){
+		return feedRepository.findById(feedId).orElseThrow(
+			() -> BaseException.FEED_NOT_FOUND
+		);
+	}
+
 	// 피드 별 좋아요 개수는 레디스를 먼저 보게 만들고, 그게 불가능 할때만 Like 테이블에서 찾도록 한다.
 	private Long getOrCacheLikeNumber(Feed feed) {
 		Long likeNumber = likeNumberCacheRepository.getFeedLikeNumber(feed.getId());
