@@ -76,7 +76,7 @@ class OauthServiceTest {
                 )
                 .build();
 
-        given(userRepository.findByNickname(anyString()))
+        given(userRepository.findByUsername(anyString()))
                 .willReturn(Optional.empty());
         given(userRepository.findByKakaoUserId(anyLong()))
                 .willReturn(Optional.empty());
@@ -137,7 +137,7 @@ class OauthServiceTest {
             )
                 .build();
 
-        given(userRepository.findByNickname(anyString()))
+        given(userRepository.findByUsername(anyString()))
                 .willReturn(Optional.of(user));
         given(jwtProvider.generateAccessTokenAndRefreshToken(user.getId()))
                 .willReturn(tokenDto);
@@ -176,7 +176,7 @@ class OauthServiceTest {
                 .signupType(UserSignUpType.EMAIL)
                 .build();
 
-        given(userRepository.findByNickname(anyString())).willReturn(Optional.of(user));
+        given(userRepository.findByUsername(anyString())).willReturn(Optional.of(user));
 
         //when
         BaseException exception = assertThrows(
