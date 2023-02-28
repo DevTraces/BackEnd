@@ -1,6 +1,8 @@
 package com.devtraces.arterest.controller.auth;
 
 import static com.devtraces.arterest.common.jwt.JwtProperties.TOKEN_PREFIX;
+import static com.devtraces.arterest.common.jwt.JwtProvider.ACCESS_TOKEN_COOKIE_NAME;
+import static com.devtraces.arterest.common.jwt.JwtProvider.REFRESH_TOKEN_COOKIE_NAME;
 
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
 import com.devtraces.arterest.controller.auth.dto.TokenWithNicknameDto;
@@ -22,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -55,13 +58,15 @@ public class AuthController {
 	}
 
 	@PostMapping("/email/auth-key")
-	public ApiSuccessResponse<?> sendMailWithAuthKey(@RequestBody @Valid MailAuthKeyRequest request) {
+	public ApiSuccessResponse<?> sendMailWithAuthKey(
+		@RequestBody @Valid MailAuthKeyRequest request) {
 		authService.sendMailWithAuthKey(request.getEmail());
 		return ApiSuccessResponse.NO_DATA_RESPONSE;
 	}
 
 	@PostMapping("/email/auth-key/check")
-	public ApiSuccessResponse<MailAuthKeyCheckResponse> checkAuthKey(@RequestBody @Valid MailAuthKeyCheckRequest request) {
+	public ApiSuccessResponse<MailAuthKeyCheckResponse> checkAuthKey(
+		@RequestBody @Valid MailAuthKeyCheckRequest request) {
 		boolean isCorrect = authService.checkAuthKey(request.getEmail(), request.getAuthKey());
 		return ApiSuccessResponse.from(new MailAuthKeyCheckResponse(isCorrect));
 	}
@@ -87,14 +92,19 @@ public class AuthController {
 	}
 
 	@PostMapping("/sign-out")
-	public ApiSuccessResponse<?> signOut(@AuthenticationPrincipal long userId, @RequestHeader("authorization") String bearerToken) {
-		String accessToken = bearerToken.substring(TOKEN_PREFIX.length() + 1);
+	public ApiSuccessResponse<?> signOut(
+		@AuthenticationPrincipal long userId,
+		@CookieValue(ACCESS_TOKEN_COOKIE_NAME) String accessToken
+	) {
 		authService.signOut(userId, accessToken);
 		return ApiSuccessResponse.NO_DATA_RESPONSE;
 	}
 
 	@PostMapping("/password/check")
-	public ApiSuccessResponse<PasswordCheckResponse> checkPassword(@AuthenticationPrincipal long userId, @RequestBody @Valid PasswordCheckRequest request) {
+	public ApiSuccessResponse<PasswordCheckResponse> checkPassword(
+		@AuthenticationPrincipal long userId,
+		@RequestBody @Valid PasswordCheckRequest request
+	) {
 		boolean isCorrect = authService.checkPassword(userId, request.getPassword());
 		return ApiSuccessResponse.from(PasswordCheckResponse.builder().isCorrect(isCorrect).build());
 	}
