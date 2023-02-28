@@ -63,7 +63,7 @@ public class FollowController {
     public ApiSuccessResponse<List<FollowResponse>> getFollowSuggestionList(
         @AuthenticationPrincipal Long userId
     ){
-        return followService.getRecommendationList();
+        return ApiSuccessResponse.from(followService.getRecommendationList());
     }
 
 }

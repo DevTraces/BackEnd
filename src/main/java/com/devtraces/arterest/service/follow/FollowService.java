@@ -2,6 +2,7 @@ package com.devtraces.arterest.service.follow;
 
 import com.devtraces.arterest.common.constant.CommonConstant;
 import com.devtraces.arterest.common.exception.BaseException;
+import com.devtraces.arterest.common.response.ApiSuccessResponse;
 import com.devtraces.arterest.controller.follow.dto.response.FollowResponse;
 import com.devtraces.arterest.model.follow.Follow;
 import com.devtraces.arterest.model.follow.FollowRepository;
@@ -12,6 +13,8 @@ import com.devtraces.arterest.model.recommendation.FollowRecommendationRepositor
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -175,6 +178,39 @@ public class FollowService {
                     .build()
             );
         }
+    }
+
+    public List<FollowResponse> getRecommendationList() {
+        List<Long> recommendedUserIdList;
+        // 캐시 서버를 본다.
+        recommendedUserIdList = followRecommendationCacheRepository.getFollowTargetUserIdList();
+        if(recommendedUserIdList == null){
+            // 없으면 DB를 본다.
+            Optional<FollowRecommendation> optionalFollowRecommendation
+                = followRecommendationRepository.findTopByOrderByIdDesc();
+            if(optionalFollowRecommendation.isPresent()){
+                recommendedUserIdList = Arrays.stream(
+                    optionalFollowRecommendation.get().getFollowRecommendationTargetUsers()
+                        .split(",")
+                ).map(Long::parseLong).collect(Collectors.toList());
+            } else {
+                // DB 마저도 없으면 빈리스트 반환.
+                return Collections.emptyList();
+            }
+        }
+        // 리스트를 랜덤으로 섞은 후, 상위 10개(recommendedUserIdList의 길이가 10미만일 경우 그 이하)를 뽑아낸다.
+        assert recommendedUserIdList != null;
+        Collections.shuffle(recommendedUserIdList);
+        List<Long> resultIdList = new ArrayList<>();
+        for(Long id : recommendedUserIdList){
+            if(resultIdList.size() != CommonConstant.FOLLOW_RECOMMENDATION_USER_NUMBER){
+                resultIdList.add(id);
+            } else break;
+        }
+
+        return userRepository.findAllByIdIn(resultIdList).stream().map(
+            user -> FollowResponse.from(user, null)
+        ).collect(Collectors.toList());
     }
 
     private User findUserById(Long userId){
