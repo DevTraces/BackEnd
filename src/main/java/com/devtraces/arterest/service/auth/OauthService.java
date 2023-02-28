@@ -17,6 +17,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -25,6 +26,7 @@ public class OauthService {
 
     private final JwtProvider jwtProvider;
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public TokenWithNicknameDto oauthKakaoSignIn(String accessTokenFromKakao) {
         // kakao 서버에 액세스 토큰 보낸 뒤 사용자 정보 가져오기
@@ -151,6 +153,7 @@ public class OauthService {
         User savedUser = userRepository.save(User.builder()
                 .kakaoUserId(kakaoUserId)
                 .email(userInfoFromKakaoDto.getEmail())
+                .password(passwordEncoder.encode(userInfoFromKakaoDto.getNickname()))
                 .username(userInfoFromKakaoDto.getUsername())
                 .nickname(userInfoFromKakaoDto.getNickname())
                 .profileImageUrl(userInfoFromKakaoDto.getProfileImageUrl())
