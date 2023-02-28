@@ -59,4 +59,11 @@ public class FollowController {
         return ApiSuccessResponse.NO_DATA_RESPONSE;
     }
 
+    @GetMapping("/suggestion")
+    public ApiSuccessResponse<List<FollowResponse>> getFollowSuggestionList(
+        @AuthenticationPrincipal Long userId
+    ){
+        return followService.getRecommendationList();
+    }
+
 }
