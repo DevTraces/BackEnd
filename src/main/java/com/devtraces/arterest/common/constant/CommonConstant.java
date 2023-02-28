@@ -20,5 +20,5 @@ public class CommonConstant {
     public static final String PUSH_SAMPLE_TO_REDIS_CRON_STRING = "0/6 * * * * ?";
 
     // 매 정각마다.
-    public static final String INITIALIZE_RECOMMENDATION_LIST_TO_REDIS_CONE_STRING = "0 0 0/1 * * *";
+    public static final String INITIALIZE_RECOMMENDATION_LIST_TO_REDIS_CRON_STRING = "0 0 0/1 * * *";
 }
