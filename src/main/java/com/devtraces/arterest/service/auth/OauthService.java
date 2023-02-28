@@ -153,6 +153,8 @@ public class OauthService {
         User savedUser = userRepository.save(User.builder()
                 .kakaoUserId(kakaoUserId)
                 .email(userInfoFromKakaoDto.getEmail())
+                // 사용자가 비밀번호에 접근하지 못하고, 소셜 로그인에서 비밀번호는 의미가 없으므로
+                // 임의로 생성한 닉네임을 비밀번호로 설정
                 .password(passwordEncoder.encode(userInfoFromKakaoDto.getNickname()))
                 .username(userInfoFromKakaoDto.getUsername())
                 .nickname(userInfoFromKakaoDto.getNickname())
