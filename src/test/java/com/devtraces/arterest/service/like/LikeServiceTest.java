@@ -217,4 +217,19 @@ class LikeServiceTest {
         assertEquals(ErrorCode.FEED_NOT_FOUND, exception.getErrorCode());
     }
 
+    @Test
+    @DisplayName("게시물 삭제시 좋아요 관련 정보 삭제 성공")
+    void successDeleteFeedRelatedLikeData(){
+        // given
+        doNothing().when(likeNumberCacheRepository).deleteLikeNumberInfo(1L);
+        doNothing().when(likeRepository).deleteAllByFeedId(1L);
+
+        // when
+        likeService.deleteLikeRelatedData(1L);
+
+        // then
+        verify(likeNumberCacheRepository, times(1)).deleteLikeNumberInfo(1L);
+        verify(likeRepository).deleteAllByFeedId(1L);
+    }
+
 }

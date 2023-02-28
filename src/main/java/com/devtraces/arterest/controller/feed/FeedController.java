@@ -7,6 +7,7 @@ import com.devtraces.arterest.controller.feed.dto.response.FeedUpdateResponse;
 import com.devtraces.arterest.service.feed.FeedDeleteService;
 import com.devtraces.arterest.service.feed.FeedReadService;
 import com.devtraces.arterest.service.feed.FeedService;
+import com.devtraces.arterest.service.feed.application.FeedDeleteApplication;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,7 +28,7 @@ public class FeedController {
 
     private final FeedService feedService;
     private final FeedReadService feedreadService;
-    private final FeedDeleteService feedDeleteService;
+    private final FeedDeleteApplication feedDeleteApplication;
 
     @PostMapping
     public ApiSuccessResponse<FeedCreateResponse> createFeed(
@@ -81,7 +82,7 @@ public class FeedController {
     public ApiSuccessResponse<?> deleteFeed(
         @AuthenticationPrincipal Long userId, @PathVariable Long feedId
     ){
-        feedDeleteService.deleteFeed(userId, feedId);
+        feedDeleteApplication.deleteFeed(userId, feedId);
         return ApiSuccessResponse.NO_DATA_RESPONSE;
     }
 

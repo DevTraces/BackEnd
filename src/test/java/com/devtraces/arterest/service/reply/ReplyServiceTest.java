@@ -373,4 +373,29 @@ class ReplyServiceTest {
         assertEquals(ErrorCode.USER_INFO_NOT_MATCH, exception.getErrorCode());
     }
 
+    @Test
+    @DisplayName("피드 관련 댓글들 삭제 성공")
+    void successDeleteAllFeedRelatedReply(){
+        // given
+        Reply reply = Reply.builder()
+            .id(1L)
+            .rereplyList(new ArrayList<>())
+            .build();
+
+        Feed feed = Feed.builder()
+            .id(1L)
+            .replyList(new ArrayList<>())
+            .build();
+
+        feed.getReplyList().add(reply);
+
+        doNothing().when(replyRepository).deleteAllByIdIn(anyList());
+
+        // when
+        replyService.deleteAllFeedRelatedReply(feed);
+
+        // then
+        verify(replyRepository, times(1)).deleteAllByIdIn(anyList());
+    }
+
 }

@@ -16,7 +16,7 @@ import com.devtraces.arterest.model.hashtag.Hashtag;
 import com.devtraces.arterest.model.hashtag.HashtagRepository;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
-import com.devtraces.arterest.service.search.util.SearchRedisUtil;
+import com.devtraces.arterest.service.search.util.SearchRedisService;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -43,7 +43,7 @@ class SearchServiceTest {
 	@Mock
 	private Trie trie;
 	@Mock
-	private SearchRedisUtil searchRedisUtil;
+	private SearchRedisService searchRedisService;
 
 	@Test
 	void testInternalServerErrorInCreateAutoCompleteWords() throws Exception{
@@ -66,7 +66,7 @@ class SearchServiceTest {
 	@Test
 	void testInternalServerErrorInGetAutoCompleteHashtags() throws Exception{
 		// given
-		given(searchRedisUtil.getTrieValue(anyString()))
+		given(searchRedisService.getTrieValue())
 			.willReturn("serializedTrie");
 
 		// when
@@ -78,7 +78,7 @@ class SearchServiceTest {
 	}
 
 	@Test
-	void TestGetSearchResultUsingHashtags() throws Exception{
+	void TestGetSearchResultUsingHashtags(){
 		//given
 		List<FeedHashtagMap> feedHashtagMapList = new ArrayList<>(
 			Arrays.asList(

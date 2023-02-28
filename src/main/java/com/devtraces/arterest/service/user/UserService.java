@@ -1,13 +1,10 @@
 package com.devtraces.arterest.service.user;
 
+import com.devtraces.arterest.controller.user.dto.response.*;
 import com.devtraces.arterest.model.follow.FollowRepository;
 import com.devtraces.arterest.service.s3.S3Service;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.exception.ErrorCode;
-import com.devtraces.arterest.controller.user.dto.response.EmailCheckResponse;
-import com.devtraces.arterest.controller.user.dto.response.NicknameCheckResponse;
-import com.devtraces.arterest.controller.user.dto.response.ProfileByNicknameResponse;
-import com.devtraces.arterest.controller.user.dto.response.UpdateProfileResponse;
 import com.devtraces.arterest.model.feed.FeedRepository;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
@@ -77,7 +74,7 @@ public class UserService {
         Integer followerNumber = followRepository.countAllByFollowingId(targetUser.getId());
         Integer followingNumber = targetUser.getFollowList().size();
         boolean isFollowing = followRepository.isFollowing(
-                user.getId(), targetUser.getId()) == 0 ? false : true;
+                user.getId(), targetUser.getId()) != 0;
 
         return ProfileByNicknameResponse.from(
                 targetUser, totalFeedNumber,
@@ -88,7 +85,7 @@ public class UserService {
     public UpdateProfileResponse updateProfile(
             Long userId, String nickname,
             String updateUsername, String updateNickname,
-            String updateDescription, MultipartFile updateProfileImage
+            String updateDescription
             ) {
         User user = getUserById(userId);
 
@@ -101,17 +98,33 @@ public class UserService {
 
         if (updateDescription != null) { user.setDescription(updateDescription); }
 
-        if (updateProfileImage != null) {
-            user.setProfileImageUrl(s3Service.uploadImage(updateProfileImage));
-        }
-
         return UpdateProfileResponse.from(userRepository.save(user));
     }
 
+    public UpdateProfileImageResponse updateProfileImage(
+            Long userId, String nickname, MultipartFile profileImage
+    ) {
+        User user = getUserById(userId);
+
+        if (!user.getNickname().equals(nickname)) { throw BaseException.FORBIDDEN; }
+
+        user.setProfileImageUrl(s3Service.uploadImage(profileImage));
+
+        return UpdateProfileImageResponse.from(userRepository.save(user));
+    }
+
+    // 프로필 이미지 삭제는 사용자의 프로필 이미지를 null로 수정하는 것으로 진행
+    public void deleteProfileImage(Long userId, String nickname) {
+        User user = getUserById(userId);
+
+        if (!user.getNickname().equals(nickname)) { throw BaseException.FORBIDDEN; }
+
+        user.setProfileImageUrl(null);
+        userRepository.save(user);
+    }
+
     private User getUserById(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> BaseException.USER_NOT_FOUND
-        );
-        return user;
+        return userRepository.findById(userId).orElseThrow(
+                () -> BaseException.USER_NOT_FOUND);
     }
 }
