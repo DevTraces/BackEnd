@@ -37,19 +37,20 @@ public class OauthService {
     public TokenWithNicknameDto kakaoSignUpOrSignIn(UserInfoFromKakaoDto userInfoFromKakaoDto) {
 
         Optional<User> optionalUser =
-                userRepository.findByNickname(userInfoFromKakaoDto.getNickname());
+                userRepository.findByUsername(userInfoFromKakaoDto.getUsername());
 
-        // 닉네임 중복이고, EMAIL로 가입했으면 일반 회원가입한 회원이므로 예외처리
+        // 사용자명 중복이고, EMAIL로 가입했으면 일반 회원가입한 회원이므로 예외처리
+        // 카카오에서 받은 nickname을 현재 서버에선 username으로 사용하고 있음
         alreadySignUpUser(optionalUser);
 
-        // 닉네임 중복이고, KAKAO_TALK으로 가입했으면 카카오 소셜 로그인
+        // 사용자명 중복이고, KAKAO_TALK으로 가입했으면 카카오 소셜 로그인
         if (optionalUser.isPresent() &&
                 optionalUser.get().getSignupType().equals(UserSignUpType.KAKAO_TALK)
         ) {
             return createTokenWithNicknameDto(optionalUser.get());
         }
 
-        // 닉네임 중복이 아니고, kakaoUserId가 없는 사람만 회원가입 실행
+        // 사용자명 중복이 아니고, kakaoUserId가 없는 사람만 회원가입 실행
         long kakaoUserId = userInfoFromKakaoDto.getKakaoUserId();
         if (!optionalUser.isPresent() &&
                 !userRepository.findByKakaoUserId(kakaoUserId).isPresent()
