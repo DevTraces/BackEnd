@@ -22,6 +22,7 @@ import com.devtraces.arterest.model.recommendation.FollowRecommendation;
 import com.devtraces.arterest.model.recommendation.FollowRecommendationRepository;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
+import com.devtraces.arterest.service.notice.NoticeService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -49,6 +50,8 @@ class FollowServiceTest {
     private FollowRecommendationCacheRepository followRecommendationCacheRepository;
     @Mock
     private FollowRecommendationRepository followRecommendationRepository;
+    @Mock
+    private NoticeService noticeService;
     @InjectMocks
     private FollowService followService;
 
@@ -76,6 +79,7 @@ class FollowServiceTest {
         given(userRepository.findByNickname(anyString())).willReturn(Optional.of(targetUser));
         given(followRepository.existsByUserIdAndFollowingId(anyLong(), anyLong())).willReturn(false);
         given(followRepository.save(any())).willReturn(followEntity);
+        doNothing().when(noticeService).createFollowNotice(anyString(), anyLong());
 
         // when
         followService.createFollowRelation(1L, "two");
@@ -85,6 +89,7 @@ class FollowServiceTest {
         verify(userRepository, times(1)).findByNickname(anyString());
         verify(followRepository, times(1)).existsByUserIdAndFollowingId(1L, 2L);
         verify(followRepository, times(1)).save(any());
+        verify(noticeService, times(1)).createFollowNotice(anyString(), anyLong());
     }
 
     @Test
