@@ -8,12 +8,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import com.devtraces.arterest.common.type.UserSignUpType;
 import com.devtraces.arterest.common.type.UserStatusType;
+import com.devtraces.arterest.model.feed.Feed;
+import com.devtraces.arterest.model.follow.FollowRepository;
+import com.devtraces.arterest.model.notice.NoticeRepository;
 import com.devtraces.arterest.service.auth.AuthService;
+import com.devtraces.arterest.service.feed.application.FeedDeleteApplication;
 import com.devtraces.arterest.service.mail.MailService;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.jwt.JwtProvider;
@@ -23,6 +28,9 @@ import com.devtraces.arterest.controller.auth.dto.request.UserRegistrationReques
 import com.devtraces.arterest.controller.auth.dto.response.UserRegistrationResponse;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import com.devtraces.arterest.service.s3.S3Service;
@@ -53,6 +61,12 @@ class AuthServiceTest {
 	private UserRepository userRepository;
 	@Mock
 	private S3Service s3Service;
+	@Mock
+	private NoticeRepository noticeRepository;
+	@Mock
+	private FollowRepository followRepository;
+	@Mock
+	private FeedDeleteApplication feedDeleteApplication;
 
 	@InjectMocks
 	private AuthService authService;
@@ -325,5 +339,75 @@ class AuthServiceTest {
 			() -> authService.checkPassword(0L, "password"));
 
 		assertEquals(BaseException.USER_NOT_FOUND, exception);
+	}
+
+	@Test
+	void testDeleteUser() {
+		// given
+		List<Feed> feedList = new ArrayList<>(Arrays.asList(Feed.builder()
+			.id(2L)
+			.build()));
+		User user = User.builder()
+			.id(1L)
+			.password("password")
+			.feedList(feedList)
+			.build();
+		given(userRepository.findById(anyLong()))
+			.willReturn(Optional.ofNullable(user));
+		given(passwordEncoder.matches(anyString(), anyString()))
+			.willReturn(true);
+		willDoNothing().given(noticeRepository).deleteAllByNoticeOwnerId(anyLong());
+		willDoNothing().given(noticeRepository).deleteAllByUser(any());
+		willDoNothing().given(followRepository).deleteAllByFollowingId(anyLong());
+		willDoNothing().given(followRepository).deleteAllByUser(any());
+		willDoNothing().given(feedDeleteApplication).deleteFeed(anyLong(),any());
+		willDoNothing().given(userRepository).deleteById(any());
+
+		// when
+		authService.deleteUser(1L, "password");
+
+		// then
+		verify(userRepository, times(1)).findById(1L);
+		verify(passwordEncoder, times(1)).matches("password","password");
+		verify(noticeRepository, times(1)).deleteAllByNoticeOwnerId(1L);
+		verify(noticeRepository, times(1)).deleteAllByUser(user);
+		verify(followRepository, times(1)).deleteAllByFollowingId(1L);
+		verify(followRepository, times(1)).deleteAllByUser(user);
+		verify(feedDeleteApplication, times(1)).deleteFeed(1L, 2L);
+		verify(userRepository, times(1)).deleteById(1L);
+	}
+
+	@Test
+	void testCheckUserNotFoundInDeleteUser() {
+		//given
+
+		//when
+		BaseException exception = assertThrows(BaseException.class,
+			() -> authService.deleteUser(1L, "password"));
+
+		//then
+		assertEquals(BaseException.USER_NOT_FOUND, exception);
+	}
+
+	@Test
+	void testCheckWrongEmailOrPasswordInDeleteUser() {
+		//given
+		List<Feed> feedList = new ArrayList<>(Arrays.asList(Feed.builder()
+			.id(2L)
+			.build()));
+		User user = User.builder()
+			.id(1L)
+			.password("password")
+			.feedList(feedList)
+			.build();
+		given(userRepository.findById(anyLong()))
+			.willReturn(Optional.ofNullable(user));
+
+		//when
+		BaseException exception = assertThrows(BaseException.class,
+			() -> authService.deleteUser(1L, "password"));
+
+		//then
+		assertEquals(BaseException.WRONG_EMAIL_OR_PASSWORD, exception);
 	}
 }
