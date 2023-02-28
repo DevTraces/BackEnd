@@ -1,9 +1,6 @@
 package com.devtraces.arterest.controller.like.dto.response;
 
-import com.devtraces.arterest.common.type.UserSignUpType;
-import com.devtraces.arterest.model.like.Likes;
 import com.devtraces.arterest.model.user.User;
-import java.time.LocalDateTime;
 import java.util.Set;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -20,14 +17,14 @@ import lombok.Setter;
 public class LikeResponse {
 
     private String profileImageUrl;
-    private String userName;
+    private String username;
     private String nickname;
     private boolean isFollowing;
 
     public static LikeResponse from(User user, Set<Long> likedUserIdSet){
         return LikeResponse.builder()
             .profileImageUrl(user.getProfileImageUrl())
-            .userName(user.getUsername())
+            .username(user.getUsername())
             .nickname(user.getNickname())
             .isFollowing(
                 likedUserIdSet != null && likedUserIdSet.contains(user.getId())
