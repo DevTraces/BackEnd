@@ -18,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseCookie;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
@@ -37,6 +38,9 @@ class OauthServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     @InjectMocks
     private OauthService oauthService;
 
@@ -53,10 +57,12 @@ class OauthServiceTest {
                 .description("description")
                 .build();
 
+        String encodedPassword = "encodedPassword";
         User user = User.builder()
                 .id(1L)
                 .kakaoUserId(dto.getKakaoUserId())
                 .email(dto.getEmail())
+                .password(encodedPassword)
                 .username(dto.getUsername())
                 .nickname(dto.getNickname())
                 .profileImageUrl(dto.getProfileImageUrl())
@@ -80,6 +86,7 @@ class OauthServiceTest {
                 .willReturn(Optional.empty());
         given(userRepository.findByKakaoUserId(anyLong()))
                 .willReturn(Optional.empty());
+        given(passwordEncoder.encode(anyString())).willReturn(encodedPassword);
         given(userRepository.save(any())).willReturn(user);
         given(jwtProvider.generateAccessTokenAndRefreshToken(user.getId()))
                 .willReturn(tokenDto);
@@ -114,10 +121,12 @@ class OauthServiceTest {
                 .description("description")
                 .build();
 
+        String encodedPassword = "encodedPassword";
         User user = User.builder()
                 .id(1L)
                 .kakaoUserId(dto.getKakaoUserId())
                 .email(dto.getEmail())
+                .password(encodedPassword)
                 .username(dto.getUsername())
                 .nickname(dto.getNickname())
                 .profileImageUrl(dto.getProfileImageUrl())
