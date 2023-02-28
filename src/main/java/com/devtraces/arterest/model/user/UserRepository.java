@@ -24,4 +24,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	Slice<User> findAllByIdIn(Collection<Long> idList, PageRequest pageRequest);
 
 	List<User> findAllByIdIn(Collection<Long> id);
+
+    Optional<User> findByUsername(String username);
 }

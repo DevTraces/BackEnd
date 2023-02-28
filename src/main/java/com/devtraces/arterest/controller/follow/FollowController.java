@@ -59,4 +59,9 @@ public class FollowController {
         return ApiSuccessResponse.NO_DATA_RESPONSE;
     }
 
+    @GetMapping("/suggestion")
+    public ApiSuccessResponse<List<FollowResponse>> getFollowSuggestionList(){
+        return ApiSuccessResponse.from(followService.getRecommendationList());
+    }
+
 }

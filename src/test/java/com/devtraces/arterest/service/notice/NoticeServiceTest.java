@@ -36,8 +36,7 @@ import static com.devtraces.arterest.common.type.NoticeType.REPLY;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class NoticeServiceTest {
@@ -810,5 +809,59 @@ class NoticeServiceTest {
 
         //then
         assertEquals(numberOfNotices, responseList.size());
+    }
+
+    @Test
+    void success_deleteNotice() {
+        //given
+        Long userId = 1L;
+
+        Long noticeId = 3L;
+        Notice notice = Notice.builder().id(noticeId).noticeOwnerId(userId).build();
+        given(noticeRepository.findById(anyLong())).willReturn(Optional.of(notice));
+
+        //when
+        noticeService.deleteNotice(userId, noticeId);
+
+        //then
+        verify(noticeRepository, times(1)).delete(notice);
+    }
+
+    @Test
+    void fail_deleteNotice_NOTICE_NOT_FOUND() {
+        //given
+        Long userId = 1L;
+
+        Long noticeId = 3L;
+        given(noticeRepository.findById(anyLong())).willReturn(Optional.empty());
+
+        //when
+        BaseException exception = assertThrows(
+                BaseException.class,
+                () -> noticeService.deleteNotice(userId, noticeId)
+        );
+
+        //then
+        assertEquals(ErrorCode.NOTICE_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    void fail_deleteNotice_FORBIDDEN() {
+        //given
+        Long ownerId = 1L;
+        Long notOwnerId = 2L;
+
+        Long noticeId = 3L;
+        Notice notice = Notice.builder().id(noticeId).noticeOwnerId(ownerId).build();
+        given(noticeRepository.findById(anyLong())).willReturn(Optional.of(notice));
+
+        //when
+        BaseException exception = assertThrows(
+                BaseException.class,
+                () -> noticeService.deleteNotice(notOwnerId, noticeId)
+        );
+
+        //then
+        assertEquals(ErrorCode.FORBIDDEN, exception.getErrorCode());
     }
 }
