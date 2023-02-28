@@ -112,7 +112,7 @@ public class NoticeService {
             User sendUser, Feed feed, Reply reply, Rereply reReply
     ) {
         // 대댓글 작성자가 피드 주인이 아닌 경우에 알림 생성
-        if (!sendUser.getId().equals(feed.getId())) {
+        if (!sendUser.getId().equals(feed.getUser().getId())) {
             noticeRepository.save(
                     buildReReplyNotice(
                             feed.getUser().getId(), // 대댓글 달린 피드 주인
