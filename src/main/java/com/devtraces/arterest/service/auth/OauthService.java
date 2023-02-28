@@ -17,6 +17,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -25,6 +26,7 @@ public class OauthService {
 
     private final JwtProvider jwtProvider;
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public TokenWithNicknameDto oauthKakaoSignIn(String accessTokenFromKakao) {
         // kakao 서버에 액세스 토큰 보낸 뒤 사용자 정보 가져오기
@@ -151,6 +153,9 @@ public class OauthService {
         User savedUser = userRepository.save(User.builder()
                 .kakaoUserId(kakaoUserId)
                 .email(userInfoFromKakaoDto.getEmail())
+                // 사용자가 비밀번호에 접근하지 못하고, 소셜 로그인에서 비밀번호는 의미가 없으므로
+                // 임의로 생성한 닉네임을 비밀번호로 설정
+                .password(passwordEncoder.encode(userInfoFromKakaoDto.getNickname()))
                 .username(userInfoFromKakaoDto.getUsername())
                 .nickname(userInfoFromKakaoDto.getNickname())
                 .profileImageUrl(userInfoFromKakaoDto.getProfileImageUrl())
