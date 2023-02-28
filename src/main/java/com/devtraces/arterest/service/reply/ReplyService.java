@@ -15,6 +15,8 @@ import com.devtraces.arterest.controller.reply.dto.response.ReplyResponse;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import com.devtraces.arterest.service.notice.NoticeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,7 @@ public class ReplyService {
     private final FeedRepository feedRepository;
     private final ReplyRepository replyRepository;
     private final RereplyRepository rereplyRepository;
+    private final NoticeService noticeService;
 
     @Transactional
     public ReplyResponse createReply(Long userId, Long feedId, ReplyRequest replyRequest) {
@@ -48,6 +51,9 @@ public class ReplyService {
                 .feed(feed)
                 .build()
         );
+
+        noticeService.createReplyNotice(authorUser.getId(), feed.getId(), reply.getId());
+
         return ReplyResponse.from(reply);
     }
 
@@ -93,6 +99,13 @@ public class ReplyService {
 
         // 댓글을 삭제한다.
         replyRepository.deleteById(replyId);
+    }
+
+    @Transactional
+    public void deleteAllFeedRelatedReply(Feed feed){
+        replyRepository.deleteAllByIdIn(
+            feed.getReplyList().stream().map(Reply::getId).collect(Collectors.toList())
+        );
     }
 
     private static void validateReplyRequest(ReplyRequest replyRequest) {

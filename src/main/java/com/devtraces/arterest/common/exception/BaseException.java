@@ -23,6 +23,7 @@ public class BaseException extends RuntimeException {
 	public static final BaseException EXPIRED_OR_PREVIOUS_REFRESH_TOKEN = new BaseException(ErrorCode.EXPIRED_OR_PREVIOUS_REFRESH_TOKEN);
 	public static final BaseException USER_NOT_FOUND = new BaseException(ErrorCode.USER_NOT_FOUND);
 	public static final BaseException FEED_NOT_FOUND = new BaseException(ErrorCode.FEED_NOT_FOUND);
+	public static final BaseException NOTICE_NOT_FOUND = new BaseException(ErrorCode.NOTICE_NOT_FOUND);
   public static final BaseException FAILED_FILE_UPLOAD = new BaseException(ErrorCode.FAILED_FILE_UPLOAD);
 	public static final BaseException FAILED_CACHE_GET_OPERATION = new BaseException(ErrorCode.FAILED_CACHE_GET_OPERATION);
 	public static final BaseException HASHTAG_LIMIT_EXCEED = new BaseException(ErrorCode.HASHTAG_LIMIT_EXCEED);

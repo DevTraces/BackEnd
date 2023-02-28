@@ -22,6 +22,8 @@ import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import com.devtraces.arterest.service.notice.NoticeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -37,6 +39,7 @@ public class FollowService {
     private final FollowSamplePoolCacheRepository followSamplePoolCacheRepository;
     private final FollowRecommendationCacheRepository followRecommendationCacheRepository;
     private final FollowRecommendationRepository followRecommendationRepository;
+    private final NoticeService noticeService;
 
     @Transactional
     public void createFollowRelation(Long userId, String nickname) {
@@ -68,6 +71,7 @@ public class FollowService {
                     .build()
             );
         }
+        noticeService.createFollowNotice(followingUser.getNickname(), followerUser.getId());
     }
 
     /*

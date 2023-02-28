@@ -12,7 +12,6 @@ public class UpdateProfileResponse {
     private String username;
     private String nickname;
     private String description;
-    private String profileImageUrl;
 
 
     public static UpdateProfileResponse from(User user) {
@@ -20,7 +19,6 @@ public class UpdateProfileResponse {
                 .username(user.getUsername())
                 .nickname(user.getNickname())
                 .description(user.getDescription())
-                .profileImageUrl(user.getProfileImageUrl())
                 .build();
     }
 }

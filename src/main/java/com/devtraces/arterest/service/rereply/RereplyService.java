@@ -2,6 +2,7 @@ package com.devtraces.arterest.service.rereply;
 
 import com.devtraces.arterest.common.constant.CommonConstant;
 import com.devtraces.arterest.common.exception.BaseException;
+import com.devtraces.arterest.model.feed.Feed;
 import com.devtraces.arterest.model.reply.Reply;
 import com.devtraces.arterest.model.reply.ReplyRepository;
 import com.devtraces.arterest.model.rereply.Rereply;
@@ -13,6 +14,8 @@ import com.devtraces.arterest.controller.rereply.dto.response.RereplyResponse;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import com.devtraces.arterest.service.notice.NoticeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -25,6 +28,7 @@ public class RereplyService {
     private final RereplyRepository rereplyRepository;
     private final UserRepository userRepository;
     private final ReplyRepository replyRepository;
+    private final NoticeService noticeService;
 
     @Transactional
     public RereplyResponse createRereply(
@@ -43,6 +47,9 @@ public class RereplyService {
                 .reply(reply)
                 .build()
         );
+
+        noticeService.createReReplyNotice(authorUser.getId(), feedId, reply.getId(), rereply.getId());
+
         return RereplyResponse.from(rereply, feedId);
     }
 
@@ -80,6 +87,18 @@ public class RereplyService {
             throw BaseException.USER_INFO_NOT_MATCH;
         }
         rereplyRepository.deleteById(rereplyId);
+    }
+
+    @Transactional
+    public void deleteAllFeedRelatedRereply(Feed feed){
+        for(Reply reply : feed.getReplyList()){
+            if(reply.getRereplyList().size() > 0){
+                rereplyRepository.deleteAllByIdIn(
+                    reply.getRereplyList().stream().map(Rereply::getId)
+                        .collect(Collectors.toList())
+                );
+            }
+        }
     }
 
     private void validateRereplyRequest(RereplyRequest rereplyRequest) {

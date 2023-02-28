@@ -236,8 +236,8 @@ class AuthServiceTest {
 			.password("encodingPassword")
 			.build();
 		TokenDto mockTokenDto = TokenDto.builder()
-			.accessToken("access-token")
-			.cookie(ResponseCookie.from("refreshToken", "refresh-token").build())
+			.accessTokenCookie(ResponseCookie.from("accessToken", "access-token").build())
+			.refreshTokenCookie(ResponseCookie.from("refreshToken", "refresh-token").build())
 			.build();
 		given(userRepository.findByEmail(anyString()))
 			.willReturn(Optional.of(mockUser));

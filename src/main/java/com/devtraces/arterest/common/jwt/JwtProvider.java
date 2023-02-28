@@ -29,6 +29,9 @@ import org.springframework.stereotype.Component;
 public class JwtProvider {
 
 	public static final String REFRESH_TOKEN_SUBJECT_PREFIX = "refresh:";
+
+	public static final String ACCESS_TOKEN_COOKIE_NAME = "accessToken";
+	public static final String REFRESH_TOKEN_COOKIE_NAME = "refreshToken";
 	private static final int CREATE_AGE = 7 * 24 * 60 * 60;
 
 	private final UserDetailsService userDetailsService;
@@ -71,19 +74,19 @@ public class JwtProvider {
 		tokenRedisUtil.setRefreshTokenValue(userId, refreshToken, refreshTokenExpiredIn);
 
 		return TokenDto.builder()
-			.accessToken(accessToken)
-			.cookie(generateCookie(refreshToken))
+			.accessTokenCookie(generateCookie(accessToken, ACCESS_TOKEN_COOKIE_NAME))
+			.refreshTokenCookie(generateCookie(refreshToken, REFRESH_TOKEN_COOKIE_NAME))
 			.build();
 	}
 
-	private ResponseCookie generateCookie(String refreshToken) {
+	private ResponseCookie generateCookie(String token, String name) {
 
-		ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+		ResponseCookie cookie = ResponseCookie.from(name, token)
 			.httpOnly(true)
 			.path("/")
-//			.maxAge(CREATE_AGE)
-//			.secure(true)
-//			.sameSite(SameSite.NONE.attributeValue())
+			.maxAge(CREATE_AGE)
+			.secure(true)
+			.sameSite(SameSite.NONE.attributeValue())
 			.build();
 
 		return cookie;

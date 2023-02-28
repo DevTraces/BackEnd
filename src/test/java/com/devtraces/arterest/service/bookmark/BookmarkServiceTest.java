@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -134,5 +135,17 @@ class BookmarkServiceTest {
 
 		// then
 		verify(bookmarkRepository, times(1)).deleteByUserIdAndFeedId(1L, 2L);
+	}
+
+	@Test
+	void testDeleteAllFeedRelatedBookmark() {
+		// given
+		doNothing().when(bookmarkRepository).deleteAllByFeedId(1L);
+
+		// when
+		bookmarkService.deleteAllFeedRelatedBookmark(1L);
+
+		// then
+		verify(bookmarkRepository, times(1)).deleteAllByFeedId(1L);
 	}
 }

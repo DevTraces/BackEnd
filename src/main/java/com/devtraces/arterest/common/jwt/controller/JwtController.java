@@ -1,15 +1,12 @@
 package com.devtraces.arterest.common.jwt.controller;
 
-import static com.devtraces.arterest.common.jwt.JwtProperties.TOKEN_PREFIX;
-import static com.devtraces.arterest.controller.auth.AuthController.ACCESS_TOKEN_PREFIX;
-import static com.devtraces.arterest.controller.auth.AuthController.SET_COOKIE;
+import static com.devtraces.arterest.common.jwt.JwtProvider.ACCESS_TOKEN_COOKIE_NAME;
+import static com.devtraces.arterest.common.jwt.JwtProvider.REFRESH_TOKEN_COOKIE_NAME;
 
 import com.devtraces.arterest.common.jwt.service.JwtService;
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
-import java.util.HashMap;
-
 import com.devtraces.arterest.controller.auth.dto.TokenWithNicknameDto;
-import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,17 +28,16 @@ public class JwtController {
 
 	@PostMapping("/reissue")
 	public ResponseEntity<ApiSuccessResponse<?>> reissue(
-		@RequestHeader("authorization") String bearerToken,
-		@CookieValue("refreshToken") String refreshToken,
+		@CookieValue(REFRESH_TOKEN_COOKIE_NAME) String refreshToken,
 		HttpServletResponse response
 	) {
-		TokenWithNicknameDto dto = jwtService.reissue(bearerToken, refreshToken);
+		TokenWithNicknameDto dto = jwtService.reissue(refreshToken);
 
 		HashMap hashMap = new HashMap();
-		hashMap.put(ACCESS_TOKEN_PREFIX, TOKEN_PREFIX + " " + dto.getAccessToken());
 		hashMap.put("nickname", dto.getNickname());
 
-		response.setHeader(HttpHeaders.SET_COOKIE, dto.getCookie().toString());
+		response.addHeader(HttpHeaders.SET_COOKIE, dto.getAcceesTokenCookie().toString());
+		response.addHeader(HttpHeaders.SET_COOKIE, dto.getRefreshTokenCookie().toString());
 
 		return ResponseEntity.ok()
 			.body(ApiSuccessResponse.from(hashMap));

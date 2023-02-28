@@ -1,25 +1,23 @@
 package com.devtraces.arterest.service.auth;
 
 import com.devtraces.arterest.common.exception.BaseException;
-import com.devtraces.arterest.common.jwt.dto.TokenDto;
+import com.devtraces.arterest.common.jwt.JwtProvider;
 import com.devtraces.arterest.common.type.UserSignUpType;
 import com.devtraces.arterest.common.type.UserStatusType;
-import com.devtraces.arterest.common.jwt.JwtProvider;
-import com.devtraces.arterest.model.user.User;
-import com.devtraces.arterest.model.user.UserRepository;
 import com.devtraces.arterest.controller.auth.dto.TokenWithNicknameDto;
 import com.devtraces.arterest.controller.auth.dto.UserInfoFromKakaoDto;
+import com.devtraces.arterest.model.user.User;
+import com.devtraces.arterest.model.user.UserRepository;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor

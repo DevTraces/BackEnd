@@ -192,7 +192,7 @@ class LikeServiceTest {
         given(userRepository.findAllByIdIn(userIdList)).willReturn(userEntityList);
 
         //when
-        List<LikeResponse> responseList = likeService.getLikedUserList(1L, 1L, 0, 10);
+        List<LikeResponse> responseList = likeService.getLikedUserList(1L, 0, 10);
 
         //then
         verify(feedRepository, times(1)).existsById(1L);
@@ -210,11 +210,26 @@ class LikeServiceTest {
         // when
         BaseException exception = assertThrows(
             BaseException.class ,
-            () -> likeService.getLikedUserList(1L, 1L, 0, 10)
+            () -> likeService.getLikedUserList(1L, 0, 10)
         );
 
         // then
         assertEquals(ErrorCode.FEED_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("게시물 삭제시 좋아요 관련 정보 삭제 성공")
+    void successDeleteFeedRelatedLikeData(){
+        // given
+        doNothing().when(likeNumberCacheRepository).deleteLikeNumberInfo(1L);
+        doNothing().when(likeRepository).deleteAllByFeedId(1L);
+
+        // when
+        likeService.deleteLikeRelatedData(1L);
+
+        // then
+        verify(likeNumberCacheRepository, times(1)).deleteLikeNumberInfo(1L);
+        verify(likeRepository).deleteAllByFeedId(1L);
     }
 
 }

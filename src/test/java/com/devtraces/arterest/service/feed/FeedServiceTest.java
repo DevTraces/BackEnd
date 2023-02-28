@@ -11,6 +11,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import com.devtraces.arterest.common.constant.CommonConstant;
+import com.devtraces.arterest.service.hashtag.HashtagService;
 import com.devtraces.arterest.service.s3.S3Service;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.exception.ErrorCode;
@@ -52,7 +53,7 @@ class FeedServiceTest {
     @Mock
     private FeedHashtagMapRepository feedHashtagMapRepository;
     @Mock
-    private FeedDeleteService feedDeleteService;
+    private HashtagService hashtagService;
     @InjectMocks
     private FeedService feedService;
 
@@ -305,7 +306,7 @@ class FeedServiceTest {
         doNothing().when(s3Service).deleteImage("urlString");
         given(s3Service.uploadImage(multipartFile)).willReturn("urlString");
         doNothing().when(feedHashtagMapRepository).deleteAllByFeedId(1L);
-        doNothing().when(feedDeleteService).deleteNotUsingHashtag(anyList());
+        doNothing().when(hashtagService).deleteNotUsingHashtag(anyList());
         given(hashtagRepository.findByHashtagString("#potato")).willReturn(Optional.of(hashtagEntity));
         given(feedHashtagMapRepository.save(any())).willReturn(feedHashtagMap);
         given(feedRepository.save(any())).willReturn(feed);
@@ -318,7 +319,7 @@ class FeedServiceTest {
         verify(s3Service, times(1)).deleteImage(any());
         verify(s3Service, times(1)).uploadImage(any());
         verify(feedHashtagMapRepository, times(1)).deleteAllByFeedId(1L);
-        verify(feedDeleteService, times(1)).deleteNotUsingHashtag(anyList());
+        verify(hashtagService, times(1)).deleteNotUsingHashtag(anyList());
         verify(hashtagRepository, times(1)).findByHashtagString(anyString());
         verify(hashtagRepository, times(1)).findByHashtagString(anyString());
         verify(feedRepository, times(1)).save(any());
@@ -370,7 +371,7 @@ class FeedServiceTest {
         doNothing().when(s3Service).deleteImage("urlString");
         given(s3Service.uploadImage(multipartFile)).willReturn("urlString");
         doNothing().when(feedHashtagMapRepository).deleteAllByFeedId(1L);
-        doNothing().when(feedDeleteService).deleteNotUsingHashtag(anyList());
+        doNothing().when(hashtagService).deleteNotUsingHashtag(anyList());
         given(hashtagRepository.findByHashtagString("#potato")).willReturn(Optional.empty());
         given(hashtagRepository.save(any())).willReturn(hashtagEntity);
         given(feedHashtagMapRepository.save(any())).willReturn(feedHashtagMap);
@@ -384,7 +385,7 @@ class FeedServiceTest {
         verify(s3Service, times(1)).deleteImage(any());
         verify(s3Service, times(1)).uploadImage(any());
         verify(feedHashtagMapRepository, times(1)).deleteAllByFeedId(1L);
-        verify(feedDeleteService, times(1)).deleteNotUsingHashtag(anyList());
+        verify(hashtagService, times(1)).deleteNotUsingHashtag(anyList());
         verify(hashtagRepository, times(1)).findByHashtagString(anyString());
         verify(hashtagRepository, times(1)).save(any());
         verify(feedHashtagMapRepository, times(1)).save(any());
