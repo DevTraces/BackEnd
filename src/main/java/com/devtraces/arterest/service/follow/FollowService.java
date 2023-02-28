@@ -170,9 +170,14 @@ public class FollowService {
             followRecommendationCacheRepository.updateRecommendationTargetUserIdList(recommendationList);
 
             // 캐시서버가 다운되었을 경우를 대비하여 DB에도 별도의 새로운 테이블을 만들어서 저장해 둔다.
+            StringBuilder builder = new StringBuilder();
+            for(Long id : recommendationList){
+                builder.append(id);
+                builder.append(",");
+            }
             followRecommendationRepository.save(
                 FollowRecommendation.builder()
-                    .followRecommendationTargetUsers(recommendationList.toString())
+                    .followRecommendationTargetUsers(builder.toString())
                     .build()
             );
         }
@@ -197,7 +202,6 @@ public class FollowService {
             }
         }
         // 리스트를 랜덤으로 섞은 후, 상위 10개(recommendedUserIdList의 길이가 10 미만이면 그 만큼)를 뽑아낸다.
-        assert recommendedUserIdList != null;
         Collections.shuffle(recommendedUserIdList);
         List<Long> resultIdList = new ArrayList<>();
         for(Long id : recommendedUserIdList){

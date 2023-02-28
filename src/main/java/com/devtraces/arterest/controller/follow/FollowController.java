@@ -60,9 +60,7 @@ public class FollowController {
     }
 
     @GetMapping("/suggestion")
-    public ApiSuccessResponse<List<FollowResponse>> getFollowSuggestionList(
-        @AuthenticationPrincipal Long userId
-    ){
+    public ApiSuccessResponse<List<FollowResponse>> getFollowSuggestionList(){
         return ApiSuccessResponse.from(followService.getRecommendationList());
     }
 
