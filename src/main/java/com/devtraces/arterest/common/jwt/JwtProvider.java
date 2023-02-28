@@ -85,8 +85,8 @@ public class JwtProvider {
 			.httpOnly(true)
 			.path("/")
 			.maxAge(CREATE_AGE)
-			.secure(true)
-			.sameSite(SameSite.NONE.attributeValue())
+//			.secure(true)
+//			.sameSite(SameSite.NONE.attributeValue())
 			.build();
 
 		return cookie;
