@@ -14,7 +14,7 @@ public interface FeedRepository extends JpaRepository<Feed, Long> {
 
     Integer countAllByUserId(Long userId);
 
-    Slice<Feed> findAllByIdInAndCreatedAtBetweenOrderByCreatedAtDesc(
+    Slice<Feed> findAllByUserIdInAndCreatedAtBetweenOrderByCreatedAtDesc(
         Collection<Long> idList, LocalDateTime from, LocalDateTime to, PageRequest pageRequest
     );
 
