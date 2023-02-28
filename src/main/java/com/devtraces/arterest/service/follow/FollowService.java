@@ -5,16 +5,28 @@ import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.controller.follow.dto.response.FollowResponse;
 import com.devtraces.arterest.model.follow.Follow;
 import com.devtraces.arterest.model.follow.FollowRepository;
+import com.devtraces.arterest.model.followcache.FollowRecommendationCacheRepository;
+import com.devtraces.arterest.model.followcache.FollowSamplePoolCacheRepository;
+import com.devtraces.arterest.model.recommendation.FollowRecommendation;
+import com.devtraces.arterest.model.recommendation.FollowRecommendationRepository;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.PriorityQueue;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.devtraces.arterest.service.notice.NoticeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +36,9 @@ public class FollowService {
 
     private final FollowRepository followRepository;
     private final UserRepository userRepository;
+    private final FollowSamplePoolCacheRepository followSamplePoolCacheRepository;
+    private final FollowRecommendationCacheRepository followRecommendationCacheRepository;
+    private final FollowRecommendationRepository followRecommendationRepository;
     private final NoticeService noticeService;
 
     @Transactional
@@ -116,6 +131,92 @@ public class FollowService {
     public void deleteFollowRelation(Long userId, String nickname) {
         User unfollowTargetUser = findUserByNickname(nickname);
         followRepository.deleteByUserIdAndFollowingId(userId, unfollowTargetUser.getId());
+    }
+
+    // 팔로우 테이블의 가장 마지막 레코드(== 가장 최근 팔로우)를 찾아낸 후 캐시해 둠.
+    // 매 6초마다 가장 최신 팔로우 정보를 캐시해두므로, 1시간이면 팔로우 추천 유저 후보 결정을 위한
+    // 600 개의 샘플을 레디스 리스트에 저장해 둘 수 있다.
+    @Scheduled(cron = CommonConstant.PUSH_SAMPLE_TO_REDIS_CRON_STRING)
+    public void pushFollowSampleToCacheServer(){
+        Optional<Follow> optionalLatestFollow = followRepository.findTopByOrderByIdDesc();
+        optionalLatestFollow
+            .ifPresent(
+                follow -> followSamplePoolCacheRepository.pushSample(follow.getFollowingId())
+            );
+    }
+
+    // 매 정각마다 followSamplePoolCacheRepository를 통해 레디스에 저장된
+    // 팔로우 추천 대상 유저 선별용 샘플 리스트의 내용을 바탕으로
+    // 최근 1시간 이내에 팔로우를 많이 받은 상위 일정 수 만큼의 유저들의 주키 아이디 값 리스트를 캐시해 둔다.
+    @Scheduled(cron = CommonConstant.INITIALIZE_RECOMMENDATION_LIST_TO_REDIS_CRON_STRING)
+    public void initializeFollowRecommendationTargetUserIdListToCacheServer(){
+        List<Long> sampleList = followSamplePoolCacheRepository.getSampleList();
+        if(sampleList != null){
+            // 주키 아이디 : 팔로우 받은 횟수 카운트 맵 구성.
+            Map<Long, Integer> userIdToCountMap = sampleList.stream().collect(
+                Collectors.toMap(Function.identity(), e -> 1, Math::addExact)
+            );
+
+            // 맵 내용물 중에서 카운트 높은 횟수 100개 (100개 보다 적다면 중간에 브레이크) 골라내기.
+            PriorityQueue<Map.Entry<Long, Integer>> priorityQueue = new PriorityQueue<>(
+                (x,y) -> (y.getValue() - x.getValue())
+            );
+            for(Map.Entry<Long, Integer> entry : userIdToCountMap.entrySet()){
+                priorityQueue.offer(entry);
+            }
+            List<Long> recommendationList = new ArrayList<>();
+            for(int i=1; i<= CommonConstant.FOLLOW_RECOMMENDATION_LIST_SIZE; i++){
+                if(!priorityQueue.isEmpty()){
+                    recommendationList.add(priorityQueue.poll().getKey());
+                } else break;
+            }
+
+            followRecommendationCacheRepository.updateRecommendationTargetUserIdList(recommendationList);
+
+            // 캐시서버가 다운되었을 경우를 대비하여 DB에도 별도의 새로운 테이블을 만들어서 저장해 둔다.
+            StringBuilder builder = new StringBuilder();
+            for(Long id : recommendationList){
+                builder.append(id);
+                builder.append(",");
+            }
+            followRecommendationRepository.save(
+                FollowRecommendation.builder()
+                    .followRecommendationTargetUsers(builder.toString())
+                    .build()
+            );
+        }
+    }
+
+    public List<FollowResponse> getRecommendationList() {
+        List<Long> recommendedUserIdList;
+        // 캐시 서버를 본다.
+        recommendedUserIdList = followRecommendationCacheRepository.getFollowTargetUserIdList();
+        if(recommendedUserIdList == null){
+            // 없으면 DB를 본다.
+            Optional<FollowRecommendation> optionalFollowRecommendation
+                = followRecommendationRepository.findTopByOrderByIdDesc();
+            if(optionalFollowRecommendation.isPresent()){
+                recommendedUserIdList = Arrays.stream(
+                    optionalFollowRecommendation.get().getFollowRecommendationTargetUsers()
+                        .split(",")
+                ).map(Long::parseLong).collect(Collectors.toList());
+            } else {
+                // DB 마저도 없으면 빈리스트 반환.
+                return Collections.emptyList();
+            }
+        }
+        // 리스트를 랜덤으로 섞은 후, 상위 10개(recommendedUserIdList의 길이가 10 미만이면 그 만큼)를 뽑아낸다.
+        Collections.shuffle(recommendedUserIdList);
+        List<Long> resultIdList = new ArrayList<>();
+        for(Long id : recommendedUserIdList){
+            if(resultIdList.size() != CommonConstant.FOLLOW_RECOMMENDATION_USER_NUMBER){
+                resultIdList.add(id);
+            } else break;
+        }
+
+        return userRepository.findAllByIdIn(resultIdList).stream().map(
+            user -> FollowResponse.from(user, null)
+        ).collect(Collectors.toList());
     }
 
     private User findUserById(Long userId){
