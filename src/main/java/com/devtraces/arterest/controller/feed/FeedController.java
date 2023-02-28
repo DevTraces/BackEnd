@@ -86,4 +86,15 @@ public class FeedController {
         return ApiSuccessResponse.NO_DATA_RESPONSE;
     }
 
+    @GetMapping("/main")
+    public ApiSuccessResponse<List<FeedResponse>> getMainFeedList(
+        @AuthenticationPrincipal Long userId,
+        @RequestParam Integer page,
+        @RequestParam(required = false, defaultValue = "10") Integer pageSize
+    ){
+        return ApiSuccessResponse.from(
+            feedService.getMainFeedList(userId, page, pageSize)
+        );
+    }
+
 }
