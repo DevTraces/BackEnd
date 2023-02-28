@@ -1,6 +1,7 @@
 package com.devtraces.arterest.service.notice;
 
 import com.devtraces.arterest.common.exception.BaseException;
+import com.devtraces.arterest.common.exception.ErrorCode;
 import com.devtraces.arterest.common.type.NoticeTarget;
 import com.devtraces.arterest.common.type.NoticeType;
 import com.devtraces.arterest.controller.notice.dto.LikeNoticeDto;
@@ -24,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -177,6 +179,19 @@ public class NoticeService {
         }
 
         return noticeListResponse;
+    }
+
+    @Transactional
+    public void deleteNotice(Long userId, Long noticeId) {
+        Notice notice = noticeRepository.findById(noticeId).orElseThrow(
+                () -> BaseException.NOTICE_NOT_FOUND);
+
+        // 본인의 알림만 삭제 가능
+        if (!notice.getNoticeOwnerId().equals(userId)) {
+            throw BaseException.FORBIDDEN;
+        }
+
+        noticeRepository.delete(notice);
     }
 
     private User getUser(Long userId) {
