@@ -93,7 +93,7 @@ public class FeedController {
         @RequestParam(required = false, defaultValue = "10") Integer pageSize
     ){
         return ApiSuccessResponse.from(
-            feedService.getMainFeedList(userId, page, pageSize)
+            feedreadService.getMainFeedList(userId, page, pageSize)
         );
     }
 
