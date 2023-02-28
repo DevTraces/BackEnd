@@ -2,6 +2,7 @@ package com.devtraces.arterest.service.follow;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -15,6 +16,10 @@ import com.devtraces.arterest.common.exception.ErrorCode;
 import com.devtraces.arterest.controller.follow.dto.response.FollowResponse;
 import com.devtraces.arterest.model.follow.Follow;
 import com.devtraces.arterest.model.follow.FollowRepository;
+import com.devtraces.arterest.model.followcache.FollowRecommendationCacheRepository;
+import com.devtraces.arterest.model.followcache.FollowSamplePoolCacheRepository;
+import com.devtraces.arterest.model.recommendation.FollowRecommendation;
+import com.devtraces.arterest.model.recommendation.FollowRecommendationRepository;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
 import java.util.ArrayList;
@@ -38,6 +43,12 @@ class FollowServiceTest {
     private FollowRepository followRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private FollowSamplePoolCacheRepository followSamplePoolCacheRepository;
+    @Mock
+    private FollowRecommendationCacheRepository followRecommendationCacheRepository;
+    @Mock
+    private FollowRecommendationRepository followRecommendationRepository;
     @InjectMocks
     private FollowService followService;
 
@@ -379,4 +390,155 @@ class FollowServiceTest {
         // then
         assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
     }
+
+    @Test
+    @DisplayName("팔로우 샘플 캐시서버에 등록 성공")
+    void successPushFollowSampleToCacheServer(){
+        // given
+        Follow follow = Follow.builder()
+            .id(1L)
+            .followingId(2L)
+            .build();
+
+        given(followRepository.findTopByOrderByIdDesc()).willReturn(Optional.of(follow));
+        doNothing().when(followSamplePoolCacheRepository).pushSample(2L);
+
+        // when
+        followService.pushFollowSampleToCacheServer();
+
+        // then
+        verify(followRepository, times(1)).findTopByOrderByIdDesc();
+        verify(followSamplePoolCacheRepository, times(1)).pushSample(2L);
+    }
+
+    @Test
+    @DisplayName("팔로우 추천을 위한 리스트 캐시서버에 초기화 성공")
+    void successInitializeFollowRecommendationTargetUserIdListToCacheServer(){
+        // given
+        List<Long> recommendationList = new ArrayList<>();
+        recommendationList.add(1L);
+        recommendationList.add(2L);
+        recommendationList.add(3L);
+
+        doNothing().when(followRecommendationCacheRepository)
+            .updateRecommendationTargetUserIdList(anyList());
+
+        FollowRecommendation followRecommendationEntity = FollowRecommendation.builder()
+            .id(1L)
+            .followRecommendationTargetUsers(recommendationList.toString())
+            .build();
+
+        given(followRecommendationRepository.save(any()))
+            .willReturn(followRecommendationEntity);
+
+        // when
+        followService.initializeFollowRecommendationTargetUserIdListToCacheServer();
+
+        // then
+        verify(followRecommendationCacheRepository, times(1))
+            .updateRecommendationTargetUserIdList(anyList());
+        verify(followRecommendationRepository, times(1))
+            .save(any());
+    }
+
+    @Test
+    @DisplayName("추천 리스트 획득 성공 - 캐시서버에서 획득 가능")
+    void successGetRecommendationListRedisAvailable(){
+        // given
+        List<Long> recommendedUserIdList = new ArrayList<>();
+        recommendedUserIdList.add(1L);
+        recommendedUserIdList.add(2L);
+        recommendedUserIdList.add(3L);
+
+        User oneUser = User.builder()
+            .id(1L)
+            .build();
+
+        User twoUser = User.builder()
+            .id(2L)
+            .build();
+
+        User threeUser = User.builder()
+            .id(3L)
+            .build();
+
+        List<User> userList = new ArrayList<>();
+        userList.add(oneUser);
+        userList.add(twoUser);
+        userList.add(threeUser);
+
+        given(followRecommendationCacheRepository
+            .getFollowTargetUserIdList()).willReturn(recommendedUserIdList);
+        given(userRepository.findAllByIdIn(anyList())).willReturn(userList);
+
+        // when
+        List<FollowResponse> resultList = followService.getRecommendationList();
+
+        // then
+        verify(followRecommendationCacheRepository, times(1))
+            .getFollowTargetUserIdList();
+        verify(userRepository, times(1)).findAllByIdIn(anyList());
+        assertEquals(3, resultList.size());
+    }
+
+    @Test
+    @DisplayName("추천 리스트 획득 성공 - 캐시서버에서 획득 불가능 but DB 가능")
+    void successGetRecommendationListRedisNotAvailable(){
+        // given
+        FollowRecommendation followRecommendationEntity = FollowRecommendation.builder()
+            .id(1L)
+            .followRecommendationTargetUsers("1,2,3,")
+            .build();
+
+        User oneUser = User.builder()
+            .id(1L)
+            .build();
+
+        User twoUser = User.builder()
+            .id(2L)
+            .build();
+
+        User threeUser = User.builder()
+            .id(3L)
+            .build();
+
+        List<User> userList = new ArrayList<>();
+        userList.add(oneUser);
+        userList.add(twoUser);
+        userList.add(threeUser);
+
+        given(followRecommendationCacheRepository
+            .getFollowTargetUserIdList()).willReturn(null);
+        given(followRecommendationRepository.findTopByOrderByIdDesc())
+            .willReturn(Optional.of(followRecommendationEntity));
+        given(userRepository.findAllByIdIn(anyList())).willReturn(userList);
+
+        // when
+        List<FollowResponse> resultList = followService.getRecommendationList();
+
+        // then
+        verify(followRecommendationCacheRepository, times(1))
+            .getFollowTargetUserIdList();
+        verify(userRepository, times(1)).findAllByIdIn(anyList());
+        assertEquals(3, resultList.size());
+    }
+
+    @Test
+    @DisplayName("추천 리스트 획득 성공 - 캐시서버 불가능 & DB 불가능")
+    void successGetRecommendationListRedisNotAvailableDBEmpty(){
+        // given
+        given(followRecommendationCacheRepository
+            .getFollowTargetUserIdList()).willReturn(null);
+        given(followRecommendationRepository.findTopByOrderByIdDesc())
+            .willReturn(Optional.empty());
+
+        // when
+        List<FollowResponse> resultList = followService.getRecommendationList();
+
+        // then
+        verify(followRecommendationCacheRepository, times(1))
+            .getFollowTargetUserIdList();
+        assertEquals(0, resultList.size());
+    }
+
 }
