@@ -55,7 +55,7 @@ public class LikeService {
 
     @Transactional(readOnly = true)
     public List<LikeResponse> getLikedUserList(
-        Long userId, Long feedId, int page, int pageSize
+        Long feedId, int page, int pageSize
     ) {
         validateFeedExistence(feedId);
         PageRequest pageRequest = PageRequest.of(page, pageSize);

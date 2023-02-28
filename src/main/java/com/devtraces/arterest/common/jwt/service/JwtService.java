@@ -24,16 +24,12 @@ public class JwtService {
 	private final UserRepository userRepository;
 
 	@Transactional
-	public TokenWithNicknameDto reissue(String bearerToken, String refreshToken) {
+	public TokenWithNicknameDto reissue(String refreshToken) {
 
-		String accessToken = "";
-		if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(TOKEN_PREFIX)) {
-			accessToken = bearerToken.substring(TOKEN_PREFIX.length() + 1);
-		}
+		validateTokens(refreshToken);
 
 		Long userId = Long.parseLong(jwtProvider.getUserId(refreshToken)
 			.replace(REFRESH_TOKEN_SUBJECT_PREFIX, ""));
-		validateTokens(accessToken, refreshToken, userId);
 
 		if (!tokenRedisUtil.hasSameRefreshToken(userId, refreshToken)) {
 			throw BaseException.EXPIRED_OR_PREVIOUS_REFRESH_TOKEN;
@@ -48,12 +44,7 @@ public class JwtService {
 		);
 	}
 
-	private void validateTokens(String accessToken, String refreshToken, Long userId) {
-		// 토큰 재발행의 경우 Access Token이 만료되어야 한다.
-		if (!jwtProvider.isExpiredToken(accessToken)) {
-			throw BaseException.NOT_EXPIRED_ACCESS_TOKEN;
-		}
-
+	private void validateTokens(String refreshToken) {
 		if (jwtProvider.isExpiredToken(refreshToken)) {
 			throw BaseException.EXPIRED_OR_PREVIOUS_REFRESH_TOKEN;
 		}
