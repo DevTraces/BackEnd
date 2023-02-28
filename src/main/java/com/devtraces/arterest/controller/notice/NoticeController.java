@@ -6,10 +6,7 @@ import com.devtraces.arterest.controller.notice.dto.NumberOfNoticeResponse;
 import com.devtraces.arterest.service.notice.NoticeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -35,5 +32,14 @@ public class NoticeController {
     ) {
         return ApiSuccessResponse.from(
                 noticeService.getNoticeList(userId, page, pageSize));
+    }
+
+    @DeleteMapping("/{noticeId}")
+    public ApiSuccessResponse<Object> deleteNotice(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long noticeId
+    ) {
+        noticeService.deleteNotice(userId, noticeId);
+        return ApiSuccessResponse.from(null);
     }
 }

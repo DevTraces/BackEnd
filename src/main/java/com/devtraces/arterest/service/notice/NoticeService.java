@@ -1,6 +1,7 @@
 package com.devtraces.arterest.service.notice;
 
 import com.devtraces.arterest.common.exception.BaseException;
+import com.devtraces.arterest.common.exception.ErrorCode;
 import com.devtraces.arterest.common.type.NoticeTarget;
 import com.devtraces.arterest.common.type.NoticeType;
 import com.devtraces.arterest.controller.notice.dto.LikeNoticeDto;
@@ -24,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,14 +46,17 @@ public class NoticeService {
     ) {
         Feed feed = getFeed(feedId);
 
-        noticeRepository.save(
-                Notice.builder()
-                        .noticeOwnerId(feed.getUser().getId()) // 좋아요 누른 피드의 주인
-                        .user(getUser(sendUserId)) // 좋아요 누른 사용자
-                        .feed(feed)
-                        .noticeType(NoticeType.LIKE)
-                        .build()
-        );
+        // 좋아요 누른 사람이 피드 주인이 아닌 경우 알림 생성
+        if (!sendUserId.equals(feed.getUser().getId())) {
+            noticeRepository.save(
+                    Notice.builder()
+                            .noticeOwnerId(feed.getUser().getId()) // 좋아요 누른 피드의 주인
+                            .user(getUser(sendUserId)) // 좋아요 누른 사용자
+                            .feed(feed)
+                            .noticeType(NoticeType.LIKE)
+                            .build()
+            );
+        }
     }
 
     public void createFollowNotice(String nickname, Long sendUserId) {
@@ -73,15 +78,18 @@ public class NoticeService {
     ) {
         Feed feed = getFeed(feedId);
 
-        noticeRepository.save(
-                Notice.builder()
-                        .noticeOwnerId(feed.getUser().getId()) // 댓글 단 피드의 주인
-                        .user(getUser(sendUserId)) // 댓글 단 사람
-                        .feed(feed)
-                        .reply(getReply(replyId))
-                        .noticeType(NoticeType.REPLY)
-                        .build()
-        );
+        // 피드 주인이 아닌 다른 사람이 댓글 달았을 때만 알림
+        if (!sendUserId.equals(feed.getUser().getId())) {
+            noticeRepository.save(
+                    Notice.builder()
+                            .noticeOwnerId(feed.getUser().getId()) // 댓글 단 피드의 주인
+                            .user(getUser(sendUserId)) // 댓글 단 사람
+                            .feed(feed)
+                            .reply(getReply(replyId))
+                            .noticeType(NoticeType.REPLY)
+                            .build()
+            );
+        }
     }
 
     public void createReReplyNotice(
@@ -103,33 +111,39 @@ public class NoticeService {
     public void saveNoticeForFeedOwner(
             User sendUser, Feed feed, Reply reply, Rereply reReply
     ) {
-        noticeRepository.save(
-                buildReReplyNotice(
-                        feed.getUser().getId(), // 대댓글 달린 피드 주인
-                        sendUser, // 대댓글 단 사람
-                        feed,
-                        reply,
-                        reReply,
-                        NoticeType.REREPLY,
-                        NoticeTarget.POST // 피드 주인을 대상으로 함
-                )
-        );
+        // 대댓글 작성자가 피드 주인이 아닌 경우에 알림 생성
+        if (!sendUser.getId().equals(feed.getId())) {
+            noticeRepository.save(
+                    buildReReplyNotice(
+                            feed.getUser().getId(), // 대댓글 달린 피드 주인
+                            sendUser, // 대댓글 단 사람
+                            feed,
+                            reply,
+                            reReply,
+                            NoticeType.REREPLY,
+                            NoticeTarget.POST // 피드 주인을 대상으로 함
+                    )
+            );
+        }
     }
 
     public void saveNoticeForReplyOwner(
             User sendUser, Feed feed, Reply reply, Rereply reReply
     ) {
-        noticeRepository.save(
-                buildReReplyNotice(
-                        reply.getUser().getId(), // 대댓글 달린 댓글 주인
-                        sendUser, // 대댓글 단 사람
-                        feed,
-                        reply,
-                        reReply,
-                        NoticeType.REREPLY,
-                        NoticeTarget.REPLY // 댓글 주인을 대상으로 함
-                )
-        );
+        // 대댓글 작성자가 댓글 주인이 아닌 경우에 알림 생성
+        if (!sendUser.getId().equals(reply.getUser().getId())) {
+            noticeRepository.save(
+                    buildReReplyNotice(
+                            reply.getUser().getId(), // 대댓글 달린 댓글 주인
+                            sendUser, // 대댓글 단 사람
+                            feed,
+                            reply,
+                            reReply,
+                            NoticeType.REREPLY,
+                            NoticeTarget.REPLY // 댓글 주인을 대상으로 함
+                    )
+            );
+        }
     }
 
     public NumberOfNoticeResponse getNumberOfNotice(Long noticeOwnerId) {
@@ -177,6 +191,19 @@ public class NoticeService {
         }
 
         return noticeListResponse;
+    }
+
+    @Transactional
+    public void deleteNotice(Long userId, Long noticeId) {
+        Notice notice = noticeRepository.findById(noticeId).orElseThrow(
+                () -> BaseException.NOTICE_NOT_FOUND);
+
+        // 본인의 알림만 삭제 가능
+        if (!notice.getNoticeOwnerId().equals(userId)) {
+            throw BaseException.FORBIDDEN;
+        }
+
+        noticeRepository.delete(notice);
     }
 
     private User getUser(Long userId) {
