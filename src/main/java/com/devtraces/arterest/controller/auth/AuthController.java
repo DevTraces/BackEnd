@@ -4,6 +4,7 @@ import static com.devtraces.arterest.common.jwt.JwtProperties.TOKEN_PREFIX;
 
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
 import com.devtraces.arterest.controller.auth.dto.TokenWithNicknameDto;
+import com.devtraces.arterest.controller.auth.dto.request.DeleteUserRequest;
 import com.devtraces.arterest.controller.auth.dto.request.MailAuthKeyCheckRequest;
 import com.devtraces.arterest.controller.auth.dto.request.MailAuthKeyRequest;
 import com.devtraces.arterest.controller.auth.dto.request.SignInRequest;
@@ -96,5 +97,14 @@ public class AuthController {
 	public ApiSuccessResponse<PasswordCheckResponse> checkPassword(@AuthenticationPrincipal long userId, @RequestBody @Valid PasswordCheckRequest request) {
 		boolean isCorrect = authService.checkPassword(userId, request.getPassword());
 		return ApiSuccessResponse.from(PasswordCheckResponse.builder().isCorrect(isCorrect).build());
+	}
+
+	@PostMapping("/withdrawal")
+	public ApiSuccessResponse<?> deleteUser(
+		@AuthenticationPrincipal long userId,
+		@RequestBody @Valid DeleteUserRequest request
+	) {
+		authService.deleteUser(userId, request.getPassword());
+		return ApiSuccessResponse.NO_DATA_RESPONSE;
 	}
 }

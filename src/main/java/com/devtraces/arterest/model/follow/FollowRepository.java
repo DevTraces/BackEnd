@@ -1,5 +1,6 @@
 package com.devtraces.arterest.model.follow;
 
+import com.devtraces.arterest.model.user.User;
 import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -26,5 +27,10 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
     
     boolean existsByUserIdAndFollowingId(Long user_id, Long followingId);
 
+    void deleteAllByFollowingId(Long followingId);
+    
+    void deleteAllByUser(User user);
+
     Optional<Follow> findTopByOrderByIdDesc();
+
 }

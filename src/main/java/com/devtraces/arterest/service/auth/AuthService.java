@@ -2,8 +2,15 @@ package com.devtraces.arterest.service.auth;
 
 import com.devtraces.arterest.common.type.UserSignUpType;
 import com.devtraces.arterest.common.type.UserStatusType;
+import com.devtraces.arterest.controller.auth.dto.request.DeleteUserRequest;
+import com.devtraces.arterest.model.feed.Feed;
+import com.devtraces.arterest.model.follow.Follow;
+import com.devtraces.arterest.model.follow.FollowRepository;
+import com.devtraces.arterest.model.notice.NoticeRepository;
 import com.devtraces.arterest.service.auth.util.AuthRedisUtil;
 import com.devtraces.arterest.service.auth.util.TokenRedisUtil;
+import com.devtraces.arterest.service.feed.application.FeedDeleteApplication;
+import com.devtraces.arterest.service.follow.FollowService;
 import com.devtraces.arterest.service.s3.S3Service;
 import com.devtraces.arterest.service.mail.MailService;
 import com.devtraces.arterest.common.exception.BaseException;
@@ -40,6 +47,9 @@ public class AuthService {
 	private final AuthRedisUtil authRedisUtil;
 	private final TokenRedisUtil tokenRedisUtil;
 	private final UserRepository userRepository;
+	private final FeedDeleteApplication feedDeleteApplication;
+	private final FollowRepository followRepository;
+	private final NoticeRepository noticeRepository;
 
 	@Transactional
 	public UserRegistrationResponse register(
@@ -153,5 +163,30 @@ public class AuthService {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> BaseException.USER_NOT_FOUND);
 		return passwordEncoder.matches(password, user.getPassword());
+	}
+
+	@Transactional
+	public void deleteUser(long userId, String password) {
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> BaseException.USER_NOT_FOUND);
+		if (!passwordEncoder.matches(password, user.getPassword())) {
+			throw BaseException.WRONG_EMAIL_OR_PASSWORD;
+		}
+
+		//알림 삭제
+		noticeRepository.deleteAllByNoticeOwnerId(userId);
+		noticeRepository.deleteAllByUser(user);
+
+		//팔로우 삭제
+		followRepository.deleteAllByFollowingId(userId);
+		followRepository.deleteAllByUser(user);
+
+		//게시물, 댓글, 대댓글, 좋아요, 북마크, 해시태그 삭제
+		for(Feed feed : user.getFeedList()){
+			feedDeleteApplication.deleteFeed(userId, feed.getId());
+		}
+
+		//유저 삭제
+		userRepository.deleteById(user.getId());
 	}
 }
