@@ -161,4 +161,4 @@ GET http://localhost:8080/api/follows/suggestion
 
 
 ### 1번 유저가 메인 피드 읽기 요청 - 피드 구성 API 호출.
-GET http://localhost:8080/api/feeds/main?userId=1&page=2
+GET http://localhost:8080/api/feeds/main?userId=1&page=0
