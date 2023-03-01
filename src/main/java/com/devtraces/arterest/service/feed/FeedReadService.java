@@ -101,7 +101,7 @@ public class FeedReadService {
 			).collect(Collectors.toList());
 
 		// responseList의 길이가 10 미만일 경우, 좋아요 개수 상위 게시물을 랜덤하게 선택하여 리스트 내용물을 추가한다.
-		if(responseList.size() == 0){
+		if(responseList.size() < pageSize){
 			List<Long> recommendedFeedIdList;
 			// 캐시 서버를 본다.
 			recommendedFeedIdList = feedRecommendationCacheRepository
@@ -121,7 +121,7 @@ public class FeedReadService {
 				}
 			}
 
-			// 추천 feedId 리스트를 랜덤하게 섞은 후 그 중에서 상위 (pageSize - responseList.size()) 만큼을 뽑는다.
+			// 추천 feedId 리스트를 랜덤하게 섞은 후 그 중에서 상위 (pageSize - responseList.size())개 만큼을 뽑는다.
 			// feedId 리스트의 길이가 (pageSize - responseList.size())보다 작다면, feedId 리스트 전체를 뽑는다.
 			Collections.shuffle(recommendedFeedIdList);
 			List<Long> randomlySelectedRecommendedFeedList = new ArrayList<>();
