@@ -39,7 +39,7 @@ public class FeedSamplingService {
 
     // 매 정각마다 최근 1시간 아내에 가장 좋아요를 많이 받은 게시물 100개(혹은 그 이하)를
     // 레디스에 리스트 형태로 초기화 해 둔다.
-    @Scheduled(cron = "0/10 * * * * ?")
+    @Scheduled(cron = CommonConstant.INITIALIZE_RECOMMENDATION_LIST_TO_REDIS_CRON_STRING)
     public void initializeRecommendationTargetFeedIdListToCacheServer(){
         List<Long> sampleList = likeSamplePoolCacheRepository.getSampleList();
         if(sampleList != null){
