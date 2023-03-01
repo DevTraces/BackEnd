@@ -41,6 +41,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 @ExtendWith(MockitoExtension.class)
 class FeedReadServiceTest {
@@ -440,19 +442,176 @@ class FeedReadServiceTest {
     @Test
     @DisplayName("메인 피드 리스트 읽기 성공 - 캐시서버 다운 & 좋아요 개수 기반 게시물 추천 리스트 볼 필요 없는 경우")
     void successGetMainFeedListRedisNotAvailableNoNeedToReadFeedRecommendationList(){
+        // given
+        User requestedUser = User.builder()
+            .id(1L)
+            .followList(new ArrayList<>())
+            .build();
 
+        User authorUser = User.builder()
+            .id(2L)
+            .build();
+
+        requestedUser.getFollowList().add(
+            Follow.builder()
+                .followingId(2L)
+                .build()
+        );
+        requestedUser.getFollowList().add(
+            Follow.builder()
+                .followingId(3L)
+                .build()
+        );
+        requestedUser.getFollowList().add(
+            Follow.builder()
+                .followingId(4L)
+                .build()
+        );
+
+        List<Long> followingUserIdListOfRequestUser = new ArrayList<>();
+        followingUserIdListOfRequestUser.add(2L);
+        followingUserIdListOfRequestUser.add(3L);
+        followingUserIdListOfRequestUser.add(4L);
+
+        Feed feed = Feed.builder()
+            .id(1L)
+            .imageUrls("")
+            .user(authorUser)
+            .build();
+
+        List<Feed> feedEntityList = new ArrayList<>();
+        feedEntityList.add(feed);
+
+        Slice<Feed> feedSlice = new PageImpl<>(feedEntityList);
+
+        LocalDateTime now = LocalDateTime.now();
+
+        LocalDateTime to = LocalDateTime.of(
+            now.getYear(), now.getMonth(), now.getDayOfMonth(),
+            now.getHour(), now.getMinute(), now.getSecond(),
+            999999000
+        );
+        LocalDateTime from = to.minusDays(CommonConstant.FEED_CONSTRUCT_DURATION_DAY);
+
+        given(userRepository.findById(1L)).willReturn(Optional.of(requestedUser));
+        given(
+            feedRepository.findAllByUserIdInAndCreatedAtBetweenOrderByCreatedAtDesc(
+                followingUserIdListOfRequestUser, from, to, PageRequest.of(0, 10)
+            )
+        ).willReturn(feedSlice);
+
+        given(likeNumberCacheRepository.getFeedLikeNumber(1L)).willReturn(null);
+        given(likeRepository.countByFeedId(1L)).willReturn(0L);
+        doNothing().when(likeNumberCacheRepository).setLikeNumber(1L, 0L);
+
+        // when
+        List<FeedResponse> resultList = feedReadService.getMainFeedList(1L, 0, 10);
+
+        // then
+        assertEquals(1, resultList.size());
+        verify(userRepository, times(1)).findById(1L);
+        verify(feedRepository, times(1))
+            .findAllByUserIdInAndCreatedAtBetweenOrderByCreatedAtDesc(
+                followingUserIdListOfRequestUser, from, to, PageRequest.of(0, 10)
+            );
+        verify(likeNumberCacheRepository, times(1)).getFeedLikeNumber(1L);
+        verify(likeRepository, times(1)).countByFeedId(1L);
+        verify(likeNumberCacheRepository, times(1)).setLikeNumber(1L, 0L);
     }
 
     @Test
     @DisplayName("메인 피드 리스트 읽기 성공 - 캐시서버 다운 & 좋아요 개수 기반 게시물 추천 리스트 봐야하는 경우")
     void successGetMainFeedListRedisNotAvailableNeedToReadFeedRecommendationList(){
+        // given
+        User requestedUser = User.builder()
+            .id(1L)
+            .followList(new ArrayList<>())
+            .build();
 
+        User authorUser = User.builder()
+            .id(2L)
+            .build();
+
+        List<Long> recommendedFeedIdList = new ArrayList<>();
+        recommendedFeedIdList.add(5L);
+
+        Feed feed = Feed.builder()
+            .id(5L)
+            .imageUrls("")
+            .user(authorUser)
+            .build();
+
+        List<Feed> feedEntityList = new ArrayList<>();
+        feedEntityList.add(feed);
+
+        Slice<Feed> feedSlice = new PageImpl<>(feedEntityList);
+
+        Slice<Feed> emptyFeedSlice = new PageImpl<>(new ArrayList<>());
+
+        LocalDateTime now = LocalDateTime.now();
+
+        LocalDateTime to = LocalDateTime.of(
+            now.getYear(), now.getMonth(), now.getDayOfMonth(),
+            now.getHour(), now.getMinute(), now.getSecond(),
+            999999000
+        );
+        LocalDateTime from = to.minusDays(CommonConstant.FEED_CONSTRUCT_DURATION_DAY);
+
+        given(userRepository.findById(1L)).willReturn(Optional.of(requestedUser));
+        given(
+            feedRepository.findAllByUserIdInAndCreatedAtBetweenOrderByCreatedAtDesc(
+                new ArrayList<>(), from, to, PageRequest.of(0, 10)
+            )
+        ).willReturn(emptyFeedSlice);
+        given(feedRecommendationCacheRepository.getRecommendationTargetFeedIdList()).willReturn(
+            recommendedFeedIdList
+        );
+        given(feedRepository.countAllByUserIdInAndCreatedAtBetween(
+            new ArrayList<>(), from, to
+        )).willReturn(0);
+
+        given(likeNumberCacheRepository.getFeedLikeNumber(5L)).willReturn(null);
+        given(likeRepository.countByFeedId(5L)).willReturn(0L);
+        doNothing().when(likeNumberCacheRepository).setLikeNumber(5L, 0L);
+        given(feedRepository.findAllByIdInOrderByCreatedAtDesc(
+            recommendedFeedIdList, PageRequest.of(0, 10)
+        )).willReturn(feedSlice);
+
+        // when
+        List<FeedResponse> resultList = feedReadService.getMainFeedList(1L, 0, 10);
+
+        // then
+        assertEquals(1, resultList.size());
+        verify(userRepository, times(1)).findById(1L);
+        verify(feedRepository, times(1))
+            .findAllByUserIdInAndCreatedAtBetweenOrderByCreatedAtDesc(
+                new ArrayList<>(), from, to, PageRequest.of(0, 10)
+            );
+        verify(feedRecommendationCacheRepository, times(1))
+            .getRecommendationTargetFeedIdList();
+        verify(feedRepository, times(1))
+            .countAllByUserIdInAndCreatedAtBetween(new ArrayList<>(), from, to);
+        verify(likeNumberCacheRepository, times(1)).getFeedLikeNumber(5L);
+        verify(feedRepository, times(1))
+            .findAllByIdInOrderByCreatedAtDesc(recommendedFeedIdList, PageRequest.of(0, 10));
+        verify(likeRepository, times(1)).countByFeedId(5L);
+        verify(likeNumberCacheRepository, times(1)).setLikeNumber(5L, 0L);
     }
 
     @Test
     @DisplayName("메인 피드 리스트 읽기 실패 - 유저 정보 찾지 못함")
     void failedGetMainFeedListUserNotFound(){
+        // given
+        given(userRepository.findById(1L)).willReturn(Optional.empty());
 
+        // when
+        BaseException exception = assertThrows(
+            BaseException.class ,
+            () -> feedReadService.getMainFeedList(1L, 0, 10)
+        );
+
+        // then
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
     }
 
 }
