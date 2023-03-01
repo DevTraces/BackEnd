@@ -89,7 +89,13 @@ public class FeedReadService {
 		).getFollowList().stream().map(Follow::getFollowingId)
 			.collect(Collectors.toList());
 
-		LocalDateTime to = LocalDateTime.now();
+		LocalDateTime now = LocalDateTime.now();
+
+		LocalDateTime to = LocalDateTime.of(
+			now.getYear(), now.getMonth(), now.getDayOfMonth(),
+			now.getHour(), now.getMinute(), now.getSecond(),
+			999999000
+		);
 		LocalDateTime from = to.minusDays(CommonConstant.FEED_CONSTRUCT_DURATION_DAY);
 
 		List<FeedResponse> responseList = feedRepository
@@ -136,7 +142,7 @@ public class FeedReadService {
 			// 첫 번째 쿼리의 내용물들 전체를 pageSize 만큼의 용량을 가지는 페이지들로 나타내기 위해서 필요로 하는
 			// 페이지 개수를 뜻한다.
 			int numberOfRequiredPagesForFirstQuery
-				= (numberOfElemsInFirstQuery + pageSize + 1)/pageSize;
+				= (numberOfElemsInFirstQuery + pageSize - 1)/pageSize;
 
 			return feedRepository
 				.findAllByIdInOrderByCreatedAtDesc(
