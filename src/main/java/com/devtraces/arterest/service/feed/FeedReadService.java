@@ -77,7 +77,9 @@ public class FeedReadService {
 	}
 
 	// 최근 30일 이내에 생성된 게시물들 중에서 userId 유저가 팔로잉 하고 있는 유저가 작성한 게시물을
-	// 최신 순으로 보여주고, 그 개수가 pageSize 보다 작을 경우 좋아요 개수 상위 글들을 랜덤하게 선택하여 채워 넣는다.
+	// 먼저 찾아내는 것이 첫 번째 쿼리이고,
+	// 첫 번째 쿼리의 결과물 리스트 길이가 0일 때, 좋아요 개수 기반 추천 게시물 리스트에 있는 게시물을
+	// 찾아내는 것이 두 번째 쿼리이다.
  	@Transactional(readOnly = true)
 	public List<FeedResponse> getMainFeedList(Long userId, Integer page, Integer pageSize) {
 		Set<Long> likedFeedSet = getLikedFeedSet(userId);
@@ -100,8 +102,23 @@ public class FeedReadService {
 				}
 			).collect(Collectors.toList());
 
-		// responseList의 길이가 10 미만일 경우, 좋아요 개수 상위 게시물을 랜덤하게 선택하여 리스트 내용물을 추가한다.
-		if(responseList.size() < pageSize){
+		if(responseList.size() > 0){
+			// 첫 번째 쿼리의 결과물이 존재하는 경우, 좋아요 개수 기반 추천 게시물 리스트를 찾지 않고 바로 리턴.
+			return responseList;
+		} else {
+			// 첫 번째 쿼리의 결과물 개수가 0일 경우, 좋아요 개수 상위 게시물을 찾아내는 두 번째 쿼리를 실행한다.
+
+			// responseList의 길이가 최초로 0이 되는 페이지 번호를 알아낸다.
+			int numberOfElemsInFirstQuery = feedRepository.countAllByUserIdInAndCreatedAtBetween(
+				followingUserIdList, from, to
+			);
+
+			// (요소 숫자 + 페이지 사이즈 - 1) / 페이지 사이즈
+			// 첫 번째 쿼리의 내용물들 전체를 pageSize 만큼의 용량을 가지는 페이지들로 나타내기 위해서 필요로 하는
+			// 페이지 개수를 뜻한다.
+			int numberOfRequiredPagesForFirstQuery
+				= (numberOfElemsInFirstQuery + pageSize + 1)/pageSize;
+
 			List<Long> recommendedFeedIdList;
 			// 캐시 서버를 본다.
 			recommendedFeedIdList = feedRecommendationCacheRepository
@@ -121,28 +138,17 @@ public class FeedReadService {
 				}
 			}
 
-			// 추천 feedId 리스트를 랜덤하게 섞은 후 그 중에서 상위 (pageSize - responseList.size())개 만큼을 뽑는다.
-			// feedId 리스트의 길이가 (pageSize - responseList.size())보다 작다면, feedId 리스트 전체를 뽑는다.
-			Collections.shuffle(recommendedFeedIdList);
-			List<Long> randomlySelectedRecommendedFeedList = new ArrayList<>();
-			for(Long feedId : recommendedFeedIdList){
-				if(randomlySelectedRecommendedFeedList.size() != (pageSize - responseList.size()) ){
-					randomlySelectedRecommendedFeedList.add(feedId);
-				} else break;
-			}
-
-			List<FeedResponse> recommendedFeedList = feedRepository
-				.findAllByIdInOrderByCreatedAtDesc(randomlySelectedRecommendedFeedList)
-				.getContent().stream().map(
+			return feedRepository
+				.findAllByIdInOrderByCreatedAtDesc(
+					recommendedFeedIdList,
+					PageRequest.of(page - numberOfRequiredPagesForFirstQuery, pageSize)
+				).getContent().stream().map(
 				feed -> {
 					Long likeNumber = getOrCacheLikeNumber(feed);
 					return FeedResponse.from(feed, likedFeedSet, likeNumber, bookmarkedFeedSet);
 				}
 			).collect(Collectors.toList());
-
-			responseList.addAll(recommendedFeedList);
 		}
-		return responseList;
 	}
 
 	// 피드 별 좋아요 개수는 레디스를 먼저 보게 만들고, 그게 불가능 할때만 Like 테이블에서 찾도록 한다.

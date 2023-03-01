@@ -39,7 +39,7 @@ public class FeedSamplingService {
 
     // 매 정각마다 최근 1시간 아내에 가장 좋아요를 많이 받은 게시물 100개(혹은 그 이하)를
     // 레디스에 리스트 형태로 초기화 해 둔다.
-    @Scheduled(cron = CommonConstant.INITIALIZE_RECOMMENDATION_LIST_TO_REDIS_CRON_STRING)
+    @Scheduled(cron = "0/10 * * * * ?")
     public void initializeRecommendationTargetFeedIdListToCacheServer(){
         List<Long> sampleList = likeSamplePoolCacheRepository.getSampleList();
         if(sampleList != null){
@@ -52,6 +52,10 @@ public class FeedSamplingService {
             PriorityQueue<Entry<Long, Integer>> priorityQueue = new PriorityQueue<>(
                 (x,y) -> (y.getValue() - x.getValue())
             );
+            for(Map.Entry<Long, Integer> entry : feedIdToCountMap.entrySet()){
+                priorityQueue.offer(entry);
+            }
+
             List<Long> recommendationList = new ArrayList<>();
             for(int i=1; i<= CommonConstant.FEED_RECOMMENDATION_LIST_SIZE; i++){
                 if(!priorityQueue.isEmpty()){

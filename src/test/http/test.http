@@ -84,11 +84,14 @@ POST http://localhost:8080/make-testuser
 
 
 
-### 팔로우 관계 설정 / 1>2 - OK
-POST http://localhost:8080/api/follows/two?userId=1
-
 ### 팔로우 관계 설정 / 1>3 - OK
 POST http://localhost:8080/api/follows/three?userId=1
+
+### 팔로우 관계 설정 / 1>4 - OK
+POST http://localhost:8080/api/follows/four?userId=1
+
+
+
 
 ### 팔로우 관계 설정  2> 3 - OK
 POST http://localhost:8080/api/follows/three?userId=2
@@ -116,20 +119,23 @@ DELETE http://localhost:8080/api/follows/three?userId=1
 ### 테스트 유저 생성 & 초기 작업 진행.
 POST http://localhost:8080/make-testuser
 
-### 1번 유저가 피드에 좋아요 누름 - OK
-POST http://localhost:8080/api/like/1?userId=1
 
-### 2번 유저가 피드에 좋아요 누름 - OK
-POST http://localhost:8080/api/like/1?userId=2
+### 1번 유저가 5 피드에 좋아요 누름 - OK
+POST http://localhost:8080/api/like/5?userId=1
 
-### 3번 유저가 피드에 좋아요 누름 - OK
-POST http://localhost:8080/api/like/1?userId=3
+### 2번 유저가 5 피드에 좋아요 누름 - OK
+POST http://localhost:8080/api/like/5?userId=2
 
-### 4번 유저가 피드에 좋아요 누름 - OK
-POST http://localhost:8080/api/like/1?userId=4
+### 1번 유저가 2 피드에 좋아요 누름 - OK
+POST http://localhost:8080/api/like/2?userId=1
 
-### 5번 유저가 피드에 좋아요 누름 - OK
-POST http://localhost:8080/api/like/1?userId=5
+### 3번 유저가 2 피드에 좋아요 누름 - OK
+POST http://localhost:8080/api/like/2?userId=3
+
+### 4번 유저가 2 피드에 좋아요 누름 - OK
+POST http://localhost:8080/api/like/2?userId=4
+
+
 
 ### 페이지 사이즈 3으로 놓고 좋아요 누른 유저들 조회 0 페이지 조회. - OK
 GET http://localhost:8080/api/feeds/like/1?userId=1&page=0&pageSize=3
@@ -152,3 +158,7 @@ GET http://localhost:8080/api/feeds/list/six?userId=6&page=0
 
 ### 팔로우 추천 리스트 읽기
 GET http://localhost:8080/api/follows/suggestion
+
+
+### 1번 유저가 메인 피드 읽기 요청 - 피드 구성 API 호출.
+GET http://localhost:8080/api/feeds/main?userId=1&page=2
