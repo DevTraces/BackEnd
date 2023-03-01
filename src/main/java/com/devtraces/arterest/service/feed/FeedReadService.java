@@ -78,8 +78,8 @@ public class FeedReadService {
 
 	// 최근 30일 이내에 생성된 게시물들 중에서 userId 유저가 팔로잉 하고 있는 유저가 작성한 게시물을
 	// 먼저 찾아내는 것이 첫 번째 쿼리이고,
-	// 첫 번째 쿼리의 결과물 리스트 길이가 0일 때, 좋아요 개수 기반 추천 게시물 리스트에 있는 게시물을
-	// 찾아내는 것이 두 번째 쿼리이다.
+	// 첫 번째 쿼리의 결과물 요소의 개수가 0일 때, 좋아요 개수 기반 추천 게시물 리스트에 있는 게시물들을 최신순으로
+	// 찾아내는 것이 두 번째 쿼리다.
  	@Transactional(readOnly = true)
 	public List<FeedResponse> getMainFeedList(Long userId, Integer page, Integer pageSize) {
 		Set<Long> likedFeedSet = getLikedFeedSet(userId);
@@ -108,17 +108,6 @@ public class FeedReadService {
 		} else {
 			// 첫 번째 쿼리의 결과물 개수가 0일 경우, 좋아요 개수 상위 게시물을 찾아내는 두 번째 쿼리를 실행한다.
 
-			// responseList의 길이가 최초로 0이 되는 페이지 번호를 알아낸다.
-			int numberOfElemsInFirstQuery = feedRepository.countAllByUserIdInAndCreatedAtBetween(
-				followingUserIdList, from, to
-			);
-
-			// (요소 숫자 + 페이지 사이즈 - 1) / 페이지 사이즈
-			// 첫 번째 쿼리의 내용물들 전체를 pageSize 만큼의 용량을 가지는 페이지들로 나타내기 위해서 필요로 하는
-			// 페이지 개수를 뜻한다.
-			int numberOfRequiredPagesForFirstQuery
-				= (numberOfElemsInFirstQuery + pageSize + 1)/pageSize;
-
 			List<Long> recommendedFeedIdList;
 			// 캐시 서버를 본다.
 			recommendedFeedIdList = feedRecommendationCacheRepository
@@ -137,6 +126,17 @@ public class FeedReadService {
 					return Collections.emptyList();
 				}
 			}
+
+			// responseList의 길이가 최초로 0이 되는 페이지 번호를 알아낸다.
+			int numberOfElemsInFirstQuery = feedRepository.countAllByUserIdInAndCreatedAtBetween(
+				followingUserIdList, from, to
+			);
+
+			// (요소 숫자 + 페이지 사이즈 - 1) / 페이지 사이즈
+			// 첫 번째 쿼리의 내용물들 전체를 pageSize 만큼의 용량을 가지는 페이지들로 나타내기 위해서 필요로 하는
+			// 페이지 개수를 뜻한다.
+			int numberOfRequiredPagesForFirstQuery
+				= (numberOfElemsInFirstQuery + pageSize + 1)/pageSize;
 
 			return feedRepository
 				.findAllByIdInOrderByCreatedAtDesc(
