@@ -22,6 +22,7 @@ import com.devtraces.arterest.model.like.LikeRepository;
 import com.devtraces.arterest.model.like.Likes;
 import com.devtraces.arterest.model.likecache.FeedRecommendationCacheRepository;
 import com.devtraces.arterest.model.likecache.LikeNumberCacheRepository;
+import com.devtraces.arterest.model.recommendation.LikeRecommendation;
 import com.devtraces.arterest.model.recommendation.LikeRecommendationRepository;
 import com.devtraces.arterest.model.reply.Reply;
 import com.devtraces.arterest.model.user.User;
@@ -541,6 +542,10 @@ class FeedReadServiceTest {
             .user(authorUser)
             .build();
 
+        LikeRecommendation likeRecommendation = LikeRecommendation.builder()
+            .RecommendationTargetFeeds("5,")
+            .build();
+
         List<Feed> feedEntityList = new ArrayList<>();
         feedEntityList.add(feed);
 
@@ -564,13 +569,17 @@ class FeedReadServiceTest {
             )
         ).willReturn(emptyFeedSlice);
         given(feedRecommendationCacheRepository.getRecommendationTargetFeedIdList()).willReturn(
-            recommendedFeedIdList
+            null
         );
+        given(likeNumberCacheRepository.getFeedLikeNumber(5L)).willReturn(null);
+        given(likeRecommendationRepository.findTopByOrderByIdDesc()).willReturn(
+            Optional.of(likeRecommendation)
+        );
+
         given(feedRepository.countAllByUserIdInAndCreatedAtBetween(
             new ArrayList<>(), from, to
         )).willReturn(0);
 
-        given(likeNumberCacheRepository.getFeedLikeNumber(5L)).willReturn(null);
         given(likeRepository.countByFeedId(5L)).willReturn(0L);
         doNothing().when(likeNumberCacheRepository).setLikeNumber(5L, 0L);
         given(feedRepository.findAllByIdInOrderByCreatedAtDesc(
@@ -592,6 +601,8 @@ class FeedReadServiceTest {
         verify(feedRepository, times(1))
             .countAllByUserIdInAndCreatedAtBetween(new ArrayList<>(), from, to);
         verify(likeNumberCacheRepository, times(1)).getFeedLikeNumber(5L);
+        verify(likeRecommendationRepository, times(1))
+            .findTopByOrderByIdDesc();
         verify(feedRepository, times(1))
             .findAllByIdInOrderByCreatedAtDesc(recommendedFeedIdList, PageRequest.of(0, 10));
         verify(likeRepository, times(1)).countByFeedId(5L);
