@@ -1,6 +1,7 @@
 package com.devtraces.arterest.controller.user;
 
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
+import com.devtraces.arterest.controller.user.dto.request.SendMailWithAuthkeyForNewPasswordRequest;
 import com.devtraces.arterest.controller.user.dto.request.PasswordUpdateRequest;
 import com.devtraces.arterest.controller.user.dto.request.UpdateProfileRequest;
 import com.devtraces.arterest.controller.user.dto.response.UpdateProfileImageResponse;
@@ -10,8 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import reactor.util.annotation.Nullable;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 @RestController
@@ -40,6 +41,16 @@ public class UserController {
                 userId, request.getBeforePassword(), request.getAfterPassword()
         );
         return ApiSuccessResponse.NO_DATA_RESPONSE;
+    }
+
+    @PostMapping("/password/email")
+    public ApiSuccessResponse<Object>
+    sendEmailAuthKeyForNewPassword(
+            @AuthenticationPrincipal Long userId,
+            @RequestBody @Valid SendMailWithAuthkeyForNewPasswordRequest request
+    ) {
+        userService.sendMailWithAuthkeyForNewPassword(userId, request.getEmail());
+        return ApiSuccessResponse.from(null);
     }
 
     @GetMapping("/profile/{nickname}")

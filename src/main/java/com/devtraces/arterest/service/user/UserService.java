@@ -2,6 +2,7 @@ package com.devtraces.arterest.service.user;
 
 import com.devtraces.arterest.controller.user.dto.response.*;
 import com.devtraces.arterest.model.follow.FollowRepository;
+import com.devtraces.arterest.service.mail.MailService;
 import com.devtraces.arterest.service.s3.S3Service;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.exception.ErrorCode;
@@ -9,21 +10,31 @@ import com.devtraces.arterest.model.feed.FeedRepository;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Duration;
 import java.util.Optional;
+import java.util.Random;
+
+import static com.devtraces.arterest.common.type.UserSignUpType.KAKAO_TALK;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
+    private static final int AUTH_KEY_DIGIT = 6;
+    private static final String PASSWORD_AUTH_KEY_PREFIX = "PASSWORD_AUTH_EMAIL:";
+    private static final int AUTH_KEY_VALID_MINUTE = 10;
     private final UserRepository userRepository;
     private final FeedRepository feedRepository;
     private final FollowRepository followRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MailService mailService;
     private final S3Service s3Service;
+    private final RedisTemplate<String, String> redisTemplate;
 
     public EmailCheckResponse checkEmail(String email) {
 
@@ -61,6 +72,27 @@ public class UserService {
 
         user.setPassword(passwordEncoder.encode(afterPassword));
         userRepository.save(user);
+    }
+
+    public void sendMailWithAuthkeyForNewPassword(
+            Long userId, String email
+    ) {
+        User user = getUserById(userId);
+
+        // 이메일로 회원가입한 사람만 이메일 인증 가능
+        // 카카오 소셜 로그인은 이메일 정보 없을 수도 있음
+        if (user.getSignupType().equals(KAKAO_TALK)) {
+            throw BaseException.UPDATE_PASSWORD_NOT_ALLOWED_FOR_KAKAO_USER;
+        }
+
+        // 본인 이메일에 대해서만 인증 가능
+        if (!email.equals(user.getEmail())) {
+            throw BaseException.INPUT_EMAIL_AND_USER_EMAIL_MISMATCH;
+        }
+
+        String authKey = generateAuthKey();
+        sendAuthenticationEmail(email, authKey);
+        setAuthKeyInRedis(email, authKey);
     }
 
     public ProfileByNicknameResponse getProfileByNickname(Long userId, String nickname) {
@@ -126,5 +158,34 @@ public class UserService {
     private User getUserById(Long userId) {
         return userRepository.findById(userId).orElseThrow(
                 () -> BaseException.USER_NOT_FOUND);
+    }
+
+    private String generateAuthKey() {
+        Random random = new Random();
+        StringBuilder resultNumber = new StringBuilder();
+
+        for (int i = 0; i < AUTH_KEY_DIGIT; i++) {
+            resultNumber.append(random.nextInt(9));	// 0~9 사이의 랜덤 숫자 생성
+        }
+        return resultNumber.toString();
+    }
+
+    private void sendAuthenticationEmail(String email, String authKey) {
+        String subject = "ArtBubble 인증 코드";
+        String text = "<h2>새 비밀번호 설정을 위한 이메일 인증코드</h2>\n"
+                + "<p>새 비밀번호 설정을 위한 인증코드입니다. <br>아래의 인증코드를 입력하시면 새 비밀번호 설정이 완료됩니다.</p>\n"
+                + "<p style=\"background: #EFEFEF; font-size: 30px;padding: 10px\">" + authKey + "</p>";
+
+        mailService.sendMail(email, subject, text);
+    }
+
+    private void setAuthKeyInRedis(String email, String authKey) {
+        redisTemplate
+                .opsForValue()
+                .set(
+                        PASSWORD_AUTH_KEY_PREFIX + email,
+                        authKey,
+                        Duration.ofMinutes(AUTH_KEY_VALID_MINUTE)
+                );
     }
 }
