@@ -1,5 +1,6 @@
 package com.devtraces.arterest.service.user;
 
+import com.devtraces.arterest.common.type.UserSignUpType;
 import com.devtraces.arterest.model.follow.Follow;
 import com.devtraces.arterest.model.follow.FollowRepository;
 import com.devtraces.arterest.service.s3.S3Service;
@@ -147,6 +148,49 @@ class UserServiceTest {
 
         // then
         assertEquals(WRONG_BEFORE_PASSWORD, exception.getErrorCode());
+    }
+
+    @Test
+    void fail_sendMailWithAuthkeyForNewPassword_UPDATE_PASSWORD_NOT_ALLOWED_FOR_KAKAO_USER() {
+        //given
+        Long userId = 1L;
+        String email = "example@gmail.com";
+        User user = User.builder()
+                .id(userId)
+                .signupType(UserSignUpType.KAKAO_TALK)
+                .build();
+        given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
+
+        //when
+        BaseException exception = assertThrows(
+                BaseException.class,
+                () -> userService.sendMailWithAuthkeyForNewPassword(userId, email)
+        );
+
+        //then
+        assertEquals(UPDATE_PASSWORD_NOT_ALLOWED_FOR_KAKAO_USER, exception.getErrorCode());
+    }
+
+    @Test
+    void fail_sendMailWithAuthkeyForNewPassword_INPUT_EMAIL_AND_USER_EMAIL_MISMATCH() {
+        //given
+        Long userId = 1L;
+        String email = "example@gmail.com";
+        User user = User.builder()
+                .id(userId)
+                .email("different@gmail.com")
+                .signupType(UserSignUpType.EMAIL)
+                .build();
+        given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
+
+        //when
+        BaseException exception = assertThrows(
+                BaseException.class,
+                () -> userService.sendMailWithAuthkeyForNewPassword(userId, email)
+        );
+
+        //then
+        assertEquals(INPUT_EMAIL_AND_USER_EMAIL_MISMATCH, exception.getErrorCode());
     }
 
     @Test
