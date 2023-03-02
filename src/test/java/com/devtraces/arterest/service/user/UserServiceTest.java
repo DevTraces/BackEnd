@@ -1,6 +1,8 @@
 package com.devtraces.arterest.service.user;
 
+import com.devtraces.arterest.common.exception.ErrorCode;
 import com.devtraces.arterest.common.type.UserSignUpType;
+import com.devtraces.arterest.controller.user.dto.response.CheckAuthkeyAndSaveNewPasswordResponse;
 import com.devtraces.arterest.model.follow.Follow;
 import com.devtraces.arterest.model.follow.FollowRepository;
 import com.devtraces.arterest.service.s3.S3Service;
@@ -17,7 +19,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -34,6 +39,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
+    @Mock
+    private RedisTemplate<String, String> redisTemplate;
     @Mock
     private UserRepository userRepository;
     @Mock
@@ -151,6 +158,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("비밀번호 수정 인증 이메일 전송 실패 - 카카오 유저는 안됨")
     void fail_sendMailWithAuthkeyForNewPassword_UPDATE_PASSWORD_NOT_ALLOWED_FOR_KAKAO_USER() {
         //given
         Long userId = 1L;
@@ -172,6 +180,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("비밀번호 수정 인증 이메일 전송 실패 - 잘못된 이메일 입력한 경우")
     void fail_sendMailWithAuthkeyForNewPassword_INPUT_EMAIL_AND_USER_EMAIL_MISMATCH() {
         //given
         Long userId = 1L;
@@ -187,6 +196,34 @@ class UserServiceTest {
         BaseException exception = assertThrows(
                 BaseException.class,
                 () -> userService.sendMailWithAuthkeyForNewPassword(userId, email)
+        );
+
+        //then
+        assertEquals(INPUT_EMAIL_AND_USER_EMAIL_MISMATCH, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("이메일 인증 및 비밀번호 설정 실패 - 이메일 불일치")
+    void fail_CheckAuthKeyAndSaveNewPassword_TRUE() {
+        //given
+        Long userId = 1L;
+        String email = "example@gmail.com";
+        String newPassword = "newPassword";
+        String authKey = "123456";
+        User user = User.builder()
+                .id(userId)
+                .email("different@gmail.com")
+                .signupType(UserSignUpType.EMAIL)
+                .build();
+
+        given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
+
+        //when
+
+        BaseException exception = assertThrows(
+                BaseException.class,
+                () -> userService.checkAuthKeyAndSaveNewPassword(
+                        userId, email, authKey, newPassword)
         );
 
         //then
