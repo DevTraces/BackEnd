@@ -1,9 +1,11 @@
 package com.devtraces.arterest.controller.user;
 
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
+import com.devtraces.arterest.controller.user.dto.request.CheckAuthkeyAndSaveNewPasswordRequest;
 import com.devtraces.arterest.controller.user.dto.request.SendMailWithAuthkeyForNewPasswordRequest;
 import com.devtraces.arterest.controller.user.dto.request.PasswordUpdateRequest;
 import com.devtraces.arterest.controller.user.dto.request.UpdateProfileRequest;
+import com.devtraces.arterest.controller.user.dto.response.CheckAuthkeyAndSaveNewPasswordResponse;
 import com.devtraces.arterest.controller.user.dto.response.UpdateProfileImageResponse;
 import com.devtraces.arterest.controller.user.dto.response.UpdateProfileResponse;
 import com.devtraces.arterest.service.user.UserService;
@@ -44,13 +46,28 @@ public class UserController {
     }
 
     @PostMapping("/password/email")
-    public ApiSuccessResponse<Object>
-    sendEmailAuthKeyForNewPassword(
+    public ApiSuccessResponse<Object> sendEmailAuthKeyForNewPassword(
             @AuthenticationPrincipal Long userId,
             @RequestBody @Valid SendMailWithAuthkeyForNewPasswordRequest request
     ) {
         userService.sendMailWithAuthkeyForNewPassword(userId, request.getEmail());
         return ApiSuccessResponse.from(null);
+    }
+
+    @PostMapping("/password/email/check")
+    public ApiSuccessResponse<CheckAuthkeyAndSaveNewPasswordResponse>
+    checkAuthkeyAndSaveNewPassword(
+            @AuthenticationPrincipal Long userId,
+            @RequestBody @Valid CheckAuthkeyAndSaveNewPasswordRequest request
+    ) {
+        return ApiSuccessResponse.from(
+                userService.checkAuthKeyAndSaveNewPassword(
+                        userId,
+                        request.getEmail(),
+                        request.getAuthKey(),
+                        request.getNewPassword()
+                )
+        );
     }
 
     @GetMapping("/profile/{nickname}")

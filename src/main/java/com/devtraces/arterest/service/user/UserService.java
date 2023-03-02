@@ -86,13 +86,31 @@ public class UserService {
         }
 
         // 본인 이메일에 대해서만 인증 가능
-        if (!email.equals(user.getEmail())) {
-            throw BaseException.INPUT_EMAIL_AND_USER_EMAIL_MISMATCH;
-        }
+        checkInputEmailAndUserEmail(email, user.getEmail());
 
         String authKey = generateAuthKey();
         sendAuthenticationEmail(email, authKey);
         setAuthKeyInRedis(email, authKey);
+    }
+
+    public CheckAuthkeyAndSaveNewPasswordResponse checkAuthKeyAndSaveNewPassword(
+            Long userId, String email, String authKey, String newPassword
+    ) {
+        User user = getUserById(userId);
+        checkInputEmailAndUserEmail(email, user.getEmail());
+
+        String authKeyOfEmail =
+                redisTemplate.opsForValue().get(PASSWORD_AUTH_KEY_PREFIX + email);
+        if (!authKey.equals(authKeyOfEmail)) {
+            return CheckAuthkeyAndSaveNewPasswordResponse.from(false);
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        redisTemplate.delete(PASSWORD_AUTH_KEY_PREFIX + email);
+
+        return CheckAuthkeyAndSaveNewPasswordResponse.from(true);
     }
 
     public ProfileByNicknameResponse getProfileByNickname(Long userId, String nickname) {
@@ -177,6 +195,14 @@ public class UserService {
                 + "<p style=\"background: #EFEFEF; font-size: 30px;padding: 10px\">" + authKey + "</p>";
 
         mailService.sendMail(email, subject, text);
+    }
+
+    private static void checkInputEmailAndUserEmail(
+            String email, String userEmail
+    ) {
+        if (!userEmail.equals(email)) {
+            throw BaseException.INPUT_EMAIL_AND_USER_EMAIL_MISMATCH;
+        }
     }
 
     private void setAuthKeyInRedis(String email, String authKey) {
