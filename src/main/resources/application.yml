@@ -4,6 +4,8 @@ server:
     encoding:
       charset: UTF-8
       force: true
+  tomcat:
+    keep-alive-timeout: 100
 
 spring:
   profiles:
