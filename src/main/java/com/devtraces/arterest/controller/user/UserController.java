@@ -47,10 +47,9 @@ public class UserController {
 
     @PostMapping("/password/email")
     public ApiSuccessResponse<Object> sendMailAuthKeyForNewPassword(
-            @AuthenticationPrincipal Long userId,
             @RequestBody @Valid SendMailWithAuthkeyForNewPasswordRequest request
     ) {
-        userService.sendMailWithAuthkeyForNewPassword(userId, request.getEmail());
+        userService.sendMailWithAuthkeyForNewPassword(request.getEmail());
         return ApiSuccessResponse.from(null);
     }
 

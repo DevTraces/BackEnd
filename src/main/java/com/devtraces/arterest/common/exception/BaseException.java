@@ -38,7 +38,6 @@ public class BaseException extends RuntimeException {
 	public static final BaseException LIKE_NUMBER_BELLOW_ZERO = new BaseException(ErrorCode.LIKE_NUMBER_BELLOW_ZERO);
   public static final BaseException ALREADY_EXIST_USER = new BaseException(ErrorCode.ALREADY_EXIST_USER);
 	public static final BaseException UPDATE_PASSWORD_NOT_ALLOWED_FOR_KAKAO_USER = new BaseException(ErrorCode.UPDATE_PASSWORD_NOT_ALLOWED_FOR_KAKAO_USER);
-	public static final BaseException INPUT_EMAIL_AND_USER_EMAIL_MISMATCH = new BaseException(ErrorCode.INPUT_EMAIL_AND_USER_EMAIL_MISMATCH);
 
 
 	private final ErrorCode errorCode;

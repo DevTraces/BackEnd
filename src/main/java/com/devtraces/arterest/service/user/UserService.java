@@ -76,19 +76,16 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void sendMailWithAuthkeyForNewPassword(
-            Long userId, String email
-    ) {
-        User user = getUserById(userId);
+    public void sendMailWithAuthkeyForNewPassword(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> BaseException.USER_NOT_FOUND
+        );
 
         // 이메일로 회원가입한 사람만 이메일 인증 가능
         // 카카오 소셜 로그인은 이메일 정보 없을 수도 있음
         if (user.getSignupType().equals(KAKAO_TALK)) {
             throw BaseException.UPDATE_PASSWORD_NOT_ALLOWED_FOR_KAKAO_USER;
         }
-
-        // 본인 이메일에 대해서만 인증 가능
-        checkInputEmailAndUserEmail(email, user.getEmail());
 
         String authKey = generateAuthKey();
         sendAuthenticationEmail(email, authKey);
@@ -211,14 +208,6 @@ public class UserService {
         } while (redisService.existKey(randomResetPasswordKey));
 
         return randomResetPasswordKey;
-    }
-
-    private static void checkInputEmailAndUserEmail(
-            String email, String userEmail
-    ) {
-        if (!userEmail.equals(email)) {
-            throw BaseException.INPUT_EMAIL_AND_USER_EMAIL_MISMATCH;
-        }
     }
 
     private void setAuthKeyInRedis(String email, String authKey) {
