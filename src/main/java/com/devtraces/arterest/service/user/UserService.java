@@ -77,9 +77,7 @@ public class UserService {
     }
 
     public void sendMailWithAuthkeyForNewPassword(String email) {
-        User user = userRepository.findByEmail(email).orElseThrow(
-                () -> BaseException.USER_NOT_FOUND
-        );
+        User user = getUserByEmail(email);
 
         // 이메일로 회원가입한 사람만 이메일 인증 가능
         // 카카오 소셜 로그인은 이메일 정보 없을 수도 있음
@@ -113,6 +111,22 @@ public class UserService {
 
         return CheckAuthkeyForNewPasswordResponse.from(
                 true, resetPasswordKey);
+    }
+
+    public ResetPasswordResponse resetPassword(
+            String email, String passwordResetKey, String newPassword
+    ) {
+        User user = getUserByEmail(email);
+
+        String userEmailByPasswordResetKey =
+                redisService.getData(NEW_PASSWORD_RESET_KEY + passwordResetKey);
+        if (!user.getEmail().equals(userEmailByPasswordResetKey)) {
+            return ResetPasswordResponse.from(false);
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        return ResetPasswordResponse.from(true);
     }
 
     public ProfileByNicknameResponse getProfileByNickname(Long userId, String nickname) {
@@ -177,6 +191,11 @@ public class UserService {
 
     private User getUserById(Long userId) {
         return userRepository.findById(userId).orElseThrow(
+                () -> BaseException.USER_NOT_FOUND);
+    }
+
+    private User getUserByEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(
                 () -> BaseException.USER_NOT_FOUND);
     }
 

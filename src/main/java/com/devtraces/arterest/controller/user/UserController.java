@@ -1,11 +1,9 @@
 package com.devtraces.arterest.controller.user;
 
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
-import com.devtraces.arterest.controller.user.dto.request.CheckAuthkeyForNewPasswordRequest;
-import com.devtraces.arterest.controller.user.dto.request.SendMailWithAuthkeyForNewPasswordRequest;
-import com.devtraces.arterest.controller.user.dto.request.PasswordUpdateRequest;
-import com.devtraces.arterest.controller.user.dto.request.UpdateProfileRequest;
+import com.devtraces.arterest.controller.user.dto.request.*;
 import com.devtraces.arterest.controller.user.dto.response.CheckAuthkeyForNewPasswordResponse;
+import com.devtraces.arterest.controller.user.dto.response.ResetPasswordResponse;
 import com.devtraces.arterest.controller.user.dto.response.UpdateProfileImageResponse;
 import com.devtraces.arterest.controller.user.dto.response.UpdateProfileResponse;
 import com.devtraces.arterest.service.user.UserService;
@@ -63,6 +61,18 @@ public class UserController {
                         request.getEmail(),
                         request.getAuthKey()
                 )
+        );
+    }
+
+    @PatchMapping("/password/reset")
+    public ApiSuccessResponse<ResetPasswordResponse> resetPassword(
+            @RequestBody @Valid ResetPasswordRequest request
+    ) {
+        return ApiSuccessResponse.from(userService.resetPassword(
+                request.getEmail(),
+                request.getPasswordResetKey(),
+                request.getNewPassword()
+            )
         );
     }
 
