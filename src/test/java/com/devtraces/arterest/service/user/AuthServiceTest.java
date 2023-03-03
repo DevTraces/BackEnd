@@ -14,9 +14,15 @@ import static org.mockito.Mockito.verify;
 
 import com.devtraces.arterest.common.type.UserSignUpType;
 import com.devtraces.arterest.common.type.UserStatusType;
+import com.devtraces.arterest.model.bookmark.BookmarkRepository;
 import com.devtraces.arterest.model.feed.Feed;
 import com.devtraces.arterest.model.follow.FollowRepository;
+import com.devtraces.arterest.model.like.LikeRepository;
 import com.devtraces.arterest.model.notice.NoticeRepository;
+import com.devtraces.arterest.model.reply.Reply;
+import com.devtraces.arterest.model.reply.ReplyRepository;
+import com.devtraces.arterest.model.rereply.Rereply;
+import com.devtraces.arterest.model.rereply.RereplyRepository;
 import com.devtraces.arterest.service.auth.AuthService;
 import com.devtraces.arterest.service.feed.application.FeedDeleteApplication;
 import com.devtraces.arterest.service.mail.MailService;
@@ -28,6 +34,8 @@ import com.devtraces.arterest.controller.auth.dto.request.UserRegistrationReques
 import com.devtraces.arterest.controller.auth.dto.response.UserRegistrationResponse;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
+import com.devtraces.arterest.service.reply.ReplyService;
+import com.devtraces.arterest.service.rereply.RereplyService;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -56,6 +64,10 @@ class AuthServiceTest {
 	@Mock
 	private MailService mailService;
 	@Mock
+	private ReplyService replyService;
+	@Mock
+	private RereplyService rereplyService;
+	@Mock
 	private AuthRedisUtil authRedisUtil;
 	@Mock
 	private UserRepository userRepository;
@@ -65,6 +77,14 @@ class AuthServiceTest {
 	private NoticeRepository noticeRepository;
 	@Mock
 	private FollowRepository followRepository;
+	@Mock
+	private BookmarkRepository bookmarkRepository;
+	@Mock
+	private LikeRepository likeRepository;
+	@Mock
+	private ReplyRepository replyRepository;
+	@Mock
+	private RereplyRepository rereplyRepository;
 	@Mock
 	private FeedDeleteApplication feedDeleteApplication;
 
@@ -347,10 +367,18 @@ class AuthServiceTest {
 		List<Feed> feedList = new ArrayList<>(Arrays.asList(Feed.builder()
 			.id(2L)
 			.build()));
+		List<Reply> replyList = new ArrayList<>(Arrays.asList(Reply.builder()
+			.id(3L)
+			.build()));
+		List<Rereply> rereplyList = new ArrayList<>(Arrays.asList(Rereply.builder()
+			.id(4L)
+			.build()));
 		User user = User.builder()
 			.id(1L)
 			.password("password")
 			.feedList(feedList)
+			.replyList(replyList)
+			.rereplyList(rereplyList)
 			.build();
 		given(userRepository.findById(anyLong()))
 			.willReturn(Optional.ofNullable(user));
@@ -359,6 +387,17 @@ class AuthServiceTest {
 		willDoNothing().given(followRepository).deleteAllByFollowingId(anyLong());
 		willDoNothing().given(followRepository).deleteAllByUser(any());
 		willDoNothing().given(feedDeleteApplication).deleteFeed(anyLong(),any());
+		willDoNothing().given(bookmarkRepository).deleteAllByUser(any());
+		willDoNothing().given(likeRepository).deleteAllByUserId(anyLong());
+
+		given(replyRepository.findById(anyLong()))
+			.willReturn(Optional.ofNullable(Reply.builder().id(3L).build()));
+		willDoNothing().given(replyService).deleteReply(anyLong(),any());
+
+		given(rereplyRepository.findById(anyLong()))
+			.willReturn(Optional.ofNullable(Rereply.builder().id(4L).build()));
+		willDoNothing().given(rereplyService).deleteRereply(anyLong(),any());
+
 		willDoNothing().given(userRepository).deleteById(any());
 
 		// when
@@ -371,6 +410,12 @@ class AuthServiceTest {
 		verify(followRepository, times(1)).deleteAllByFollowingId(1L);
 		verify(followRepository, times(1)).deleteAllByUser(user);
 		verify(feedDeleteApplication, times(1)).deleteFeed(1L, 2L);
+		verify(bookmarkRepository, times(1)).deleteAllByUser(user);
+		verify(likeRepository, times(1)).deleteAllByUserId(1L);
+		verify(replyRepository, times(1)).findById(3L);
+		verify(replyService, times(1)).deleteReply(1L, 3L);
+		verify(rereplyRepository, times(1)).findById(4L);
+		verify(rereplyService, times(1)).deleteRereply(1L, 4L);
 		verify(userRepository, times(1)).deleteById(1L);
 	}
 

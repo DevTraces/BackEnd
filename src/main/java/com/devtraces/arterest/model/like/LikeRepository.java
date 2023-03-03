@@ -1,5 +1,6 @@
 package com.devtraces.arterest.model.like;
 
+import com.devtraces.arterest.model.user.User;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
@@ -24,5 +25,7 @@ public interface LikeRepository extends JpaRepository<Likes, Long> {
     void deleteByUserIdAndFeedId(Long userId, Long feedId);
 
     Optional<Likes> findTopByOrderByIdDesc();
+
+    void deleteAllByUserId(Long userId);
 
 }
