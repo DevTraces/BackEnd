@@ -1,6 +1,7 @@
 package com.devtraces.arterest.service.user;
 
 import com.devtraces.arterest.common.type.UserSignUpType;
+import com.devtraces.arterest.controller.user.dto.response.CheckAuthkeyForNewPasswordResponse;
 import com.devtraces.arterest.model.follow.Follow;
 import com.devtraces.arterest.model.follow.FollowRepository;
 import com.devtraces.arterest.service.s3.S3Service;
@@ -18,7 +19,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -36,7 +36,7 @@ import static org.mockito.Mockito.*;
 class UserServiceTest {
 
     @Mock
-    private RedisTemplate<String, String> redisTemplate;
+    private RedisService redisService;
     @Mock
     private UserRepository userRepository;
     @Mock
@@ -199,31 +199,21 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("이메일 인증 및 비밀번호 설정 실패 - 이메일 불일치")
-    void fail_CheckAuthKeyAndSaveNewPassword_TRUE() {
+    @DisplayName("이메일 인증 성공 - 인증키 불일치")
+    void fail_CheckAuthKeyForNewPassword_AUTHKEY_NOT_IDENTIFIED() {
         //given
-        Long userId = 1L;
         String email = "example@gmail.com";
-        String newPassword = "newPassword";
         String authKey = "123456";
-        User user = User.builder()
-                .id(userId)
-                .email("different@gmail.com")
-                .signupType(UserSignUpType.EMAIL)
-                .build();
+        String wrongAuthKey = "234567";
 
-        given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
+        given(redisService.getData(anyString())).willReturn(wrongAuthKey);
 
         //when
-
-        BaseException exception = assertThrows(
-                BaseException.class,
-                () -> userService.checkAuthKeyAndSaveNewPassword(
-                        userId, email, authKey, newPassword)
-        );
+        CheckAuthkeyForNewPasswordResponse response =
+                userService.checkAuthKeyForNewPassword(email, authKey);
 
         //then
-        assertEquals(INPUT_EMAIL_AND_USER_EMAIL_MISMATCH, exception.getErrorCode());
+        assertFalse(response.isIsCorrect());
     }
 
     @Test
