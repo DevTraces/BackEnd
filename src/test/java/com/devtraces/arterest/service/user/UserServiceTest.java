@@ -1,8 +1,6 @@
 package com.devtraces.arterest.service.user;
 
-import com.devtraces.arterest.common.exception.ErrorCode;
 import com.devtraces.arterest.common.type.UserSignUpType;
-import com.devtraces.arterest.controller.user.dto.response.CheckAuthkeyAndSaveNewPasswordResponse;
 import com.devtraces.arterest.model.follow.Follow;
 import com.devtraces.arterest.model.follow.FollowRepository;
 import com.devtraces.arterest.service.s3.S3Service;
@@ -19,10 +17,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 

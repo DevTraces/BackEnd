@@ -1,11 +1,11 @@
 package com.devtraces.arterest.controller.user;
 
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
-import com.devtraces.arterest.controller.user.dto.request.CheckAuthkeyAndSaveNewPasswordRequest;
+import com.devtraces.arterest.controller.user.dto.request.CheckAuthkeyForNewPasswordRequest;
 import com.devtraces.arterest.controller.user.dto.request.SendMailWithAuthkeyForNewPasswordRequest;
 import com.devtraces.arterest.controller.user.dto.request.PasswordUpdateRequest;
 import com.devtraces.arterest.controller.user.dto.request.UpdateProfileRequest;
-import com.devtraces.arterest.controller.user.dto.response.CheckAuthkeyAndSaveNewPasswordResponse;
+import com.devtraces.arterest.controller.user.dto.response.CheckAuthkeyForNewPasswordResponse;
 import com.devtraces.arterest.controller.user.dto.response.UpdateProfileImageResponse;
 import com.devtraces.arterest.controller.user.dto.response.UpdateProfileResponse;
 import com.devtraces.arterest.service.user.UserService;
@@ -46,7 +46,7 @@ public class UserController {
     }
 
     @PostMapping("/password/email")
-    public ApiSuccessResponse<Object> sendEmailAuthKeyForNewPassword(
+    public ApiSuccessResponse<Object> sendMailAuthKeyForNewPassword(
             @AuthenticationPrincipal Long userId,
             @RequestBody @Valid SendMailWithAuthkeyForNewPasswordRequest request
     ) {
@@ -55,17 +55,14 @@ public class UserController {
     }
 
     @PostMapping("/password/email/check")
-    public ApiSuccessResponse<CheckAuthkeyAndSaveNewPasswordResponse>
-    checkAuthkeyAndSaveNewPassword(
-            @AuthenticationPrincipal Long userId,
-            @RequestBody @Valid CheckAuthkeyAndSaveNewPasswordRequest request
+    public ApiSuccessResponse<CheckAuthkeyForNewPasswordResponse>
+    checkAuthkeyForNewPassword(
+            @RequestBody @Valid CheckAuthkeyForNewPasswordRequest request
     ) {
         return ApiSuccessResponse.from(
-                userService.checkAuthKeyAndSaveNewPassword(
-                        userId,
+                userService.checkAuthKeyForNewPassword(
                         request.getEmail(),
-                        request.getAuthKey(),
-                        request.getNewPassword()
+                        request.getAuthKey()
                 )
         );
     }

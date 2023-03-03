@@ -11,7 +11,6 @@ import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,8 +26,9 @@ import static com.devtraces.arterest.common.type.UserSignUpType.KAKAO_TALK;
 public class UserService {
 
     private static final int AUTH_KEY_DIGIT = 6;
+    private static final int AUTH_KEY_VALID_MINUTE = 60 * 3; // 3분
     private static final String PASSWORD_AUTH_KEY_PREFIX = "PASSWORD_AUTH_EMAIL:";
-    private static final int AUTH_KEY_VALID_MINUTE = 10;
+    private static final String NEW_PASSWORD_RESET_KEY = "NEW_PASSWORD_RESET_KEY:";
     private final UserRepository userRepository;
     private final FeedRepository feedRepository;
     private final FollowRepository followRepository;
@@ -36,6 +36,7 @@ public class UserService {
     private final MailService mailService;
     private final S3Service s3Service;
     private final RedisTemplate<String, String> redisTemplate;
+    private final RedisService redisService;
 
     public EmailCheckResponse checkEmail(String email) {
 
@@ -94,24 +95,27 @@ public class UserService {
         setAuthKeyInRedis(email, authKey);
     }
 
-    public CheckAuthkeyAndSaveNewPasswordResponse checkAuthKeyAndSaveNewPassword(
-            Long userId, String email, String authKey, String newPassword
+    public CheckAuthkeyForNewPasswordResponse checkAuthKeyForNewPassword(
+            String email, String authKey
     ) {
-        User user = getUserById(userId);
-        checkInputEmailAndUserEmail(email, user.getEmail());
-
         String authKeyOfEmail =
-                redisTemplate.opsForValue().get(PASSWORD_AUTH_KEY_PREFIX + email);
+                redisService.getData(PASSWORD_AUTH_KEY_PREFIX + email);
         if (!authKey.equals(authKeyOfEmail)) {
-            return CheckAuthkeyAndSaveNewPasswordResponse.from(false);
+            return CheckAuthkeyForNewPasswordResponse.from(
+                    false,
+                    null
+            );
         }
 
-        user.setPassword(passwordEncoder.encode(newPassword));
-        userRepository.save(user);
+        String resetPasswordKey = generateRandomResetPasswordKey();
+        redisService.setDataExpire(
+                NEW_PASSWORD_RESET_KEY + resetPasswordKey,
+                email,
+                AUTH_KEY_VALID_MINUTE
+        );
 
-        redisTemplate.delete(PASSWORD_AUTH_KEY_PREFIX + email);
-
-        return CheckAuthkeyAndSaveNewPasswordResponse.from(true);
+        return CheckAuthkeyForNewPasswordResponse.from(
+                true, resetPasswordKey);
     }
 
     public ProfileByNicknameResponse getProfileByNickname(Long userId, String nickname) {
@@ -196,6 +200,17 @@ public class UserService {
                 + "<p style=\"background: #EFEFEF; font-size: 30px;padding: 10px\">" + authKey + "</p>";
 
         mailService.sendMail(email, subject, text);
+    }
+
+    private String generateRandomResetPasswordKey() {
+        String randomResetPasswordKey = "";
+        do {
+            for (int i = 0; i < 6; i++) {
+                randomResetPasswordKey += (char) ((int) (Math.random() * 25) + 97);
+            }
+        } while (redisService.existKey(randomResetPasswordKey));
+
+        return randomResetPasswordKey;
     }
 
     private static void checkInputEmailAndUserEmail(

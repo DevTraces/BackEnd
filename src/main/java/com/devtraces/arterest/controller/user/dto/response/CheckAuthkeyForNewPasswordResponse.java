@@ -6,14 +6,17 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class CheckAuthkeyAndSaveNewPasswordResponse {
+public class CheckAuthkeyForNewPasswordResponse {
 
-    private boolean isCorrect;
+    private boolean isIsCorrect; // boolean에서 is가 생략됨
+    private String passwordResetKey;
 
-    public static CheckAuthkeyAndSaveNewPasswordResponse from(boolean isCorrect
+    public static CheckAuthkeyForNewPasswordResponse from(
+            boolean isCorrect, String passwordResetKey
     ) {
-        return CheckAuthkeyAndSaveNewPasswordResponse.builder()
-                .isCorrect(isCorrect)
+        return CheckAuthkeyForNewPasswordResponse.builder()
+                .isIsCorrect(isCorrect)
+                .passwordResetKey(passwordResetKey)
                 .build();
     }
 }
