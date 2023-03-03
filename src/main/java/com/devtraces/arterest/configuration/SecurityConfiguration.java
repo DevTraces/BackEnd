@@ -55,7 +55,7 @@ public class SecurityConfiguration {
 				"/api/auth/email/auth-key/check", "/api/auth/sign-in",
 				"/api/oauth/kakao/callback", "/api/auth/password/check", "/api/auth/withdrawal",
 				"/api/users/email/**", "/api/users/nickname/**",
-				"/api/users/password", "/api/tokens/reissue",
+				"/api/users/password/**", "/api/tokens/reissue",
 				"/v2/api-docs", "/swagger-resources",
 				"/swagger-resources/**", "/configuration/ui",
 				"/configuration/security", "/swagger-ui.html",
