@@ -1,12 +1,11 @@
 package com.devtraces.arterest.service.user;
 
+import com.devtraces.arterest.common.type.UserSignUpType;
+import com.devtraces.arterest.controller.user.dto.response.*;
 import com.devtraces.arterest.model.follow.Follow;
 import com.devtraces.arterest.model.follow.FollowRepository;
 import com.devtraces.arterest.service.s3.S3Service;
 import com.devtraces.arterest.common.exception.BaseException;
-import com.devtraces.arterest.controller.user.dto.response.EmailCheckResponse;
-import com.devtraces.arterest.controller.user.dto.response.NicknameCheckResponse;
-import com.devtraces.arterest.controller.user.dto.response.ProfileByNicknameResponse;
 import com.devtraces.arterest.model.feed.FeedRepository;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
@@ -33,6 +32,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
+    @Mock
+    private RedisService redisService;
     @Mock
     private UserRepository userRepository;
     @Mock
@@ -147,6 +148,131 @@ class UserServiceTest {
 
         // then
         assertEquals(WRONG_BEFORE_PASSWORD, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("비밀번호 수정 인증 이메일 전송 실패 - 카카오 유저는 안됨")
+    void fail_sendMailWithAuthkeyForNewPassword_UPDATE_PASSWORD_NOT_ALLOWED_FOR_KAKAO_USER() {
+        //given
+        String email = "example@gmail.com";
+        User user = User.builder()
+                .signupType(UserSignUpType.KAKAO_TALK)
+                .build();
+        given(userRepository.findByEmail(anyString())).willReturn(Optional.of(user));
+
+        //when
+        BaseException exception = assertThrows(
+                BaseException.class,
+                () -> userService.sendMailWithAuthkeyForNewPassword(email)
+        );
+
+        //then
+        assertEquals(UPDATE_PASSWORD_NOT_ALLOWED_FOR_KAKAO_USER, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("비밀번호 수정 인증 이메일 전송 실패 - 잘못된 이메일 입력한 경우")
+    void fail_sendMailWithAuthkeyForNewPassword_USER_NOT_FOUND() {
+        //given
+        String email = "example@gmail.com";
+        given(userRepository.findByEmail(anyString())).willReturn(Optional.empty());
+
+        //when
+        BaseException exception = assertThrows(
+                BaseException.class,
+                () -> userService.sendMailWithAuthkeyForNewPassword(email)
+        );
+
+        //then
+        assertEquals(USER_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    @DisplayName("이메일 인증 성공 - 인증키 불일치")
+    void fail_CheckAuthKeyForNewPassword_AUTHKEY_NOT_IDENTIFIED() {
+        //given
+        String email = "example@gmail.com";
+        String authKey = "123456";
+        String wrongAuthKey = "234567";
+
+        given(redisService.getData(anyString())).willReturn(wrongAuthKey);
+
+        //when
+        CheckAuthkeyForNewPasswordResponse response =
+                userService.checkAuthKeyForNewPassword(email, authKey);
+
+        //then
+        assertFalse(response.isIsCorrect());
+    }
+
+    @Test
+    @DisplayName("비밀번호 재설정 성공 - 비밀번호 키 일치하는 경우")
+    void success_resetPassword_RESET_PASSWORD_KEY_SAME() {
+        //given
+        String email = "user@gmail.com";
+        String passwordResetKey = "hello";
+        String newPassword = "newPassword";
+        String newEncodedPassword = "newEncodedPassword";
+
+        User user = User.builder().email(email).build();
+
+        given(userRepository.findByEmail(anyString())).willReturn(Optional.of(user));
+        given(redisService.getData(anyString())).willReturn(email);
+        given(passwordEncoder.encode(anyString())).willReturn(newEncodedPassword);
+        given(userRepository.save(any())).willReturn(user);
+
+        ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
+
+        //when
+        ResetPasswordResponse response =
+                userService.resetPassword(email, passwordResetKey, newPassword);
+
+        //then
+        verify(userRepository, times(1)).save(captor.capture());
+        assertTrue(response.isIsPasswordResetKeyCorrect());
+    }
+
+    @Test
+    @DisplayName("비밀번호 재설정 성공 - 비밀번호 키 일치하지 않는 경우")
+    void success_resetPassword_RESET_PASSWORD_KEY_NOT_SAME() {
+        //given
+        String email = "user@gmail.com";
+        String differentEmail = "different@gmail.com";
+        String passwordResetKey = "hello";
+        String newPassword = "newPassword";
+
+        User user = User.builder().email(email).build();
+
+        given(userRepository.findByEmail(anyString())).willReturn(Optional.of(user));
+        given(redisService.getData(anyString())).willReturn(differentEmail);
+
+        //when
+        ResetPasswordResponse response =
+                userService.resetPassword(email, passwordResetKey, newPassword);
+
+        //then
+        assertFalse(response.isIsPasswordResetKeyCorrect());
+    }
+
+    @Test
+    @DisplayName("비밀번호 재설정 성공 - 존재하지 않는 사용자")
+    void fail_resetPassword_USER_NOT_FOUND() {
+        //given
+        String email = "user@gmail.com";
+        String passwordResetKey = "hello";
+        String newPassword = "newPassword";
+
+        given(userRepository.findByEmail(anyString()))
+                .willReturn(Optional.empty());
+
+        //when
+        BaseException exception = assertThrows(
+                BaseException.class,
+                () -> userService.resetPassword(email, passwordResetKey, newPassword)
+        );
+
+        //then
+        assertEquals(USER_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test

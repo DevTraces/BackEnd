@@ -111,9 +111,9 @@ public class AuthService {
 	}
 
 	private void sendAuthenticationEmail(String email, String authKey) {
-		String subject = "Arterest 인증 코드";
+		String subject = "ArtBubble 인증 코드";
 		String text = "<h2>이메일 인증코드</h2>\n"
-			+ "<p>Arterest에 가입하신 것을 환영합니다.<br>아래의 인증코드를 입력하시면 가입이 정상적으로 완료됩니다.</p>\n"
+			+ "<p>ArtBubble에 가입하신 것을 환영합니다.<br>아래의 인증코드를 입력하시면 가입이 정상적으로 완료됩니다.</p>\n"
 			+ "<p style=\"background: #EFEFEF; font-size: 30px;padding: 10px\">" + authKey + "</p>";
 		mailService.sendMail(email, subject, text);
 	}

@@ -1,8 +1,9 @@
 package com.devtraces.arterest.controller.user;
 
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
-import com.devtraces.arterest.controller.user.dto.request.PasswordUpdateRequest;
-import com.devtraces.arterest.controller.user.dto.request.UpdateProfileRequest;
+import com.devtraces.arterest.controller.user.dto.request.*;
+import com.devtraces.arterest.controller.user.dto.response.CheckAuthkeyForNewPasswordResponse;
+import com.devtraces.arterest.controller.user.dto.response.ResetPasswordResponse;
 import com.devtraces.arterest.controller.user.dto.response.UpdateProfileImageResponse;
 import com.devtraces.arterest.controller.user.dto.response.UpdateProfileResponse;
 import com.devtraces.arterest.service.user.UserService;
@@ -10,8 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import reactor.util.annotation.Nullable;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 @RestController
@@ -40,6 +41,39 @@ public class UserController {
                 userId, request.getBeforePassword(), request.getAfterPassword()
         );
         return ApiSuccessResponse.NO_DATA_RESPONSE;
+    }
+
+    @PostMapping("/password/email")
+    public ApiSuccessResponse<Object> sendMailAuthKeyForNewPassword(
+            @RequestBody @Valid SendMailWithAuthkeyForNewPasswordRequest request
+    ) {
+        userService.sendMailWithAuthkeyForNewPassword(request.getEmail());
+        return ApiSuccessResponse.from(null);
+    }
+
+    @PostMapping("/password/email/check")
+    public ApiSuccessResponse<CheckAuthkeyForNewPasswordResponse>
+    checkAuthkeyForNewPassword(
+            @RequestBody @Valid CheckAuthkeyForNewPasswordRequest request
+    ) {
+        return ApiSuccessResponse.from(
+                userService.checkAuthKeyForNewPassword(
+                        request.getEmail(),
+                        request.getAuthKey()
+                )
+        );
+    }
+
+    @PatchMapping("/password/reset")
+    public ApiSuccessResponse<ResetPasswordResponse> resetPassword(
+            @RequestBody @Valid ResetPasswordRequest request
+    ) {
+        return ApiSuccessResponse.from(userService.resetPassword(
+                request.getEmail(),
+                request.getPasswordResetKey(),
+                request.getNewPassword()
+            )
+        );
     }
 
     @GetMapping("/profile/{nickname}")

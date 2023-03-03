@@ -37,9 +37,10 @@ public class BaseException extends RuntimeException {
 	public static final BaseException DUPLICATED_FOLLOW_OR_LIKE = new BaseException(ErrorCode.DUPLICATED_FOLLOW_OR_LIKE);
 	public static final BaseException LIKE_NUMBER_BELLOW_ZERO = new BaseException(ErrorCode.LIKE_NUMBER_BELLOW_ZERO);
   public static final BaseException ALREADY_EXIST_USER = new BaseException(ErrorCode.ALREADY_EXIST_USER);
+	public static final BaseException UPDATE_PASSWORD_NOT_ALLOWED_FOR_KAKAO_USER = new BaseException(ErrorCode.UPDATE_PASSWORD_NOT_ALLOWED_FOR_KAKAO_USER);
 
 
-    private final ErrorCode errorCode;
+	private final ErrorCode errorCode;
 
 	// 의도적인 예외이므로 stack trace 제거 (불필요한 예외처리 비용 제거)
 	@Override
