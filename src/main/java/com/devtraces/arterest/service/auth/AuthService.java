@@ -7,14 +7,15 @@ import com.devtraces.arterest.common.type.UserSignUpType;
 import com.devtraces.arterest.common.type.UserStatusType;
 import com.devtraces.arterest.controller.auth.dto.TokenWithNicknameDto;
 import com.devtraces.arterest.controller.auth.dto.response.UserRegistrationResponse;
-import com.devtraces.arterest.model.bookmark.Bookmark;
 import com.devtraces.arterest.model.bookmark.BookmarkRepository;
 import com.devtraces.arterest.model.feed.Feed;
 import com.devtraces.arterest.model.follow.FollowRepository;
 import com.devtraces.arterest.model.like.LikeRepository;
 import com.devtraces.arterest.model.notice.NoticeRepository;
 import com.devtraces.arterest.model.reply.Reply;
+import com.devtraces.arterest.model.reply.ReplyRepository;
 import com.devtraces.arterest.model.rereply.Rereply;
+import com.devtraces.arterest.model.rereply.RereplyRepository;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
 import com.devtraces.arterest.service.auth.util.AuthRedisUtil;
@@ -25,6 +26,7 @@ import com.devtraces.arterest.service.reply.ReplyService;
 import com.devtraces.arterest.service.rereply.RereplyService;
 import com.devtraces.arterest.service.s3.S3Service;
 import java.util.Date;
+import java.util.Optional;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -52,6 +54,8 @@ public class AuthService {
 	private final NoticeRepository noticeRepository;
 	private final BookmarkRepository bookmarkRepository;
 	private final LikeRepository likeRepository;
+	private final ReplyRepository replyRepository;
+	private final RereplyRepository rereplyRepository;
 
 	@Transactional
 	public UserRegistrationResponse register(
@@ -185,23 +189,29 @@ public class AuthService {
 			feedDeleteApplication.deleteFeed(userId, feed.getId());
 		}
 
-		//댓글 삭제(해당 댓글 관련 대댓글 삭제)
-		for(Reply reply : user.getReplyList()){
-			replyService.deleteReply(userId, reply.getId());
-		}
-
-		//대댓글 삭제
-		for(Rereply rereply : user.getRereplyList()){
-			rereplyService.deleteRereply(userId, rereply.getId());
-		}
-
 		//북마크 삭제
 		bookmarkRepository.deleteAllByUser(user);
 
 		//좋아요 삭제
 		likeRepository.deleteAllByUserId(userId);
 
+		//댓글 삭제(해당 댓글 관련 대댓글 삭제)
+		for(Reply reply : user.getReplyList()){
+			Optional<Reply> replyOptional = replyRepository.findById(reply.getId());
+			if(replyOptional.isPresent()) {
+				replyService.deleteReply(userId, reply.getId());
+			}
+		}
+
+		//대댓글 삭제
+		for(Rereply rereply : user.getRereplyList()){
+			Optional<Rereply> rereplyOptional = rereplyRepository.findById(rereply.getId());
+			if(rereplyOptional.isPresent()){
+				rereplyService.deleteRereply(userId, rereply.getId());
+			}
+		}
+
 		//유저 삭제
-		userRepository.deleteById(user.getId());
+		userRepository.deleteById(userId);
 	}
 }
