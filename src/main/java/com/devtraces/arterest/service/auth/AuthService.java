@@ -1,33 +1,24 @@
 package com.devtraces.arterest.service.auth;
 
-import com.devtraces.arterest.common.type.UserSignUpType;
-import com.devtraces.arterest.common.type.UserStatusType;
-import com.devtraces.arterest.controller.auth.dto.request.DeleteUserRequest;
-import com.devtraces.arterest.model.feed.Feed;
-import com.devtraces.arterest.model.follow.Follow;
-import com.devtraces.arterest.model.follow.FollowRepository;
-import com.devtraces.arterest.model.notice.NoticeRepository;
-import com.devtraces.arterest.service.auth.util.AuthRedisUtil;
-import com.devtraces.arterest.service.auth.util.TokenRedisUtil;
-import com.devtraces.arterest.service.feed.application.FeedDeleteApplication;
-import com.devtraces.arterest.service.follow.FollowService;
-import com.devtraces.arterest.service.s3.S3Service;
-import com.devtraces.arterest.service.mail.MailService;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.jwt.JwtProvider;
 import com.devtraces.arterest.common.jwt.dto.TokenDto;
-
-import com.devtraces.arterest.controller.auth.dto.request.UserRegistrationRequest;
+import com.devtraces.arterest.common.type.UserSignUpType;
+import com.devtraces.arterest.common.type.UserStatusType;
+import com.devtraces.arterest.controller.auth.dto.TokenWithNicknameDto;
 import com.devtraces.arterest.controller.auth.dto.response.UserRegistrationResponse;
-
+import com.devtraces.arterest.model.feed.Feed;
+import com.devtraces.arterest.model.follow.FollowRepository;
+import com.devtraces.arterest.model.notice.NoticeRepository;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
-
+import com.devtraces.arterest.service.auth.util.AuthRedisUtil;
+import com.devtraces.arterest.service.auth.util.TokenRedisUtil;
+import com.devtraces.arterest.service.feed.application.FeedDeleteApplication;
+import com.devtraces.arterest.service.mail.MailService;
+import com.devtraces.arterest.service.s3.S3Service;
 import java.util.Date;
-
 import java.util.Random;
-
-import com.devtraces.arterest.controller.auth.dto.TokenWithNicknameDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -166,12 +157,9 @@ public class AuthService {
 	}
 
 	@Transactional
-	public void deleteUser(long userId, String password) {
+	public void deleteUser(long userId) {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> BaseException.USER_NOT_FOUND);
-		if (!passwordEncoder.matches(password, user.getPassword())) {
-			throw BaseException.WRONG_EMAIL_OR_PASSWORD;
-		}
 
 		//알림 삭제
 		noticeRepository.deleteAllByNoticeOwnerId(userId);

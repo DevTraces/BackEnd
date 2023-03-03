@@ -1,12 +1,9 @@
 package com.devtraces.arterest.controller.auth;
 
-import static com.devtraces.arterest.common.jwt.JwtProperties.TOKEN_PREFIX;
 import static com.devtraces.arterest.common.jwt.JwtProvider.ACCESS_TOKEN_COOKIE_NAME;
-import static com.devtraces.arterest.common.jwt.JwtProvider.REFRESH_TOKEN_COOKIE_NAME;
 
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
 import com.devtraces.arterest.controller.auth.dto.TokenWithNicknameDto;
-import com.devtraces.arterest.controller.auth.dto.request.DeleteUserRequest;
 import com.devtraces.arterest.controller.auth.dto.request.MailAuthKeyCheckRequest;
 import com.devtraces.arterest.controller.auth.dto.request.MailAuthKeyRequest;
 import com.devtraces.arterest.controller.auth.dto.request.SignInRequest;
@@ -27,7 +24,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -111,10 +107,9 @@ public class AuthController {
 
 	@PostMapping("/withdrawal")
 	public ApiSuccessResponse<?> deleteUser(
-		@AuthenticationPrincipal long userId,
-		@RequestBody @Valid DeleteUserRequest request
+		@AuthenticationPrincipal long userId
 	) {
-		authService.deleteUser(userId, request.getPassword());
+		authService.deleteUser(userId);
 		return ApiSuccessResponse.NO_DATA_RESPONSE;
 	}
 }

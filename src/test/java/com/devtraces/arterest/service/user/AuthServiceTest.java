@@ -354,8 +354,6 @@ class AuthServiceTest {
 			.build();
 		given(userRepository.findById(anyLong()))
 			.willReturn(Optional.ofNullable(user));
-		given(passwordEncoder.matches(anyString(), anyString()))
-			.willReturn(true);
 		willDoNothing().given(noticeRepository).deleteAllByNoticeOwnerId(anyLong());
 		willDoNothing().given(noticeRepository).deleteAllByUser(any());
 		willDoNothing().given(followRepository).deleteAllByFollowingId(anyLong());
@@ -364,11 +362,10 @@ class AuthServiceTest {
 		willDoNothing().given(userRepository).deleteById(any());
 
 		// when
-		authService.deleteUser(1L, "password");
+		authService.deleteUser(1L);
 
 		// then
 		verify(userRepository, times(1)).findById(1L);
-		verify(passwordEncoder, times(1)).matches("password","password");
 		verify(noticeRepository, times(1)).deleteAllByNoticeOwnerId(1L);
 		verify(noticeRepository, times(1)).deleteAllByUser(user);
 		verify(followRepository, times(1)).deleteAllByFollowingId(1L);
@@ -383,31 +380,9 @@ class AuthServiceTest {
 
 		//when
 		BaseException exception = assertThrows(BaseException.class,
-			() -> authService.deleteUser(1L, "password"));
+			() -> authService.deleteUser(1L));
 
 		//then
 		assertEquals(BaseException.USER_NOT_FOUND, exception);
-	}
-
-	@Test
-	void testCheckWrongEmailOrPasswordInDeleteUser() {
-		//given
-		List<Feed> feedList = new ArrayList<>(Arrays.asList(Feed.builder()
-			.id(2L)
-			.build()));
-		User user = User.builder()
-			.id(1L)
-			.password("password")
-			.feedList(feedList)
-			.build();
-		given(userRepository.findById(anyLong()))
-			.willReturn(Optional.ofNullable(user));
-
-		//when
-		BaseException exception = assertThrows(BaseException.class,
-			() -> authService.deleteUser(1L, "password"));
-
-		//then
-		assertEquals(BaseException.WRONG_EMAIL_OR_PASSWORD, exception);
 	}
 }
