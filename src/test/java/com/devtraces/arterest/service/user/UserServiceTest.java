@@ -157,18 +157,16 @@ class UserServiceTest {
     @DisplayName("비밀번호 수정 인증 이메일 전송 실패 - 카카오 유저는 안됨")
     void fail_sendMailWithAuthkeyForNewPassword_UPDATE_PASSWORD_NOT_ALLOWED_FOR_KAKAO_USER() {
         //given
-        Long userId = 1L;
         String email = "example@gmail.com";
         User user = User.builder()
-                .id(userId)
                 .signupType(UserSignUpType.KAKAO_TALK)
                 .build();
-        given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
+        given(userRepository.findByEmail(anyString())).willReturn(Optional.of(user));
 
         //when
         BaseException exception = assertThrows(
                 BaseException.class,
-                () -> userService.sendMailWithAuthkeyForNewPassword(userId, email)
+                () -> userService.sendMailWithAuthkeyForNewPassword(email)
         );
 
         //then
@@ -177,25 +175,19 @@ class UserServiceTest {
 
     @Test
     @DisplayName("비밀번호 수정 인증 이메일 전송 실패 - 잘못된 이메일 입력한 경우")
-    void fail_sendMailWithAuthkeyForNewPassword_INPUT_EMAIL_AND_USER_EMAIL_MISMATCH() {
+    void fail_sendMailWithAuthkeyForNewPassword_USER_NOT_FOUND() {
         //given
-        Long userId = 1L;
         String email = "example@gmail.com";
-        User user = User.builder()
-                .id(userId)
-                .email("different@gmail.com")
-                .signupType(UserSignUpType.EMAIL)
-                .build();
-        given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
+        given(userRepository.findByEmail(anyString())).willReturn(Optional.empty());
 
         //when
         BaseException exception = assertThrows(
                 BaseException.class,
-                () -> userService.sendMailWithAuthkeyForNewPassword(userId, email)
+                () -> userService.sendMailWithAuthkeyForNewPassword(email)
         );
 
         //then
-        assertEquals(INPUT_EMAIL_AND_USER_EMAIL_MISMATCH, exception.getErrorCode());
+        assertEquals(USER_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
