@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import com.devtraces.arterest.service.notice.NoticeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +33,7 @@ public class ReplyService {
     private final RereplyRepository rereplyRepository;
     private final NoticeService noticeService;
 
+    @Async
     @Transactional
     public ReplyResponse createReply(Long userId, Long feedId, ReplyRequest replyRequest) {
         validateReplyRequest(replyRequest);
@@ -101,6 +103,7 @@ public class ReplyService {
         replyRepository.deleteById(replyId);
     }
 
+    @Async
     @Transactional
     public void deleteAllFeedRelatedReply(Feed feed){
         replyRepository.deleteAllByIdIn(

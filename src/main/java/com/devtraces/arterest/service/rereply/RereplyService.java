@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import com.devtraces.arterest.service.notice.NoticeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -89,6 +90,7 @@ public class RereplyService {
         rereplyRepository.deleteById(rereplyId);
     }
 
+    @Async
     @Transactional
     public void deleteAllFeedRelatedRereply(Feed feed){
         for(Reply reply : feed.getReplyList()){
