@@ -51,6 +51,8 @@ public class ReplyService {
                 .content(replyRequest.getContent())
                 .user(authorUser)
                 .feed(feed)
+                .feedPrimaryKeyId(feedId)
+                .numberOfRereplies(0)
                 .build()
         );
 

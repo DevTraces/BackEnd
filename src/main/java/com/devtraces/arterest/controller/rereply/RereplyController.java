@@ -61,9 +61,10 @@ public class RereplyController {
     @DeleteMapping("/{feedId}/replies/{replyId}/rereplies/{rereplyId}")
     public ApiSuccessResponse<?> deleteRereply(
         @AuthenticationPrincipal Long userId,
+        @PathVariable Long replyId,
         @PathVariable Long rereplyId
     ){
-        rereplyService.deleteRereply(userId, rereplyId);
+        rereplyService.deleteRereply(userId, replyId, rereplyId);
         return ApiSuccessResponse.NO_DATA_RESPONSE;
     }
 

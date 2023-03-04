@@ -40,6 +40,9 @@ public class Reply extends BaseEntity {
     @Column(name = "reply_id")
     private Long id;
 
+    private Long feedPrimaryKeyId;
+    private Integer numberOfRereplies;
+
     private String content;
 
     // 1:N mapping with User
@@ -61,6 +64,14 @@ public class Reply extends BaseEntity {
 
     public void updateContent(String content){
         this.content = content;
+    }
+
+    public void plusOneRereply(){
+        this.numberOfRereplies ++;
+    }
+
+    public void minusOneRereply(){
+        this.numberOfRereplies --;
     }
 }
 
