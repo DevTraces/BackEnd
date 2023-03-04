@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 public interface ReplyResponseConverter {
 
     Long getReplyId();
-    Long getFeedId();
 
     String getAuthorNickname();
     String getContent();

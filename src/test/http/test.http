@@ -128,7 +128,7 @@ POST http://localhost:8080/api/feeds/1/replies?userId=1
 Content-Type: application/json
 
 {
-  "content" : "새로운 댓글"
+  "content" : "세 번째 댓글"
 }
 
 
@@ -182,3 +182,8 @@ GET http://localhost:8080/api/feeds/main?userId=1&page=1
 ### 2번 유저가 작성한 피드 리스트 읽기 요청
 GET http://localhost:8080/api/feeds/list/two?userId=1&page=0
 Content-Type: application/json
+
+
+
+### 댓글 리스트 읽기 작업
+GET http://localhost:8080/api/feeds/1/replies?page=0

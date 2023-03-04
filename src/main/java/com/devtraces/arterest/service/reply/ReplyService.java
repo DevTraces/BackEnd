@@ -67,8 +67,12 @@ public class ReplyService {
     @Transactional(readOnly = true)
     public List<ReplyResponse> getReplyList(Long feedId, Integer page, Integer pageSize) {
         return replyRepository
-            .findAllByFeedIdOrderByCreatedAtDesc(feedId, PageRequest.of(page, pageSize))
-            .getContent().stream().map(ReplyResponse::from).collect(Collectors.toList());
+            .findAllReplyJoinUserLatestFirst(feedId, PageRequest.of(page, pageSize))
+            .getContent().stream().map(
+                replyResponseConverter -> ReplyResponse.fromConverter(
+                    replyResponseConverter, feedId
+                )
+            ).collect(Collectors.toList());
     }
 
     @Transactional
