@@ -71,4 +71,16 @@ public class Feed extends BaseEntity {
         this.imageUrls = imageUrls;
     }
 
+    private void updateHashtagStringValues(String input){
+        this.hashtagStringValues = input;
+    }
+
+    private void plusOneReply(){
+        this.numberOfReplies ++;
+    }
+
+    private void minusOneReply(){
+        this.numberOfReplies --;
+    }
+
 }
