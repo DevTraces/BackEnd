@@ -372,6 +372,7 @@ class FollowServiceTest {
         given(userRepository.findByNickname("one")).willReturn(Optional.of(targetUser));
 
         doNothing().when(followRepository).deleteByUserIdAndFollowingId(2L, 1L);
+        doNothing().when(noticeService).deleteNoticeWhenFollowingCanceled(1L, 2L);
 
         // when
         followService.deleteFollowRelation(2L, "one");
