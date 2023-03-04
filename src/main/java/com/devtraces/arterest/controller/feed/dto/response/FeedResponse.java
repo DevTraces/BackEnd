@@ -1,6 +1,5 @@
 package com.devtraces.arterest.controller.feed.dto.response;
 
-import com.devtraces.arterest.model.converter.FeedResponseConverter;
 import com.devtraces.arterest.model.feed.Feed;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -71,34 +70,6 @@ public class FeedResponse {
             ) // 현재 게시물이 예전에 북마크 했던 게시물인지 여부
             .createdAt(feedConverter.getCreatedAt())
             .modifiedAt(feedConverter.getModifiedAt())
-            .build();
-    }
-
-    public static FeedResponse from(
-        Feed feed, Set<Long> likedFeedSet, Long numberOfLike, Set<Long> bookmarkedFeedSet
-    ){
-        return FeedResponse.builder()
-            .feedId(feed.getId())
-            .authorProfileImageUrl(feed.getUser().getProfileImageUrl())
-            .authorNickname(feed.getUser().getNickname())
-            .content(feed.getContent())
-            .imageUrls(
-                feed.getImageUrls().equals("") ? null :
-                Arrays.stream(feed.getImageUrls().split(",")).collect(Collectors.toList())
-            )
-            .hashtags(
-                feed.getHashtagStringValues() == null ? null :
-                Arrays.stream(feed.getHashtagStringValues().split(","))
-                    .collect(Collectors.toList())
-            )
-            .numberOfLike(numberOfLike)
-            .numberOfReply(feed.getNumberOfReplies())
-            .isLiked(likedFeedSet == null ? false : likedFeedSet.contains(feed.getId()))
-            .isBookMarked(
-                bookmarkedFeedSet == null? false : bookmarkedFeedSet.contains(feed.getId())
-            ) // 현재 게시물이 예전에 북마크 했던 게시물인지 여부
-            .createdAt(feed.getCreatedAt())
-            .modifiedAt(feed.getModifiedAt())
             .build();
     }
 

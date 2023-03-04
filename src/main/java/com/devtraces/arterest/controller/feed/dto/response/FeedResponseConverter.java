@@ -1,4 +1,4 @@
-package com.devtraces.arterest.model.converter;
+package com.devtraces.arterest.controller.feed.dto.response;
 
 import java.time.LocalDateTime;
 import java.util.List;

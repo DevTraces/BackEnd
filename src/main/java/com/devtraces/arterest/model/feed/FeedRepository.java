@@ -1,6 +1,6 @@
 package com.devtraces.arterest.model.feed;
 
-import com.devtraces.arterest.model.converter.FeedResponseConverter;
+import com.devtraces.arterest.controller.feed.dto.response.FeedResponseConverter;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;

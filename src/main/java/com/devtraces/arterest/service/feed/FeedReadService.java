@@ -4,7 +4,7 @@ import com.devtraces.arterest.common.constant.CommonConstant;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.controller.feed.dto.response.FeedResponse;
 import com.devtraces.arterest.model.bookmark.BookmarkRepository;
-import com.devtraces.arterest.model.converter.FeedResponseConverter;
+import com.devtraces.arterest.controller.feed.dto.response.FeedResponseConverter;
 import com.devtraces.arterest.model.feed.Feed;
 import com.devtraces.arterest.model.feed.FeedRepository;
 import com.devtraces.arterest.model.follow.Follow;
