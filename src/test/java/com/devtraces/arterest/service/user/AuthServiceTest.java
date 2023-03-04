@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import com.devtraces.arterest.common.type.UserSignUpType;
 import com.devtraces.arterest.common.type.UserStatusType;
 import com.devtraces.arterest.controller.auth.dto.response.MailAuthKeyCheckResponse;
+import com.devtraces.arterest.controller.auth.dto.response.UserRegistrationResponse;
 import com.devtraces.arterest.model.bookmark.BookmarkRepository;
 import com.devtraces.arterest.model.feed.Feed;
 import com.devtraces.arterest.model.follow.FollowRepository;
@@ -98,6 +99,7 @@ class AuthServiceTest {
 		String description = "description";
 		String encodingPassword = "encodingPassword";
 		String profileImageUrl = "profileImageUrl";
+		String signUpKey = "abcdef";
 		User mockUser = User.builder()
 				.email(email)
 				.password(encodingPassword)
@@ -107,6 +109,7 @@ class AuthServiceTest {
 				.userStatus(UserStatusType.ACTIVE)
 				.build();
 
+		given(redisService.getData(anyString())).willReturn(email);
 		given(authRedisUtil.notExistsAuthCompletedValue(anyString()))
 			.willReturn(false);
 		given(userRepository.existsByEmail(anyString()))
@@ -123,7 +126,7 @@ class AuthServiceTest {
 		ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
 
 		authService.register(
-				email, password, username, nickname, profileImage, description
+				email, password, username, nickname, profileImage, description, signUpKey
 		);
 
 		verify(userRepository, times(1)).save(captor.capture());
@@ -137,6 +140,36 @@ class AuthServiceTest {
 	}
 
 	@Test
+	@DisplayName("회원가입 실패 - signUpKey 불일치 ")
+	void fail_register_SIGNUP_KEY_NOT_CORRECT() {
+		// given
+		String email = "example@gmail.com";
+		String differentEmail = "different@gmail.com";
+		String password = "password";
+		String nickname = "example";
+		String username = "김공공";
+		MockMultipartFile profileImage =
+				new MockMultipartFile("profileImage", "profileImage".getBytes());
+		String description = "description";
+		String signUpKey = "abcdef";
+
+		given(redisService.getData(anyString())).willReturn(differentEmail);
+
+	    //when
+		UserRegistrationResponse response = authService.register(
+				email, password, username, nickname, profileImage, description, signUpKey
+		);
+
+		//then
+		assertFalse(response.isIsSignUpKeyCorrect());
+		assertNull(response.getEmail());
+		assertNull(response.getUsername());
+		assertNull(response.getNickname());
+		assertNull(response.getProfileImageUrl());
+		assertNull(response.getDescription());
+	}
+
+	@Test
 	@DisplayName("회원가입 실패 - 이미 가입된 이메일인 경우")
 	void testRegisterByRegisteredUser() {
 		String email = "example@gmail.com";
@@ -146,14 +179,16 @@ class AuthServiceTest {
 		MockMultipartFile profileImage =
 				new MockMultipartFile("profileImage", "profileImage".getBytes());
 		String description = "description";
+		String signUpKey = "abcdef";
 
+		given(redisService.getData(anyString())).willReturn(email);
 		given(authRedisUtil.notExistsAuthCompletedValue(anyString()))
 			.willReturn(false);
 		given(userRepository.existsByEmail(anyString()))
 			.willReturn(true);
 
 		BaseException exception = assertThrows(BaseException.class,
-			() -> authService.register(email, password, username, nickname, profileImage, description));
+			() -> authService.register(email, password, username, nickname, profileImage, description, signUpKey));
 
 		assertEquals(BaseException.ALREADY_EXIST_EMAIL, exception);
 	}
@@ -168,7 +203,9 @@ class AuthServiceTest {
 		MockMultipartFile profileImage =
 				new MockMultipartFile("profileImage", "profileImage".getBytes());
 		String description = "description";
+		String signUpKey = "abcdef";
 
+		given(redisService.getData(anyString())).willReturn(email);
 		given(authRedisUtil.notExistsAuthCompletedValue(anyString()))
 			.willReturn(false);
 		given(userRepository.existsByEmail(anyString()))
@@ -177,7 +214,7 @@ class AuthServiceTest {
 			.willReturn(true);
 
 		BaseException exception = assertThrows(BaseException.class,
-			() -> authService.register(email, password, username, nickname, profileImage, description));
+			() -> authService.register(email, password, username, nickname, profileImage, description, signUpKey));
 
 		assertEquals(BaseException.ALREADY_EXIST_NICKNAME, exception);
 	}

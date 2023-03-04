@@ -48,7 +48,7 @@ public class AuthController {
 			@RequestParam @Nullable String description,
 			@RequestParam @NotNull String signUpKey
 			) {
-		UserRegistrationResponse response = authService.signUp(
+		UserRegistrationResponse response = authService.register(
 				email, password,
 				username, nickname,
 				profileImage, description, signUpKey
