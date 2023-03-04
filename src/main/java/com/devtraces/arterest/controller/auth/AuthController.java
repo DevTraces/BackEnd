@@ -63,8 +63,9 @@ public class AuthController {
 	@PostMapping("/email/auth-key/check")
 	public ApiSuccessResponse<MailAuthKeyCheckResponse> checkAuthKey(
 		@RequestBody @Valid MailAuthKeyCheckRequest request) {
-		boolean isCorrect = authService.checkAuthKey(request.getEmail(), request.getAuthKey());
-		return ApiSuccessResponse.from(new MailAuthKeyCheckResponse(isCorrect));
+		return ApiSuccessResponse.from(
+				authService.checkAuthKey(request.getEmail(), request.getAuthKey())
+		);
 	}
 
 	@PostMapping("/sign-in")

@@ -12,6 +12,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MailAuthKeyCheckResponse {
 
-	private boolean isCorrect;
+	private String signUpKey;
+	private boolean isIsCorrect;
 
+	public static MailAuthKeyCheckResponse from(String signUpKey, boolean isIsCorrect) {
+		return MailAuthKeyCheckResponse.builder()
+				.signUpKey(signUpKey)
+				.isIsCorrect(isIsCorrect)
+				.build();
+	}
 }
