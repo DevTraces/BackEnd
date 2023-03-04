@@ -36,6 +36,7 @@ import static com.devtraces.arterest.common.type.NoticeType.REPLY;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -863,5 +864,38 @@ class NoticeServiceTest {
 
         //then
         assertEquals(ErrorCode.FORBIDDEN, exception.getErrorCode());
+    }
+
+    @Test
+    void success_deleteNoticeWhenFollowingCanceled() {
+        //given
+        Long noticeOwnerId = 1L;
+        Long userId = 2L;
+
+        User user = User.builder().id(userId).build();
+        Notice followNotice = Notice.builder()
+                .noticeOwnerId(noticeOwnerId)
+                .user(user)
+                .noticeType(FOLLOW)
+                .build();
+
+        Notice likeNotice = Notice.builder()
+                .noticeOwnerId(noticeOwnerId)
+                .user(user)
+                .noticeType(LIKE)
+                .build();
+
+        ArrayList<Notice> list = new ArrayList<>();
+        list.add(followNotice);
+        list.add(likeNotice);
+
+        given(noticeRepository.findAllByNoticeOwnerIdAndUserId(anyLong(), anyLong()))
+                .willReturn(list);
+
+        //when
+        noticeService.deleteNoticeWhenFollowingCanceled(noticeOwnerId, userId);
+
+        //then
+        verify(noticeRepository, times(1)).delete(followNotice);
     }
 }
