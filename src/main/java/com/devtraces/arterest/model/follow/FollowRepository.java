@@ -1,6 +1,7 @@
 package com.devtraces.arterest.model.follow;
 
 import com.devtraces.arterest.model.user.User;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Repository;
 public interface FollowRepository extends JpaRepository<Follow, Long> {
 
     void deleteByUserIdAndFollowingId(Long user_id, Long followingId);
+
+    List<Follow> findAllByUserId(Long user_id);
 
     Slice<Follow> findAllByFollowingId(Long followingId, PageRequest pageRequest);
 
