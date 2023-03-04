@@ -199,7 +199,7 @@ public class AuthService {
 		for(Reply reply : user.getReplyList()){
 			Optional<Reply> replyOptional = replyRepository.findById(reply.getId());
 			if(replyOptional.isPresent()) {
-				replyService.deleteReply(userId, reply.getId());
+				replyService.deleteReply(userId, null, reply.getId());
 			}
 		}
 

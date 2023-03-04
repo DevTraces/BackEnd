@@ -59,6 +59,7 @@ public class FeedService {
                 .content(content)
                 .imageUrls(imageUrlBuilder.toString())
                 .user(authorUser)
+                .numberOfReplies(0)
                 .build()
         );
         // 입력 받은 해시태그 값들을 순회하면서 새로 저장해야 하는 것은 저장하고, 이미 찾을 수 있는 것은 찾아내서
@@ -81,6 +82,10 @@ public class FeedService {
                 );
             }
         }
+
+        // 새로 들어온 hashtag 리스트로 newFeed 엔티티의 필드를 초기화 한다.
+        initializeHashtagStringField(hashtagList, newFeed);
+
         // 새로 만들어진 게시물이므로, 좋아요 개수를 레디스에 0으로 캐시 해둔다.
         // 레디스가 다운되어도 게시물 저장 로직 전체가 취소 및 롤백되지 않고 그대로 완료 된다.
         likeNumberCacheRepository.setInitialLikeNumber(newFeed.getId());
@@ -179,6 +184,9 @@ public class FeedService {
                 }
             }
         }
+
+        initializeHashtagStringField(hashtagList, feed);
+
         feed.updateContent(content);
         // Feed 엔티티의 imageUrls 필드의 내용물을 수정할 때 사용할 문자열을 만들어 준다.
         StringBuilder imageUrlBuilder = new StringBuilder();
@@ -192,5 +200,16 @@ public class FeedService {
             imageUrlBuilder.toString().equals("") ? null : imageUrlBuilder.toString()
         );
         return FeedUpdateResponse.from( feedRepository.save(feed), hashtagList, content );
+    }
+
+    private static void initializeHashtagStringField(List<String> hashtagList, Feed feed) {
+        if(hashtagList != null){
+            StringBuilder builder = new StringBuilder();
+            for(String hashtagString : hashtagList){
+                builder.append(hashtagString);
+                builder.append(",");
+            }
+            feed.updateHashtagStringValues(builder.toString());
+        }
     }
 }

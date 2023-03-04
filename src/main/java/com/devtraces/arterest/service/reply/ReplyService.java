@@ -54,6 +54,9 @@ public class ReplyService {
                 .build()
         );
 
+        // Feed 엔티티의 댓글 개수 필드 += 1.
+        feed.plusOneReply();
+
         noticeService.createReplyNotice(authorUser.getId(), feed.getId(), reply.getId());
 
         return ReplyResponse.from(reply);
@@ -83,9 +86,9 @@ public class ReplyService {
         return ReplyResponse.from(reply);
     }
 
-    // TODO 이 작업도 @Async 로 비동기 멀티 스레딩 처리를 할 경우 응답 지연 시간을 최소화 할 수 있다.
+    @Async
     @Transactional
-    public void deleteReply(Long userId, Long replyId) {
+    public void deleteReply(Long userId, Long feedId, Long replyId) {
         Reply reply = replyRepository.findById(replyId).orElseThrow(
             () -> BaseException.REPLY_NOT_FOUND
         );
@@ -98,6 +101,10 @@ public class ReplyService {
                 reply.getRereplyList().stream().map(Rereply::getId).collect(Collectors.toList())
             );
         }
+
+        // 게시물의 댓글 개수을 1개 차감한다.
+        feedRepository.findById(feedId).orElseThrow(() -> BaseException.FEED_NOT_FOUND)
+            .minusOneReply();
 
         // 댓글을 삭제한다.
         replyRepository.deleteById(replyId);

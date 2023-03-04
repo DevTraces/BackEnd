@@ -50,13 +50,12 @@ public class FeedResponse {
                 Arrays.stream(feed.getImageUrls().split(",")).collect(Collectors.toList())
             )
             .hashtags(
-                feed.getFeedHashtagMapList() == null ? null :
-                feed.getFeedHashtagMapList().stream().map(
-                    feedHashtagMap -> feedHashtagMap.getHashtag().getHashtagString()
-                ).collect(Collectors.toList())
+                feed.getHashtagStringValues() == null ? null :
+                Arrays.stream(feed.getHashtagStringValues().split(","))
+                    .collect(Collectors.toList())
             )
             .numberOfLike(numberOfLike)
-            .numberOfReply(feed.getReplyList() == null ? 0 : feed.getReplyList().size())
+            .numberOfReply(feed.getNumberOfReplies())
             .isLiked(likedFeedSet == null ? false : likedFeedSet.contains(feed.getId()))
             .isBookMarked(
                 bookmarkedFeedSet == null? false : bookmarkedFeedSet.contains(feed.getId())
