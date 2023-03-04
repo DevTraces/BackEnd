@@ -17,6 +17,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -43,12 +45,13 @@ public class AuthController {
 			@RequestParam @NotBlank(message = "username 입력은 필수입니다.") String username,
 			@RequestParam @NotBlank(message = "nickname 입력은 필수입니다.") String nickname,
 			@RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
-			@RequestParam @Nullable String description
+			@RequestParam @Nullable String description,
+			@RequestParam @NotNull String signUpKey
 			) {
-		UserRegistrationResponse response = authService.register(
+		UserRegistrationResponse response = authService.signUp(
 				email, password,
 				username, nickname,
-				profileImage, description
+				profileImage, description, signUpKey
 		);
 		return ApiSuccessResponse.from(response);
 	}

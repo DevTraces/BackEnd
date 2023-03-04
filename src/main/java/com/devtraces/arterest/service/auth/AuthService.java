@@ -65,8 +65,19 @@ public class AuthService {
 	@Transactional
 	public UserRegistrationResponse register(
 			String email, String password, String username,
-			String nickname, MultipartFile profileImage, String description
+			String nickname, MultipartFile profileImage,
+			String description, String signUpKey
 	) {
+		String emailBySignUpKey =
+				redisService.getData(SIGN_UP_KEY + signUpKey);
+
+		// 이메일 인증이 안 된 사용자는 null, false 반환
+		if (!email.equals(emailBySignUpKey)) {
+			return UserRegistrationResponse.from(
+					User.builder().build(), false
+			);
+		}
+
 		validateRegistration(email, nickname);
 
 		String profileImageUrl = null;
@@ -85,7 +96,7 @@ public class AuthService {
 				.userStatus(UserStatusType.ACTIVE)
 				.build());
 
-		return UserRegistrationResponse.from(savedUser);
+		return UserRegistrationResponse.from(savedUser, true);
 	}
 
 	private void validateRegistration(String email, String nickname) {
