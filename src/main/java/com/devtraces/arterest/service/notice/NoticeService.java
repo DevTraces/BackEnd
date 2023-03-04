@@ -119,7 +119,6 @@ public class NoticeService {
                             feed,
                             reply,
                             reReply,
-                            NoticeType.REREPLY,
                             NoticeTarget.POST // 피드 주인을 대상으로 함
                     )
             );
@@ -138,7 +137,6 @@ public class NoticeService {
                             feed,
                             reply,
                             reReply,
-                            NoticeType.REREPLY,
                             NoticeTarget.REPLY // 댓글 주인을 대상으로 함
                     )
             );
@@ -245,7 +243,7 @@ public class NoticeService {
 
     private Notice buildReReplyNotice(
             Long ownerUserId, User sendUser, Feed feed, Reply reply,
-            Rereply reReply, NoticeType noticeType, NoticeTarget noticeTarget
+            Rereply reReply, NoticeTarget noticeTarget
     ) {
         return Notice.builder()
                 .noticeOwnerId(ownerUserId)
@@ -253,7 +251,7 @@ public class NoticeService {
                 .feed(feed)
                 .reply(reply)
                 .rereply(reReply)
-                .noticeType(noticeType)
+                .noticeType(NoticeType.REREPLY)
                 .noticeTarget(noticeTarget)
                 .build();
     }
