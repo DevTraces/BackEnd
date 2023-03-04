@@ -1,5 +1,7 @@
 package com.devtraces.arterest.service.auth;
 
+import static com.devtraces.arterest.common.constant.CommonConstant.ARTIST_NAME_LIST;
+
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.jwt.JwtProvider;
 import com.devtraces.arterest.common.type.UserSignUpType;
@@ -141,9 +143,8 @@ public class OauthService {
     private String generateRandomNickname() {
         String randomNickname = "";
         do {
-            for (int i = 0; i < 30; i++) {
-                randomNickname += (char) ((int) (Math.random() * 25) + 97);
-            }
+            randomNickname = ARTIST_NAME_LIST.get((int) (Math.random() * 10)) + "_"
+                + (int) (Math.random() * 10000000);
         } while (userRepository.existsByNickname(randomNickname));
 
         return randomNickname;
