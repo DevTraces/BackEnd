@@ -20,7 +20,7 @@ public class ThreadPoolConfig extends AsyncConfigurerSupport {
         executor.setCorePoolSize(2*n);
         executor.setMaxPoolSize(2*n);
         executor.setQueueCapacity(CommonConstant.NUMBER_OF_EXPECTED_MAX_REQUEST *3);
-        executor.setThreadNamePrefix("GithubLookup-");
+        executor.setThreadNamePrefix("ArtBubbleAsyncThread-");
         executor.initialize();
         return executor;
     }
