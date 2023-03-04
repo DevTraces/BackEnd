@@ -7,8 +7,8 @@ public interface FeedResponseConverter {
 
     Long getFeedId();
 
-    String authorProfileImageUrl();
-    String authorNickname();
+    String getAuthorProfileImageUrl();
+    String getAuthorNickname();
 
     String getContent();
     String getImageUrls(); // "url1,rul2, ..."

@@ -4,6 +4,7 @@ import com.devtraces.arterest.common.constant.CommonConstant;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.controller.feed.dto.response.FeedResponse;
 import com.devtraces.arterest.model.bookmark.BookmarkRepository;
+import com.devtraces.arterest.model.converter.FeedResponseConverter;
 import com.devtraces.arterest.model.feed.Feed;
 import com.devtraces.arterest.model.feed.FeedRepository;
 import com.devtraces.arterest.model.follow.Follow;
@@ -64,8 +65,12 @@ public class FeedReadService {
 		Feed feed = feedRepository.findById(feedId).orElseThrow(() -> BaseException.FEED_NOT_FOUND);
 		Long likeNumber = getOrCacheLikeNumber(feed);
 
-		return FeedResponse.from(
-			feed, likedFeedSet, likeNumber, bookmarkedFeedSet
+		FeedResponseConverter feedConverter = feedRepository.findOneFeedJoinUser(
+			feedId
+		).orElseThrow(() -> BaseException.FEED_NOT_FOUND);
+
+		return FeedResponse.fromConverter(
+			feedConverter, likedFeedSet, likeNumber, bookmarkedFeedSet
 		);
 	}
 

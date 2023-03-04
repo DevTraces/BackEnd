@@ -142,7 +142,7 @@ DELETE http://localhost:8080/api/like/1?userId=1
 DELETE http://localhost:8080/api/like/1?userId=2
 
 ### 피드 1개 읽기 - 좋아요 개수 잘 들어오나? - OK
-GET http://localhost:8080/api/feeds/1?userId=6
+GET http://localhost:8080/api/feeds/1?userId=1
 
 ### 피드 리스트로 읽기 - 좋아요 개수 잘 들어오나? - OK
 GET http://localhost:8080/api/feeds/list/six?userId=6&page=0
