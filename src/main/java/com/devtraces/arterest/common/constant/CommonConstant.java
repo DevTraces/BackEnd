@@ -1,5 +1,9 @@
 package com.devtraces.arterest.common.constant;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class CommonConstant {
 
     public static final int CONTENT_LENGTH_LIMIT = 1000;
@@ -29,4 +33,9 @@ public class CommonConstant {
 
     // 매 정각마다.
     public static final String INITIALIZE_RECOMMENDATION_LIST_TO_REDIS_CRON_STRING = "0 0 0/1 * * *";
+
+    public static final List<String> ARTIST_NAME_LIST = new ArrayList<>(
+        Arrays.asList("LeonardoDaVinci", "VincentVanGogh", "PabloPicasso", "ClaudeMonet",
+            "JohannesVermeer", "EdvardMunch", "SalvadorDali", "AndyWarhol", "HenriMatisse",
+            "NamJunePaik"));
 }
