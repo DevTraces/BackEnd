@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import com.devtraces.arterest.service.notice.NoticeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +42,7 @@ public class FollowService {
     private final FollowRecommendationRepository followRecommendationRepository;
     private final NoticeService noticeService;
 
+    @Async
     @Transactional
     public void createFollowRelation(Long userId, String nickname) {
         User followerUser = findUserById(userId);
