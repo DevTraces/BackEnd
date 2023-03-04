@@ -50,4 +50,76 @@ public interface FeedRepository extends JpaRepository<Feed, Long> {
         @Param("inputFeedId") Long inputFeedId
     );
 
+    @Query(
+        value =
+            "SELECT"
+                + " f.id as feedId,"
+                + " u.profileImageUrl as authorProfileImageUrl, "
+                + " u.nickname as authorNickname, "
+                + " f.content as content, "
+                + " f.imageUrls as imageUrls, "
+                + " f.hashtagStringValues as hashtags, "
+                + " f.numberOfReplies as numberOfReply, "
+                + " f.createdAt as createdAt, "
+                + " f.modifiedAt as modifiedAt "
+                + " FROM Feed f"
+                + " JOIN User u"
+                + " ON f.user.id = u.id"
+                + " WHERE u.id = :inputAuthorId "
+                + " ORDER BY f.createdAt DESC "
+    )
+    Slice<FeedResponseConverter> findAllFeedJoinUserLatestFirst(
+        @Param("inputAuthorId") Long inputAuthorId, PageRequest pageRequest
+    );
+
+    @Query(
+        value =
+            "SELECT"
+                + " f.id as feedId,"
+                + " u.profileImageUrl as authorProfileImageUrl, "
+                + " u.nickname as authorNickname, "
+                + " f.content as content, "
+                + " f.imageUrls as imageUrls, "
+                + " f.hashtagStringValues as hashtags, "
+                + " f.numberOfReplies as numberOfReply, "
+                + " f.createdAt as createdAt, "
+                + " f.modifiedAt as modifiedAt "
+                + " FROM Feed f"
+                + " JOIN User u"
+                + " ON f.user.id = u.id"
+                + " WHERE u.id IN (:followingUserIdList) "
+                + " And f.createdAt >= :from "
+                + " AND f.createdAt <= :to "
+                + " ORDER BY f.createdAt DESC "
+    )
+    Slice<FeedResponseConverter> findAllMainFeedJoinUserLatestFirst(
+        @Param("followingUserIdList") List<Long> followingUserIdList,
+        @Param("from") LocalDateTime from,
+        @Param("to") LocalDateTime to,
+        PageRequest pageRequest
+    );
+
+    @Query(
+        value =
+            "SELECT"
+                + " f.id as feedId,"
+                + " u.profileImageUrl as authorProfileImageUrl, "
+                + " u.nickname as authorNickname, "
+                + " f.content as content, "
+                + " f.imageUrls as imageUrls, "
+                + " f.hashtagStringValues as hashtags, "
+                + " f.numberOfReplies as numberOfReply, "
+                + " f.createdAt as createdAt, "
+                + " f.modifiedAt as modifiedAt "
+                + " FROM Feed f"
+                + " JOIN User u"
+                + " ON f.user.id = u.id"
+                + " WHERE u.id IN (:recommendedFeedIdList) "
+                + " ORDER BY f.createdAt DESC "
+    )
+    Slice<FeedResponseConverter> findAllRecommendedFeedJoinUserLatestFirst(
+        @Param("recommendedFeedIdList") List<Long> recommendedFeedIdList,
+        PageRequest pageRequest
+    );
+
 }
