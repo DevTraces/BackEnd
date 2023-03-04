@@ -6,6 +6,7 @@ import com.devtraces.arterest.common.jwt.dto.TokenDto;
 import com.devtraces.arterest.common.type.UserSignUpType;
 import com.devtraces.arterest.common.type.UserStatusType;
 import com.devtraces.arterest.controller.auth.dto.TokenWithNicknameDto;
+import com.devtraces.arterest.controller.auth.dto.response.MailAuthKeyCheckResponse;
 import com.devtraces.arterest.controller.auth.dto.response.UserRegistrationResponse;
 import com.devtraces.arterest.model.bookmark.BookmarkRepository;
 import com.devtraces.arterest.model.feed.Feed;
@@ -28,6 +29,8 @@ import com.devtraces.arterest.service.s3.S3Service;
 import java.util.Date;
 import java.util.Optional;
 import java.util.Random;
+
+import com.devtraces.arterest.service.user.RedisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -39,7 +42,8 @@ import org.springframework.web.multipart.MultipartFile;
 public class AuthService {
 
 	private static final int AUTH_KEY_DIGIT = 6;
-
+	private static final String SIGN_UP_KEY = "SIGN_UP_KEY:";
+	private static final int SIGN_UP_KEY_VALID_MINUTE = 60 * 3; // 3분
 	private final PasswordEncoder passwordEncoder;
 	private final JwtProvider jwtProvider;
 	private final S3Service s3Service;
@@ -56,12 +60,24 @@ public class AuthService {
 	private final LikeRepository likeRepository;
 	private final ReplyRepository replyRepository;
 	private final RereplyRepository rereplyRepository;
+	private final RedisService redisService;
 
 	@Transactional
 	public UserRegistrationResponse register(
 			String email, String password, String username,
-			String nickname, MultipartFile profileImage, String description
+			String nickname, MultipartFile profileImage,
+			String description, String signUpKey
 	) {
+		String emailBySignUpKey =
+				redisService.getData(SIGN_UP_KEY + signUpKey);
+
+		// 이메일 인증이 안 된 사용자는 null, false 반환
+		if (!email.equals(emailBySignUpKey)) {
+			return UserRegistrationResponse.from(
+					User.builder().build(), false
+			);
+		}
+
 		validateRegistration(email, nickname);
 
 		String profileImageUrl = null;
@@ -80,7 +96,7 @@ public class AuthService {
 				.userStatus(UserStatusType.ACTIVE)
 				.build());
 
-		return UserRegistrationResponse.from(savedUser);
+		return UserRegistrationResponse.from(savedUser, true);
 	}
 
 	private void validateRegistration(String email, String nickname) {
@@ -124,18 +140,24 @@ public class AuthService {
 		mailService.sendMail(email, subject, text);
 	}
 
-	public boolean checkAuthKey(String email, String authKey) {
+	public MailAuthKeyCheckResponse checkAuthKey(String email, String authKey) {
 		if (userRepository.existsByEmail(email)) {
 			throw BaseException.ALREADY_EXIST_EMAIL;
 		}
 		String authKeyInRedis = authRedisUtil.getAuthKeyValue(email);
 		if (!authKey.equals(authKeyInRedis)) {
-			return false;
+			return MailAuthKeyCheckResponse.from(null, false);
 		}
 		// 인증 완료했으므로 Redis 정보 변경
 		authRedisUtil.deleteAuthKeyValue(email);
 		authRedisUtil.setAuthCompletedValue(email);
-		return true;
+
+		String signUpKey = generateRandomSignUpKey();
+		redisService.setDataExpire(
+				SIGN_UP_KEY + signUpKey, email, SIGN_UP_KEY_VALID_MINUTE
+		);
+
+		return MailAuthKeyCheckResponse.from(signUpKey, true);
 	}
 
 	@Transactional(readOnly = true)
@@ -213,5 +235,16 @@ public class AuthService {
 
 		//유저 삭제
 		userRepository.deleteById(userId);
+	}
+
+	private String generateRandomSignUpKey() {
+		String randomSignUpPasswordKey = "";
+		do {
+			for (int i = 0; i < 6; i++) {
+				randomSignUpPasswordKey += (char) ((int) (Math.random() * 25) + 97);
+			}
+		} while (redisService.existKey(randomSignUpPasswordKey));
+
+		return randomSignUpPasswordKey;
 	}
 }

@@ -18,14 +18,16 @@ public class UserRegistrationResponse {
 	private String nickname;
 	private String profileImageUrl;
 	private String description;
+	private boolean isIsSignUpKeyCorrect;
 
-	public static UserRegistrationResponse from(User user) {
+	public static UserRegistrationResponse from(User user, boolean isIsSignUpKeyCorrect) {
 		return UserRegistrationResponse.builder()
 			.email(user.getEmail())
 			.username(user.getUsername())
 			.nickname(user.getNickname())
 			.profileImageUrl(user.getProfileImageUrl())
 			.description(user.getDescription())
+			.isIsSignUpKeyCorrect(isIsSignUpKeyCorrect)
 			.build();
 	}
 }

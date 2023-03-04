@@ -1,19 +1,16 @@
 package com.devtraces.arterest.service.user;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import com.devtraces.arterest.common.type.UserSignUpType;
 import com.devtraces.arterest.common.type.UserStatusType;
+import com.devtraces.arterest.controller.auth.dto.response.MailAuthKeyCheckResponse;
+import com.devtraces.arterest.controller.auth.dto.response.UserRegistrationResponse;
 import com.devtraces.arterest.model.bookmark.BookmarkRepository;
 import com.devtraces.arterest.model.feed.Feed;
 import com.devtraces.arterest.model.follow.FollowRepository;
@@ -30,8 +27,6 @@ import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.jwt.JwtProvider;
 import com.devtraces.arterest.common.jwt.dto.TokenDto;
 import com.devtraces.arterest.service.auth.util.AuthRedisUtil;
-import com.devtraces.arterest.controller.auth.dto.request.UserRegistrationRequest;
-import com.devtraces.arterest.controller.auth.dto.response.UserRegistrationResponse;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
 import com.devtraces.arterest.service.reply.ReplyService;
@@ -46,7 +41,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -87,6 +81,8 @@ class AuthServiceTest {
 	private RereplyRepository rereplyRepository;
 	@Mock
 	private FeedDeleteApplication feedDeleteApplication;
+	@Mock
+	private RedisService redisService;
 
 	@InjectMocks
 	private AuthService authService;
@@ -103,6 +99,7 @@ class AuthServiceTest {
 		String description = "description";
 		String encodingPassword = "encodingPassword";
 		String profileImageUrl = "profileImageUrl";
+		String signUpKey = "abcdef";
 		User mockUser = User.builder()
 				.email(email)
 				.password(encodingPassword)
@@ -112,6 +109,7 @@ class AuthServiceTest {
 				.userStatus(UserStatusType.ACTIVE)
 				.build();
 
+		given(redisService.getData(anyString())).willReturn(email);
 		given(authRedisUtil.notExistsAuthCompletedValue(anyString()))
 			.willReturn(false);
 		given(userRepository.existsByEmail(anyString()))
@@ -128,7 +126,7 @@ class AuthServiceTest {
 		ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
 
 		authService.register(
-				email, password, username, nickname, profileImage, description
+				email, password, username, nickname, profileImage, description, signUpKey
 		);
 
 		verify(userRepository, times(1)).save(captor.capture());
@@ -142,6 +140,36 @@ class AuthServiceTest {
 	}
 
 	@Test
+	@DisplayName("회원가입 실패 - signUpKey 불일치 ")
+	void fail_register_SIGNUP_KEY_NOT_CORRECT() {
+		// given
+		String email = "example@gmail.com";
+		String differentEmail = "different@gmail.com";
+		String password = "password";
+		String nickname = "example";
+		String username = "김공공";
+		MockMultipartFile profileImage =
+				new MockMultipartFile("profileImage", "profileImage".getBytes());
+		String description = "description";
+		String signUpKey = "abcdef";
+
+		given(redisService.getData(anyString())).willReturn(differentEmail);
+
+	    //when
+		UserRegistrationResponse response = authService.register(
+				email, password, username, nickname, profileImage, description, signUpKey
+		);
+
+		//then
+		assertFalse(response.isIsSignUpKeyCorrect());
+		assertNull(response.getEmail());
+		assertNull(response.getUsername());
+		assertNull(response.getNickname());
+		assertNull(response.getProfileImageUrl());
+		assertNull(response.getDescription());
+	}
+
+	@Test
 	@DisplayName("회원가입 실패 - 이미 가입된 이메일인 경우")
 	void testRegisterByRegisteredUser() {
 		String email = "example@gmail.com";
@@ -151,14 +179,16 @@ class AuthServiceTest {
 		MockMultipartFile profileImage =
 				new MockMultipartFile("profileImage", "profileImage".getBytes());
 		String description = "description";
+		String signUpKey = "abcdef";
 
+		given(redisService.getData(anyString())).willReturn(email);
 		given(authRedisUtil.notExistsAuthCompletedValue(anyString()))
 			.willReturn(false);
 		given(userRepository.existsByEmail(anyString()))
 			.willReturn(true);
 
 		BaseException exception = assertThrows(BaseException.class,
-			() -> authService.register(email, password, username, nickname, profileImage, description));
+			() -> authService.register(email, password, username, nickname, profileImage, description, signUpKey));
 
 		assertEquals(BaseException.ALREADY_EXIST_EMAIL, exception);
 	}
@@ -173,7 +203,9 @@ class AuthServiceTest {
 		MockMultipartFile profileImage =
 				new MockMultipartFile("profileImage", "profileImage".getBytes());
 		String description = "description";
+		String signUpKey = "abcdef";
 
+		given(redisService.getData(anyString())).willReturn(email);
 		given(authRedisUtil.notExistsAuthCompletedValue(anyString()))
 			.willReturn(false);
 		given(userRepository.existsByEmail(anyString()))
@@ -182,7 +214,7 @@ class AuthServiceTest {
 			.willReturn(true);
 
 		BaseException exception = assertThrows(BaseException.class,
-			() -> authService.register(email, password, username, nickname, profileImage, description));
+			() -> authService.register(email, password, username, nickname, profileImage, description, signUpKey));
 
 		assertEquals(BaseException.ALREADY_EXIST_NICKNAME, exception);
 	}
@@ -232,10 +264,13 @@ class AuthServiceTest {
 			.given(authRedisUtil).deleteAuthKeyValue(anyString());
 		willDoNothing()
 			.given(authRedisUtil).setAuthCompletedValue(anyString());
+		given(redisService.existKey(anyString())).willReturn(false);
 
-		boolean isCorrect = authService.checkAuthKey("example@gmail.com", "010101");
+		MailAuthKeyCheckResponse response =
+				authService.checkAuthKey("example@gmail.com", "010101");
 
-		assertTrue(isCorrect);
+		assertTrue(response.isIsCorrect());
+		assertNotNull(response.getSignUpKey());
 	}
 
 	// Redis에 정보가 없거나 그 값과 다른 경우
@@ -246,9 +281,11 @@ class AuthServiceTest {
 		given(authRedisUtil.getAuthKeyValue(anyString()))
 			.willReturn("111111");
 
-		boolean isCorrect = authService.checkAuthKey("example@gmail.com", "010101");
+		MailAuthKeyCheckResponse response =
+				authService.checkAuthKey("example@gmail.com", "010101");
 
-		assertFalse(isCorrect);
+		assertFalse(response.isIsCorrect());
+		assertNull(response.getSignUpKey());
 	}
 
 	@Test

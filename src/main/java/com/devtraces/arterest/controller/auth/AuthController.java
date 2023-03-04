@@ -17,6 +17,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -43,12 +45,13 @@ public class AuthController {
 			@RequestParam @NotBlank(message = "username 입력은 필수입니다.") String username,
 			@RequestParam @NotBlank(message = "nickname 입력은 필수입니다.") String nickname,
 			@RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
-			@RequestParam @Nullable String description
+			@RequestParam @Nullable String description,
+			@RequestParam @NotNull String signUpKey
 			) {
 		UserRegistrationResponse response = authService.register(
 				email, password,
 				username, nickname,
-				profileImage, description
+				profileImage, description, signUpKey
 		);
 		return ApiSuccessResponse.from(response);
 	}
@@ -63,8 +66,9 @@ public class AuthController {
 	@PostMapping("/email/auth-key/check")
 	public ApiSuccessResponse<MailAuthKeyCheckResponse> checkAuthKey(
 		@RequestBody @Valid MailAuthKeyCheckRequest request) {
-		boolean isCorrect = authService.checkAuthKey(request.getEmail(), request.getAuthKey());
-		return ApiSuccessResponse.from(new MailAuthKeyCheckResponse(isCorrect));
+		return ApiSuccessResponse.from(
+				authService.checkAuthKey(request.getEmail(), request.getAuthKey())
+		);
 	}
 
 	@PostMapping("/sign-in")
