@@ -189,7 +189,7 @@ public class FollowService {
         }
     }
 
-    public List<FollowResponse> getRecommendationList() {
+    public List<FollowResponse> getRecommendationList(Long userId) {
         List<Long> recommendedUserIdList;
         // 캐시 서버를 본다.
         recommendedUserIdList = followRecommendationCacheRepository.getFollowTargetUserIdList();
@@ -207,11 +207,20 @@ public class FollowService {
                 return Collections.emptyList();
             }
         }
-        // 리스트를 랜덤으로 섞은 후, 상위 10개(recommendedUserIdList의 길이가 10 미만이면 그 만큼)를 뽑아낸다.
+
+        // 요청을 한 유저가 팔로우 하고 있는 유저들의 주키아이디 값 set을 구한다.
+        Set<Long> followingIdSetOfRequestUser = followRepository.findAllByUserId(userId).stream()
+            .map(Follow::getFollowingId).collect(Collectors.toSet());
+
+        // 리스트를 랜덤으로 섞은 후 상위 10개(recommendedUserIdList의 길이가 10 미만이면 그 만큼)를 뽑아내되,
+        // 이미 팔로우 하고 있는 유저들의 id 값 set에 포함되지 않은 것만을 뽑아낸다.
         Collections.shuffle(recommendedUserIdList);
         List<Long> resultIdList = new ArrayList<>();
         for(Long id : recommendedUserIdList){
-            if(resultIdList.size() != CommonConstant.FOLLOW_RECOMMENDATION_USER_NUMBER){
+            if(
+                resultIdList.size() != CommonConstant.FOLLOW_RECOMMENDATION_USER_NUMBER &&
+                    !followingIdSetOfRequestUser.contains(id)
+            ){
                 resultIdList.add(id);
             } else break;
         }
