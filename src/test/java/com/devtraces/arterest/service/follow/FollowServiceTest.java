@@ -459,31 +459,36 @@ class FollowServiceTest {
             .id(1L)
             .build();
 
-        User twoUser = User.builder()
-            .id(2L)
-            .build();
-
         User threeUser = User.builder()
             .id(3L)
             .build();
 
         List<User> userList = new ArrayList<>();
         userList.add(oneUser);
-        userList.add(twoUser);
         userList.add(threeUser);
+
+        Follow followEntity = Follow.builder()
+            .id(1L)
+            .user(oneUser)
+            .followingId(2L)
+            .build();
+        List<Follow> alreadyFollowingEntityList = new ArrayList<>();
+        alreadyFollowingEntityList.add(followEntity);
 
         given(followRecommendationCacheRepository
             .getFollowTargetUserIdList()).willReturn(recommendedUserIdList);
         given(userRepository.findAllByIdIn(anyList())).willReturn(userList);
+        given(followRepository.findAllByUserId(1L)).willReturn(alreadyFollowingEntityList);
 
         // when
-        List<FollowResponse> resultList = followService.getRecommendationList();
+        List<FollowResponse> resultList = followService.getRecommendationList(1L);
 
         // then
         verify(followRecommendationCacheRepository, times(1))
             .getFollowTargetUserIdList();
+        verify(followRepository, times(1)).findAllByUserId(1L);
         verify(userRepository, times(1)).findAllByIdIn(anyList());
-        assertEquals(3, resultList.size());
+        assertEquals(2, resultList.size());
     }
 
     @Test
@@ -509,23 +514,32 @@ class FollowServiceTest {
 
         List<User> userList = new ArrayList<>();
         userList.add(oneUser);
-        userList.add(twoUser);
         userList.add(threeUser);
+
+        Follow followEntity = Follow.builder()
+            .id(1L)
+            .user(oneUser)
+            .followingId(2L)
+            .build();
+        List<Follow> alreadyFollowingEntityList = new ArrayList<>();
+        alreadyFollowingEntityList.add(followEntity);
 
         given(followRecommendationCacheRepository
             .getFollowTargetUserIdList()).willReturn(null);
         given(followRecommendationRepository.findTopByOrderByIdDesc())
             .willReturn(Optional.of(followRecommendationEntity));
         given(userRepository.findAllByIdIn(anyList())).willReturn(userList);
+        given(followRepository.findAllByUserId(1L)).willReturn(alreadyFollowingEntityList);
 
         // when
-        List<FollowResponse> resultList = followService.getRecommendationList();
+        List<FollowResponse> resultList = followService.getRecommendationList(1L);
 
         // then
         verify(followRecommendationCacheRepository, times(1))
             .getFollowTargetUserIdList();
+        verify(followRepository, times(1)).findAllByUserId(1L);
         verify(userRepository, times(1)).findAllByIdIn(anyList());
-        assertEquals(3, resultList.size());
+        assertEquals(2, resultList.size());
     }
 
     @Test
@@ -538,7 +552,7 @@ class FollowServiceTest {
             .willReturn(Optional.empty());
 
         // when
-        List<FollowResponse> resultList = followService.getRecommendationList();
+        List<FollowResponse> resultList = followService.getRecommendationList(1L);
 
         // then
         verify(followRecommendationCacheRepository, times(1))
