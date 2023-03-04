@@ -1,7 +1,6 @@
 package com.devtraces.arterest.service.notice;
 
 import com.devtraces.arterest.common.exception.BaseException;
-import com.devtraces.arterest.common.exception.ErrorCode;
 import com.devtraces.arterest.common.type.NoticeTarget;
 import com.devtraces.arterest.common.type.NoticeType;
 import com.devtraces.arterest.controller.notice.dto.LikeNoticeDto;
@@ -204,6 +203,22 @@ public class NoticeService {
         }
 
         noticeRepository.delete(notice);
+    }
+
+    // 팔로워가 팔로잉 취소할 때 관련 알림도 삭제
+    @Transactional
+    public void deleteNoticeWhenFollowingCanceled(
+            Long noticeOwnerId, Long userId
+    ) {
+        List<Notice> notices = noticeRepository
+                .findAllByNoticeOwnerIdAndUserId(noticeOwnerId, userId);
+
+        // 팔로워 유저와 팔로잉 유저 사이의 알림 중 FOLLOW 알림만 삭제
+        for (Notice notice : notices) {
+            if (notice.getNoticeType().equals(NoticeType.FOLLOW)) {
+                noticeRepository.delete(notice);
+            }
+        }
     }
 
     private User getUser(Long userId) {
