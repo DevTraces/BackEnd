@@ -7,6 +7,9 @@ public class CommonConstant {
     public static final int HASHTAG_COUNT_LIMIT = 10;
     public static final int IMAGE_FILE_COUNT_LIMIT = 15;
 
+
+    public static final int NUMBER_OF_EXPECTED_MAX_REQUEST = 3000;
+
     public static final int FEED_CONSTRUCT_DURATION_DAY = 30;
 
     public static final String REDIS_LIKE_NUMBER_KEY_PREFIX = "LikeNumber:";
