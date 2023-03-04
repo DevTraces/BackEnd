@@ -1,7 +1,6 @@
 package com.devtraces.arterest.service.notice;
 
 import com.devtraces.arterest.common.exception.BaseException;
-import com.devtraces.arterest.common.exception.ErrorCode;
 import com.devtraces.arterest.common.type.NoticeTarget;
 import com.devtraces.arterest.common.type.NoticeType;
 import com.devtraces.arterest.controller.notice.dto.LikeNoticeDto;
@@ -120,7 +119,6 @@ public class NoticeService {
                             feed,
                             reply,
                             reReply,
-                            NoticeType.REREPLY,
                             NoticeTarget.POST // 피드 주인을 대상으로 함
                     )
             );
@@ -139,7 +137,6 @@ public class NoticeService {
                             feed,
                             reply,
                             reReply,
-                            NoticeType.REREPLY,
                             NoticeTarget.REPLY // 댓글 주인을 대상으로 함
                     )
             );
@@ -206,6 +203,22 @@ public class NoticeService {
         noticeRepository.delete(notice);
     }
 
+    // 팔로워가 팔로잉 취소할 때 관련 알림도 삭제
+    @Transactional
+    public void deleteNoticeWhenFollowingCanceled(
+            Long noticeOwnerId, Long userId
+    ) {
+        List<Notice> notices = noticeRepository
+                .findAllByNoticeOwnerIdAndUserId(noticeOwnerId, userId);
+
+        // 팔로워 유저와 팔로잉 유저 사이의 알림 중 FOLLOW 알림만 삭제
+        for (Notice notice : notices) {
+            if (notice.getNoticeType().equals(NoticeType.FOLLOW)) {
+                noticeRepository.delete(notice);
+            }
+        }
+    }
+
     private User getUser(Long userId) {
         return userRepository.findById(userId).orElseThrow(
                 () -> BaseException.USER_NOT_FOUND);
@@ -230,7 +243,7 @@ public class NoticeService {
 
     private Notice buildReReplyNotice(
             Long ownerUserId, User sendUser, Feed feed, Reply reply,
-            Rereply reReply, NoticeType noticeType, NoticeTarget noticeTarget
+            Rereply reReply, NoticeTarget noticeTarget
     ) {
         return Notice.builder()
                 .noticeOwnerId(ownerUserId)
@@ -238,7 +251,7 @@ public class NoticeService {
                 .feed(feed)
                 .reply(reply)
                 .rereply(reReply)
-                .noticeType(noticeType)
+                .noticeType(NoticeType.REREPLY)
                 .noticeTarget(noticeTarget)
                 .build();
     }

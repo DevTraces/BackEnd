@@ -133,6 +133,9 @@ public class FollowService {
     public void deleteFollowRelation(Long userId, String nickname) {
         User unfollowTargetUser = findUserByNickname(nickname);
         followRepository.deleteByUserIdAndFollowingId(userId, unfollowTargetUser.getId());
+
+        // 팔로우 취소되는 유저, 팔로워 유저
+        noticeService.deleteNoticeWhenFollowingCanceled(unfollowTargetUser.getId(), userId);
     }
 
     // 팔로우 테이블의 가장 마지막 레코드(== 가장 최근 팔로우)를 찾아낸 후 캐시해 둠.
