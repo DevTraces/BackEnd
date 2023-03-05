@@ -202,9 +202,9 @@ public class AuthService {
 
 		//알림 삭제
 		log.info("check 1");
-		noticeRepository.deleteAllByNoticeOwnerId(userId);
+//		noticeRepository.deleteAllByNoticeOwnerId(userId);
 		log.info("check 2");
-		noticeRepository.deleteAllByUser(user);
+//		noticeRepository.deleteAllByUser(user);
 		log.info("check 3");
 
 		//팔로우 삭제
