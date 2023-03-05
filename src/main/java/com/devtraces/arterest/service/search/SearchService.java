@@ -35,7 +35,7 @@ public class SearchService {
 
 	private final UserRepository userRepository;
 	private final HashtagRepository hashtagRepository;
-	private final Trie<String, String> trie;
+	public final Trie<String, String> trie;
 	private final SearchRedisService searchRedisService;
 
 
@@ -93,6 +93,9 @@ public class SearchService {
 
 	// 해시태그가 저장된 Trie 자료구조를 직렬화하여 Redis 에 저장.
 	private void saveAllHashtags(List<Hashtag> feedList) {
+
+		trie.clear();
+
 		for (int i = 0; i < feedList.size(); i++) {
 			trie.put(feedList.get(i).getHashtagString(), null);
 		}
