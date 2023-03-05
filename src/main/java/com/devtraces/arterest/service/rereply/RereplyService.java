@@ -88,7 +88,7 @@ public class RereplyService {
 
     @Async
     @Transactional
-    public void deleteRereply(Long userId, Long replyId, Long rereplyId) {
+    public void deleteRereply(Long userId, Long rereplyId) {
         Rereply rereply = rereplyRepository.findById(rereplyId).orElseThrow(
             () -> BaseException.REREPLY_NOT_FOUND
         );
@@ -96,11 +96,10 @@ public class RereplyService {
             throw BaseException.USER_INFO_NOT_MATCH;
         }
 
-        rereplyRepository.deleteById(rereplyId);
-
         // 삭제되는 대댓글이 달려 있는 댓글의 개수를 1개 차감한다.
-        replyRepository.findById(replyId).orElseThrow(()->BaseException.REPLY_NOT_FOUND)
-            .minusOneRereply();
+        rereply.getReply().minusOneRereply();
+
+        rereplyRepository.deleteById(rereplyId);
     }
 
     @Async

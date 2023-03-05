@@ -318,11 +318,10 @@ class ReplyServiceTest {
             .build();
 
         given(replyRepository.findById(anyLong())).willReturn(Optional.of(reply));
-        given(feedRepository.findById(anyLong())).willReturn(Optional.of(feed));
         doNothing().when(rereplyRepository).deleteAllByIdIn(anyList());
 
         // when
-        replyService.deleteReply(1L, 1L, 1L);
+        replyService.deleteReply(1L, 1L);
 
         // then
         verify(replyRepository, times(1)).findById(anyLong());
@@ -339,7 +338,7 @@ class ReplyServiceTest {
         // when
         BaseException exception = assertThrows(
             BaseException.class ,
-            () -> replyService.deleteReply(1L, 1L, 1L)
+            () -> replyService.deleteReply(1L, 1L)
         );
 
         // then
@@ -365,7 +364,7 @@ class ReplyServiceTest {
         // when
         BaseException exception = assertThrows(
             BaseException.class ,
-            () -> replyService.deleteReply(1L, 1L, 1L)
+            () -> replyService.deleteReply(1L, 1L)
         );
 
         // then

@@ -200,7 +200,7 @@ public class AuthService {
 			Optional<Reply> replyOptional = replyRepository.findById(reply.getId());
 			if(replyOptional.isPresent()) {
 				replyService.deleteReply(
-					userId, replyOptional.get().getFeed().getId(), reply.getId()
+					userId, reply.getId()
 				);
 			}
 		}
@@ -210,7 +210,7 @@ public class AuthService {
 			Optional<Rereply> rereplyOptional = rereplyRepository.findById(rereply.getId());
 			if(rereplyOptional.isPresent()){
 				rereplyService.deleteRereply(
-					userId, rereplyOptional.get().getReply().getId(), rereply.getId()
+					userId, rereply.getId()
 				);
 			}
 		}

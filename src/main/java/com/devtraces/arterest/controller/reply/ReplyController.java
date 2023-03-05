@@ -52,10 +52,9 @@ public class ReplyController {
     @DeleteMapping("/{feedId}/replies/{replyId}")
     public ApiSuccessResponse<?> deleteReply(
         @AuthenticationPrincipal Long userId,
-        @PathVariable Long feedId,
         @PathVariable Long replyId
     ){
-        replyService.deleteReply(userId, feedId, replyId);
+        replyService.deleteReply(userId, replyId);
         return ApiSuccessResponse.NO_DATA_RESPONSE;
     }
 

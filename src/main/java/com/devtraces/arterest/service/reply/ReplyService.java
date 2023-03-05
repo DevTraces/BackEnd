@@ -94,7 +94,7 @@ public class ReplyService {
 
     @Async
     @Transactional
-    public void deleteReply(Long userId, Long feedId, Long replyId) {
+    public void deleteReply(Long userId, Long replyId) {
         Reply reply = replyRepository.findById(replyId).orElseThrow(
             () -> BaseException.REPLY_NOT_FOUND
         );
@@ -109,8 +109,7 @@ public class ReplyService {
         }
 
         // 게시물의 댓글 개수을 1개 차감한다.
-        feedRepository.findById(feedId).orElseThrow(() -> BaseException.FEED_NOT_FOUND)
-            .minusOneReply();
+        reply.getFeed().minusOneReply();
 
         // 댓글을 삭제한다.
         replyRepository.deleteById(replyId);

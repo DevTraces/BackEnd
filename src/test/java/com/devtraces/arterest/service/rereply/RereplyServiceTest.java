@@ -291,11 +291,6 @@ class RereplyServiceTest {
             .id(1L)
             .build();
 
-        Rereply rereply = Rereply.builder()
-            .id(1L)
-            .user(user)
-            .build();
-
         Reply reply = Reply.builder()
             .id(1L)
             .user(user)
@@ -303,19 +298,23 @@ class RereplyServiceTest {
             .numberOfRereplies(1)
             .build();
 
+        Rereply rereply = Rereply.builder()
+            .id(1L)
+            .reply(reply)
+            .user(user)
+            .build();
+
         reply.getRereplyList().add(rereply);
 
         given(rereplyRepository.findById(anyLong())).willReturn(Optional.of(rereply));
         doNothing().when(rereplyRepository).deleteById(anyLong());
-        given(replyRepository.findById(anyLong())).willReturn(Optional.of(reply));
 
         // when
-        rereplyService.deleteRereply(1L, 1L, 1L);
+        rereplyService.deleteRereply(1L, 1L);
 
         // then
         verify(rereplyRepository, times(1)).findById(anyLong());
         verify(rereplyRepository, times(1)).deleteById(anyLong());
-        verify(replyRepository, times(1)).findById(anyLong());
     }
 
     @Test
@@ -327,7 +326,7 @@ class RereplyServiceTest {
         // when
         BaseException exception = assertThrows(
             BaseException.class ,
-            () -> rereplyService.deleteRereply(2L, 1L,  1L)
+            () -> rereplyService.deleteRereply(2L, 1L)
         );
 
         // then
@@ -352,7 +351,7 @@ class RereplyServiceTest {
         // when
         BaseException exception = assertThrows(
             BaseException.class ,
-            () -> rereplyService.deleteRereply(2L, 1L, 1L)
+            () -> rereplyService.deleteRereply(2L, 1L)
         );
 
         // then
