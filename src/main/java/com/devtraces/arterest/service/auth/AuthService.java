@@ -200,33 +200,20 @@ public class AuthService {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> BaseException.USER_NOT_FOUND);
 
-		//알림 삭제
-		log.info("check 1");
-//		noticeRepository.deleteAllByNoticeOwnerId(userId);
-		log.info("check 2");
-//		noticeRepository.deleteAllByUser(user);
-		log.info("check 3");
-
 		//팔로우 삭제
 		followRepository.deleteAllByFollowingId(userId);
-		log.info("check 4");
 		followRepository.deleteAllByUser(user);
-		log.info("check 5");
 
 		//게시물 삭제(해당 게시물 관련 댓글, 대댓글, 좋아요, 북마크, 해시태그 삭제)
 		for(Feed feed : user.getFeedList()){
 			feedDeleteApplication.deleteFeed(userId, feed.getId());
 		}
 
-		log.info("check 6");
-
 		//북마크 삭제
 		bookmarkRepository.deleteAllByUser(user);
-		log.info("check 7");
 
 		//좋아요 삭제
 		likeRepository.deleteAllByUserId(userId);
-		log.info("check 8");
 
 		//댓글 삭제(해당 댓글 관련 대댓글 삭제)
 		for(Reply reply : user.getReplyList()){
@@ -235,7 +222,6 @@ public class AuthService {
 				replyService.deleteReply(userId, reply.getId());
 			}
 		}
-		log.info("check 9");
 
 		//대댓글 삭제
 		for(Rereply rereply : user.getRereplyList()){
@@ -244,11 +230,9 @@ public class AuthService {
 				rereplyService.deleteRereply(userId, rereply.getId());
 			}
 		}
-		log.info("check 10");
 
 		//유저 삭제
 		userRepository.deleteById(userId);
-		log.info("check 11");
 	}
 
 	private String generateRandomSignUpKey() {

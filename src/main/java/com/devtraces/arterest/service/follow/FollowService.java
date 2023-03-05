@@ -151,7 +151,6 @@ public class FollowService {
             .ifPresent(
                 follow -> followSamplePoolCacheRepository.pushSample(follow.getFollowingId())
             );
-        log.info("pushFollowSampleToCacheServer() running: " + LocalDateTime.now());
     }
 
     // 매 정각마다 followSamplePoolCacheRepository를 통해 레디스에 저장된
@@ -194,7 +193,6 @@ public class FollowService {
                     .build()
             );
         }
-        log.info("initializeFollowRecommendationTargetUserIdListToCacheServer() running: " + LocalDateTime.now());
     }
 
     public List<FollowResponse> getRecommendationList(Long userId) {

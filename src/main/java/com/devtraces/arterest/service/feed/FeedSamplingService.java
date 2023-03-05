@@ -38,7 +38,6 @@ public class FeedSamplingService {
         optionalLatestLikeInfo.ifPresent(
             likes -> likeSamplePoolCacheRepository.pushSample(likes.getFeedId())
         );
-        log.info("pushLikeSampleToCacheServer() running: " + LocalDateTime.now());
     }
 
     // 매 정각마다 최근 1시간 아내에 가장 좋아요를 많이 받은 게시물 100개(혹은 그 이하)를
@@ -82,7 +81,6 @@ public class FeedSamplingService {
                     .build()
             );
         }
-        log.info("initializeRecommendationTargetFeedIdListToCacheServer() running: " + LocalDateTime.now());
     }
 
 }

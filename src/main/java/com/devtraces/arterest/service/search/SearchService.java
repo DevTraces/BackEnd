@@ -46,7 +46,6 @@ public class SearchService {
 	public void createAutoCompleteWords() {
 		List<Hashtag> hashtagList = hashtagRepository.findAll();
 		saveAllHashtags(hashtagList);
-		log.info("createAutoCompleteWords() running: " + LocalDateTime.now());
 	}
 
 	public List<String> getAutoCompleteWords(String keyword, Integer numberOfWords) {
