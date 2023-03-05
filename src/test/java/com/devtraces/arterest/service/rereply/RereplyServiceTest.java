@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.exception.ErrorCode;
+import com.devtraces.arterest.controller.rereply.dto.response.RereplyResponseConverter;
 import com.devtraces.arterest.model.feed.Feed;
 import com.devtraces.arterest.model.reply.Reply;
 import com.devtraces.arterest.model.reply.ReplyRepository;
@@ -20,6 +21,8 @@ import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
 import com.devtraces.arterest.controller.rereply.dto.request.RereplyRequest;
 import com.devtraces.arterest.controller.rereply.dto.response.RereplyResponse;
+import com.devtraces.arterest.service.notice.NoticeService;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -45,6 +48,9 @@ class RereplyServiceTest {
     @Mock
     private ReplyRepository replyRepository;
 
+    @Mock
+    private NoticeService noticeService;
+
     @InjectMocks
     private RereplyService rereplyService;
 
@@ -58,6 +64,7 @@ class RereplyServiceTest {
 
         Reply reply = Reply.builder()
             .id(1L)
+            .numberOfRereplies(0)
             .user(user)
             .build();
 
@@ -72,6 +79,7 @@ class RereplyServiceTest {
         given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
         given(replyRepository.findById(anyLong())).willReturn(Optional.of(reply));
         given(rereplyRepository.save(any())).willReturn(rereply);
+        doNothing().when(noticeService).createReReplyNotice(1L, 1L, 1L, 1L);
 
         // when
         rereplyService.createRereply(1L, 1L, 1L, rereplyRequest);
@@ -80,6 +88,9 @@ class RereplyServiceTest {
         verify(userRepository, times(1)).findById(anyLong());
         verify(replyRepository, times(1)).findById(anyLong());
         verify(rereplyRepository, times(1)).save(any());
+        verify(noticeService, times(1)).createReReplyNotice(
+            anyLong(), anyLong(), anyLong(), anyLong()
+        );
     }
 
     @Test
@@ -147,38 +158,25 @@ class RereplyServiceTest {
     @DisplayName("대댓글 리스트 읽기")
     void successGetRereplyList(){
         // given
-        User user = User.builder()
-            .id(1L)
-            .description("introduction")
-            .profileImageUrl("url1")
-            .nickname("dongvin99")
-            .username("박동빈")
-            .build();
 
-        Reply reply = Reply.builder()
-            .id(1L)
-            .user(user)
-            .content("this is reply")
-            .build();
+        RereplyResponseConverter rereplyResponseConverter
+            = new RereplyResponseConverterImpl(
+            1L, "dongvin99", "pdv profile url",
+            "대댓글 내용", LocalDateTime.now(), LocalDateTime.now()
+        );
 
-        Rereply rereply = Rereply.builder()
-            .id(1L)
-            .user(user)
-            .reply(reply)
-            .build();
+        List<RereplyResponseConverter> rereplyConverterList = new ArrayList<>();
+        rereplyConverterList.add(rereplyResponseConverter);
 
-        List<Rereply> rereplyList = new ArrayList<>();
-        rereplyList.add(rereply);
+        Slice<RereplyResponseConverter> slice = new PageImpl<>(rereplyConverterList);
 
-        Slice<Rereply> slice = new PageImpl<>(rereplyList);
-
-        given(rereplyRepository.findAllByReplyId(1L, PageRequest.of(0, 10))).willReturn(slice);
+        given(rereplyRepository.findAllRereplyJoinUser(1L, PageRequest.of(0, 10))).willReturn(slice);
 
         // when
         List<RereplyResponse> rereplyResponseList = rereplyService.getRereplyList(1L, 1L, 0, 10);
 
         // then
-        verify(rereplyRepository, times(1)).findAllByReplyId(1L, PageRequest.of(0, 10));
+        verify(rereplyRepository, times(1)).findAllRereplyJoinUser(1L, PageRequest.of(0, 10));
         assertEquals(rereplyResponseList.size(), 1);
     }
 
@@ -298,15 +296,26 @@ class RereplyServiceTest {
             .user(user)
             .build();
 
+        Reply reply = Reply.builder()
+            .id(1L)
+            .user(user)
+            .rereplyList(new ArrayList<>())
+            .numberOfRereplies(1)
+            .build();
+
+        reply.getRereplyList().add(rereply);
+
         given(rereplyRepository.findById(anyLong())).willReturn(Optional.of(rereply));
         doNothing().when(rereplyRepository).deleteById(anyLong());
+        given(replyRepository.findById(anyLong())).willReturn(Optional.of(reply));
 
         // when
-        rereplyService.deleteRereply(1L, 1L);
+        rereplyService.deleteRereply(1L, 1L, 1L);
 
         // then
         verify(rereplyRepository, times(1)).findById(anyLong());
         verify(rereplyRepository, times(1)).deleteById(anyLong());
+        verify(replyRepository, times(1)).findById(anyLong());
     }
 
     @Test
@@ -318,7 +327,7 @@ class RereplyServiceTest {
         // when
         BaseException exception = assertThrows(
             BaseException.class ,
-            () -> rereplyService.deleteRereply(2L, 1L)
+            () -> rereplyService.deleteRereply(2L, 1L,  1L)
         );
 
         // then
@@ -343,7 +352,7 @@ class RereplyServiceTest {
         // when
         BaseException exception = assertThrows(
             BaseException.class ,
-            () -> rereplyService.deleteRereply(2L, 1L)
+            () -> rereplyService.deleteRereply(2L, 1L, 1L)
         );
 
         // then
