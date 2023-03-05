@@ -187,3 +187,42 @@ Content-Type: application/json
 
 ### 댓글 리스트 읽기 작업
 GET http://localhost:8080/api/feeds/1/replies?page=0
+
+
+
+
+
+
+
+
+
+
+
+
+
+### 테스트 유저 생성 & 초기 작업 진행.
+POST http://localhost:8080/make-testuser
+
+
+### 피드 만들기 - PostMan으로.
+
+### 댓글 만들기
+POST http://localhost:8080/api/feeds/1/replies?userId=1
+Content-Type: application/json
+
+{
+  "content" : "첫 번째 댓글"
+}
+
+### 대댓글 만들기 1~3
+POST http://localhost:8080/api/feeds/1/replies/1/rereplies?userId=1
+Content-Type: application/json
+
+{
+  "content" : "세 번째 대댓글"
+}
+
+
+### 대댓글 리스트 읽기
+GET http://localhost:8080/api/feeds/1/replies/1/rereplies?page=0
+Content-Type: application/json

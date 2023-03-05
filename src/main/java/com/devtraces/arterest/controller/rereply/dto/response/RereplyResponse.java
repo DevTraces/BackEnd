@@ -27,6 +27,21 @@ public class RereplyResponse {
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
 
+    public static RereplyResponse fromConverter(
+        RereplyResponseConverter rereplyResponseConverter, Long feedId, Long replyId
+    ){
+        return RereplyResponse.builder()
+            .rereplyId(rereplyResponseConverter.getRereplyId())
+            .feedId(feedId)
+            .replyId(replyId)
+            .authorNickname(rereplyResponseConverter.getAuthorNickname())
+            .authorProfileImageUrl(rereplyResponseConverter.getAuthorProfileImageUrl())
+            .content(rereplyResponseConverter.getContent())
+            .createdAt(rereplyResponseConverter.getCreatedAt())
+            .modifiedAt(rereplyResponseConverter.getCreatedAt())
+            .build();
+    }
+
     public static RereplyResponse from(Rereply rereply, Long feedId){
         return RereplyResponse.builder()
             .rereplyId(rereply.getId())

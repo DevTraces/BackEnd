@@ -62,10 +62,13 @@ public class RereplyService {
     public List<RereplyResponse> getRereplyList(
         Long feedId, Long replyId, Integer page, Integer pageSize
     ) {
-        return rereplyRepository.findAllByReplyId(replyId, PageRequest.of(page, pageSize))
-            .getContent().stream().map(
-                rereply -> RereplyResponse.from(rereply, feedId)
-            ).collect(Collectors.toList());
+        return rereplyRepository.findAllRereplyJoinUser(
+            replyId, PageRequest.of(page, pageSize)
+        ).getContent().stream().map(
+            rereplyResponseConverter -> RereplyResponse.fromConverter(
+                rereplyResponseConverter, feedId, replyId
+            )
+        ).collect(Collectors.toList());
     }
 
     @Transactional
