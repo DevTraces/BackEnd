@@ -13,6 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -45,6 +46,7 @@ public class SearchService {
 	public void createAutoCompleteWords() {
 		List<Hashtag> hashtagList = hashtagRepository.findAll();
 		saveAllHashtags(hashtagList);
+		log.info("createAutoCompleteWords() running: " + LocalDateTime.now());
 	}
 
 	public List<String> getAutoCompleteWords(String keyword, Integer numberOfWords) {

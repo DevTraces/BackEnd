@@ -7,6 +7,7 @@ import com.devtraces.arterest.model.likecache.FeedRecommendationCacheRepository;
 import com.devtraces.arterest.model.likecache.LikeSamplePoolCacheRepository;
 import com.devtraces.arterest.model.recommendation.LikeRecommendation;
 import com.devtraces.arterest.model.recommendation.LikeRecommendationRepository;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,10 +17,12 @@ import java.util.PriorityQueue;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class FeedSamplingService {
 
@@ -35,6 +38,7 @@ public class FeedSamplingService {
         optionalLatestLikeInfo.ifPresent(
             likes -> likeSamplePoolCacheRepository.pushSample(likes.getFeedId())
         );
+        log.info("pushLikeSampleToCacheServer() running: " + LocalDateTime.now());
     }
 
     // 매 정각마다 최근 1시간 아내에 가장 좋아요를 많이 받은 게시물 100개(혹은 그 이하)를
@@ -78,6 +82,7 @@ public class FeedSamplingService {
                     .build()
             );
         }
+        log.info("initializeRecommendationTargetFeedIdListToCacheServer() running: " + LocalDateTime.now());
     }
 
 }

@@ -11,6 +11,7 @@ import com.devtraces.arterest.model.recommendation.FollowRecommendation;
 import com.devtraces.arterest.model.recommendation.FollowRecommendationRepository;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 
 import com.devtraces.arterest.service.notice.NoticeService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -32,6 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class FollowService {
 
@@ -148,6 +151,7 @@ public class FollowService {
             .ifPresent(
                 follow -> followSamplePoolCacheRepository.pushSample(follow.getFollowingId())
             );
+        log.info("pushFollowSampleToCacheServer() running: " + LocalDateTime.now());
     }
 
     // 매 정각마다 followSamplePoolCacheRepository를 통해 레디스에 저장된
@@ -190,6 +194,7 @@ public class FollowService {
                     .build()
             );
         }
+        log.info("initializeFollowRecommendationTargetUserIdListToCacheServer() running: " + LocalDateTime.now());
     }
 
     public List<FollowResponse> getRecommendationList(Long userId) {
