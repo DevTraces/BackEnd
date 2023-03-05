@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,6 +65,9 @@ public class FeedService {
         // 입력 받은 해시태그 값들을 순회하면서 새로 저장해야 하는 것은 저장하고, 이미 찾을 수 있는 것은 찾아내서
         // FeedHashtagMap에 저장한다.
         // FeedHashtagMap 엔티티를 빌드하기 위해서는 Feed 엔티티와 Hashtag 엔티티 모두가 필요하다.
+        // 해시태그의 앞뒤 공백을 제거하고 해시태그가 중복인 경우 1개로 취급한다.
+        hashtagList = hashtagList.stream().map(String::trim).collect(Collectors.toSet()).stream().collect(Collectors.toList());
+
         if(hashtagList != null){
             for(String hashtagInputString : hashtagList){
                 Hashtag hashtagEntity = hashtagRepository.findByHashtagString(hashtagInputString).orElse(
@@ -152,6 +156,9 @@ public class FeedService {
         hashtagService.deleteNotUsingHashtag(feedHashtagMapList);
 
         // 그 후 입력 받은 값에 따라서 새롭게 저장한다.
+        // 해시태그의 앞뒤 공백을 제거하고 해시태그가 중복인 경우 1개로 취급한다.
+        hashtagList = hashtagList.stream().map(String::trim).collect(Collectors.toSet()).stream().collect(Collectors.toList());
+
         if(hashtagList != null){
             for(String hashtagInputString : hashtagList){
                 Optional<Hashtag> optionalHashtag = hashtagRepository
