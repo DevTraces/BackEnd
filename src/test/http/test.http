@@ -180,7 +180,7 @@ POST http://localhost:8080/api/like/2?userId=4
 GET http://localhost:8080/api/feeds/main?userId=1&page=1
 
 ### 2번 유저가 작성한 피드 리스트 읽기 요청
-GET http://localhost:8080/api/feeds/list/two?userId=1&page=0
+GET http://localhost:8080/api/feeds/list/one?userId=1&page=0
 Content-Type: application/json
 
 
@@ -221,6 +221,9 @@ Content-Type: application/json
 {
   "content" : "세 번째 대댓글"
 }
+
+### 대댓글 삭제
+DELETE http://localhost:8080/api/feeds/1/replies/1/rereplies/1?userId=1
 
 
 ### 대댓글 리스트 읽기
