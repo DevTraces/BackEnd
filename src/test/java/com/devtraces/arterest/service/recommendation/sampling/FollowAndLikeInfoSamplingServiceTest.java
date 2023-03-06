@@ -65,25 +65,4 @@ class FollowAndLikeInfoSamplingServiceTest {
         verify(likeSamplePoolCacheRepository, times(1)).pushSample(2L);
     }
 
-    @Test
-    @DisplayName("좋아요 정보 샘플 캐시서버에 등록 성공")
-    void successPushLikeSampleToCacheServer(){
-        // given
-
-        // when
-
-        // then
-    }
-
-    @Test
-    @DisplayName("팔로우 샘플 캐시서버에 등록 성공")
-    void successPushFollowSampleToCacheServer(){
-        // given
-
-        // when
-
-        // then
-
-    }
-
 }
