@@ -226,6 +226,12 @@ public class NoticeService {
         noticeRepository.deleteAllByRereplyId(rereplyId);
     }
 
+    @Transactional
+    public void deleteNoticeWhenReplyDeleted(Long replyId) {
+        noticeRepository.deleteAllByReplyId(replyId);
+    }
+
+
     private User getUser(Long userId) {
         return userRepository.findById(userId).orElseThrow(
                 () -> BaseException.USER_NOT_FOUND);

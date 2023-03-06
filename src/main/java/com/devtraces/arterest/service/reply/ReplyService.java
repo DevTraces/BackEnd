@@ -101,6 +101,14 @@ public class ReplyService {
         if(!Objects.equals(reply.getUser().getId(), userId)){
             throw BaseException.USER_INFO_NOT_MATCH;
         }
+
+        // 댓글과 관련된 대댓글들의 알림들 삭제
+        // TODO : 아래 대댓글 삭제하는 로직과 합치면 중복없이 깔끔해질 것 같음. 리팩토링 필요
+        List<Rereply> rereplyList = reply.getRereplyList();
+        for (Rereply rereply : rereplyList) {
+            noticeService.deleteNoticeWhenRereplyDeleted(rereply.getId());
+        }
+
         // 댓글에 달려 있는 대댓글을 삭제한다.
         if(reply.getRereplyList() != null && reply.getRereplyList().size() > 0){
             rereplyRepository.deleteAllByIdIn(
@@ -110,6 +118,9 @@ public class ReplyService {
 
         // 게시물의 댓글 개수을 1개 차감한다.
         reply.getFeed().minusOneReply();
+
+        // 댓글 삭제시 댓글 관련 알림도 남아있으면 삭제
+        noticeService.deleteNoticeWhenReplyDeleted(replyId);
 
         // 댓글을 삭제한다.
         replyRepository.deleteById(replyId);

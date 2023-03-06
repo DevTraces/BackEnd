@@ -20,4 +20,6 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     List<Notice> findAllByNoticeOwnerIdAndUserId(Long noticeOwnerId, Long userId);
 
     void deleteAllByRereplyId(Long rereplyId);
+
+    void deleteAllByReplyId(Long replyId);
 }
