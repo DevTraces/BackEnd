@@ -910,4 +910,17 @@ class NoticeServiceTest {
         verify(noticeRepository, times(1))
                 .deleteAllByRereplyId(rereplyId);
     }
+
+    @Test
+    void success_deleteNoticeWhenReplyDeleted() {
+        //given
+        Long replyId = 1L;
+
+        //when
+        noticeService.deleteNoticeWhenReplyDeleted(replyId);
+
+        //then
+        verify(noticeRepository, times(1))
+                .deleteAllByReplyId(replyId);
+    }
 }
