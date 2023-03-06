@@ -231,6 +231,15 @@ public class NoticeService {
         noticeRepository.deleteAllByReplyId(replyId);
     }
 
+    @Transactional
+    public void deleteNoticeWhenFeedDeleted(Long feedId) {
+        List<Notice> notices = noticeRepository.findALlByFeedId(feedId);
+        if (notices.size() > 0) {
+            for (Notice notice : notices) {
+                noticeRepository.delete(notice);
+            }
+        }
+    }
 
     private User getUser(Long userId) {
         return userRepository.findById(userId).orElseThrow(

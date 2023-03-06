@@ -109,6 +109,10 @@ public class RereplyService {
     @Transactional
     public void deleteAllFeedRelatedRereply(Feed feed){
         for(Reply reply : feed.getReplyList()){
+            for (Rereply rereply : reply.getRereplyList()) {
+                noticeService.deleteNoticeWhenRereplyDeleted(rereply.getId());
+            }
+
             if(reply.getRereplyList().size() > 0){
                 rereplyRepository.deleteAllByIdIn(
                     reply.getRereplyList().stream().map(Rereply::getId)

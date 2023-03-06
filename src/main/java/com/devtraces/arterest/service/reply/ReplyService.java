@@ -129,6 +129,10 @@ public class ReplyService {
     @Async
     @Transactional
     public void deleteAllFeedRelatedReply(Feed feed){
+        for (Reply reply : feed.getReplyList()) {
+            noticeService.deleteNoticeWhenReplyDeleted(reply.getId());
+        }
+
         replyRepository.deleteAllByIdIn(
             feed.getReplyList().stream().map(Reply::getId).collect(Collectors.toList())
         );

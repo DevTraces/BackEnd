@@ -22,4 +22,6 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     void deleteAllByRereplyId(Long rereplyId);
 
     void deleteAllByReplyId(Long replyId);
+
+    List<Notice> findALlByFeedId(Long feedId);
 }
