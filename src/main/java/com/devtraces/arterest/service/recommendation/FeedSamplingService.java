@@ -1,4 +1,4 @@
-package com.devtraces.arterest.service.feed;
+package com.devtraces.arterest.service.recommendation;
 
 import com.devtraces.arterest.common.constant.CommonConstant;
 import com.devtraces.arterest.model.like.LikeRepository;
@@ -30,15 +30,6 @@ public class FeedSamplingService {
     private final LikeSamplePoolCacheRepository likeSamplePoolCacheRepository;
     private final FeedRecommendationCacheRepository feedRecommendationCacheRepository;
     private final LikeRecommendationRepository likeRecommendationRepository;
-
-    // 매 6초마다 가장 최신 좋아요 정보 샘플을 리스트 형태로 캐시해 둔다.
-    @Scheduled(cron = CommonConstant.PUSH_SAMPLE_TO_REDIS_CRON_STRING)
-    public void pushLikeSampleToCacheServer(){
-        Optional<Likes> optionalLatestLikeInfo = likeRepository.findTopByOrderByIdDesc();
-        optionalLatestLikeInfo.ifPresent(
-            likes -> likeSamplePoolCacheRepository.pushSample(likes.getFeedId())
-        );
-    }
 
     // 매 정각마다 최근 1시간 아내에 가장 좋아요를 많이 받은 게시물 100개(혹은 그 이하)를
     // 레디스에 리스트 형태로 초기화 해 둔다.

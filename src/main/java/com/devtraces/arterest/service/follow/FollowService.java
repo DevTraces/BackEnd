@@ -139,18 +139,6 @@ public class FollowService {
         noticeService.deleteNoticeWhenFollowingCanceled(unfollowTargetUser.getId(), userId);
     }
 
-    // 팔로우 테이블의 가장 마지막 레코드(== 가장 최근 팔로우)를 찾아낸 후 캐시해 둠.
-    // 매 6초마다 가장 최신 팔로우 정보를 캐시해두므로, 1시간이면 팔로우 추천 유저 후보 결정을 위한
-    // 600 개의 샘플을 레디스 리스트에 저장해 둘 수 있다.
-    @Scheduled(cron = CommonConstant.PUSH_SAMPLE_TO_REDIS_CRON_STRING)
-    public void pushFollowSampleToCacheServer(){
-        Optional<Follow> optionalLatestFollow = followRepository.findTopByOrderByIdDesc();
-        optionalLatestFollow
-            .ifPresent(
-                follow -> followSamplePoolCacheRepository.pushSample(follow.getFollowingId())
-            );
-    }
-
     // 매 정각마다 followSamplePoolCacheRepository를 통해 레디스에 저장된
     // 팔로우 추천 대상 유저 선별용 샘플 리스트의 내용을 바탕으로
     // 최근 1시간 이내에 팔로우를 많이 받은 상위 일정 수 만큼의 유저들의 주키 아이디 값 리스트를 캐시해 둔다.

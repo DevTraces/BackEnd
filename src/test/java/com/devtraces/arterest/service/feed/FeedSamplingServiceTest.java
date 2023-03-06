@@ -1,6 +1,5 @@
 package com.devtraces.arterest.service.feed;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.BDDMockito.given;
@@ -14,6 +13,7 @@ import com.devtraces.arterest.model.likecache.FeedRecommendationCacheRepository;
 import com.devtraces.arterest.model.likecache.LikeSamplePoolCacheRepository;
 import com.devtraces.arterest.model.recommendation.LikeRecommendation;
 import com.devtraces.arterest.model.recommendation.LikeRecommendationRepository;
+import com.devtraces.arterest.service.recommendation.FeedSamplingService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
