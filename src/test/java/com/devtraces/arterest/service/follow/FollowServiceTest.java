@@ -17,7 +17,6 @@ import com.devtraces.arterest.controller.follow.dto.response.FollowResponse;
 import com.devtraces.arterest.model.follow.Follow;
 import com.devtraces.arterest.model.follow.FollowRepository;
 import com.devtraces.arterest.model.followcache.FollowRecommendationCacheRepository;
-import com.devtraces.arterest.model.followcache.FollowSamplePoolCacheRepository;
 import com.devtraces.arterest.model.recommendation.FollowRecommendation;
 import com.devtraces.arterest.model.recommendation.FollowRecommendationRepository;
 import com.devtraces.arterest.model.user.User;
@@ -44,8 +43,6 @@ class FollowServiceTest {
     private FollowRepository followRepository;
     @Mock
     private UserRepository userRepository;
-    @Mock
-    private FollowSamplePoolCacheRepository followSamplePoolCacheRepository;
     @Mock
     private FollowRecommendationCacheRepository followRecommendationCacheRepository;
     @Mock
@@ -400,56 +397,6 @@ class FollowServiceTest {
 
         // then
         assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
-    }
-
-    @Test
-    @DisplayName("팔로우 샘플 캐시서버에 등록 성공")
-    void successPushFollowSampleToCacheServer(){
-        // given
-        Follow follow = Follow.builder()
-            .id(1L)
-            .followingId(2L)
-            .build();
-
-        given(followRepository.findTopByOrderByIdDesc()).willReturn(Optional.of(follow));
-        doNothing().when(followSamplePoolCacheRepository).pushSample(2L);
-
-        // when
-        followService.pushFollowSampleToCacheServer();
-
-        // then
-        verify(followRepository, times(1)).findTopByOrderByIdDesc();
-        verify(followSamplePoolCacheRepository, times(1)).pushSample(2L);
-    }
-
-    @Test
-    @DisplayName("팔로우 추천을 위한 리스트 캐시서버에 초기화 성공")
-    void successInitializeFollowRecommendationTargetUserIdListToCacheServer(){
-        // given
-        List<Long> recommendationList = new ArrayList<>();
-        recommendationList.add(1L);
-        recommendationList.add(2L);
-        recommendationList.add(3L);
-
-        doNothing().when(followRecommendationCacheRepository)
-            .updateRecommendationTargetUserIdList(anyList());
-
-        FollowRecommendation followRecommendationEntity = FollowRecommendation.builder()
-            .id(1L)
-            .followRecommendationTargetUsers(recommendationList.toString())
-            .build();
-
-        given(followRecommendationRepository.save(any()))
-            .willReturn(followRecommendationEntity);
-
-        // when
-        followService.initializeFollowRecommendationTargetUserIdListToCacheServer();
-
-        // then
-        verify(followRecommendationCacheRepository, times(1))
-            .updateRecommendationTargetUserIdList(anyList());
-        verify(followRecommendationRepository, times(1))
-            .save(any());
     }
 
     @Test
