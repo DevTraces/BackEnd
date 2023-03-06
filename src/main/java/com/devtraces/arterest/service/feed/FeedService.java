@@ -209,7 +209,7 @@ public class FeedService {
                 builder.append(hashtagString);
                 builder.append(",");
             }
-            feed.updateHashtagStringValues(builder.toString());
+            feed.setHashtagStringValues(builder.toString());
         }
     }
 }
