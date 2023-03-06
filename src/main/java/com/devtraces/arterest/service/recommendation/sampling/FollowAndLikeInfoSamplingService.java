@@ -26,7 +26,7 @@ public class FollowAndLikeInfoSamplingService {
     // 매 6초마다 가장 최신 팔로우 정보 샘플을 리스트 형태로 캐시해 둔다.
     // 매 6초마다 가장 최신 좋아요 정보 샘플을 리스트 형태로 캐시해 둔다.
     @Scheduled(cron = CommonConstant.PUSH_SAMPLE_TO_REDIS_CRON_STRING)
-    public void pushLikeSampleToCacheServer(){
+    public void pushFollowAndLikeSampleToCacheServer(){
         Optional<Follow> optionalLatestFollow = followRepository.findTopByOrderByIdDesc();
         optionalLatestFollow
             .ifPresent(

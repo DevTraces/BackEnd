@@ -403,26 +403,6 @@ class FollowServiceTest {
     }
 
     @Test
-    @DisplayName("팔로우 샘플 캐시서버에 등록 성공")
-    void successPushFollowSampleToCacheServer(){
-        // given
-        Follow follow = Follow.builder()
-            .id(1L)
-            .followingId(2L)
-            .build();
-
-        given(followRepository.findTopByOrderByIdDesc()).willReturn(Optional.of(follow));
-        doNothing().when(followSamplePoolCacheRepository).pushSample(2L);
-
-        // when
-        followService.pushFollowSampleToCacheServer();
-
-        // then
-        verify(followRepository, times(1)).findTopByOrderByIdDesc();
-        verify(followSamplePoolCacheRepository, times(1)).pushSample(2L);
-    }
-
-    @Test
     @DisplayName("팔로우 추천을 위한 리스트 캐시서버에 초기화 성공")
     void successInitializeFollowRecommendationTargetUserIdListToCacheServer(){
         // given

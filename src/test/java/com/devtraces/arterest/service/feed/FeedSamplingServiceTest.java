@@ -39,27 +39,6 @@ class FeedSamplingServiceTest {
     private FeedSamplingService feedSamplingService;
 
     @Test
-    @DisplayName("좋아요 정보 샘플 캐시서버에 등록 성공")
-    void successPushLikeSampleToCacheServer(){
-        // given
-        Likes likeSampleEntity = Likes.builder()
-            .id(1L)
-            .userId(1L)
-            .feedId(2L)
-            .build();
-
-        given(likeRepository.findTopByOrderByIdDesc()).willReturn(Optional.of(likeSampleEntity));
-        doNothing().when(likeSamplePoolCacheRepository).pushSample(2L);
-
-        // when
-        feedSamplingService.pushLikeSampleToCacheServer();
-
-        // then
-        verify(likeRepository, times(1)).findTopByOrderByIdDesc();
-        verify(likeSamplePoolCacheRepository, times(1)).pushSample(2L);
-    }
-
-    @Test
     @DisplayName("좋아요 개수 기반 추천 탸깃 게시물 리스트 캐시서버에 초기화 성공")
     void InitializeRecommendationTargetFeedIdListToCacheServer(){
         // given
