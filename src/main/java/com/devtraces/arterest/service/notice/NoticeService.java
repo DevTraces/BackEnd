@@ -219,6 +219,13 @@ public class NoticeService {
         }
     }
 
+    // 대댓글이 삭제되면 해당 대댓글의 알림을 가져올 때 에러가 발생
+    // 대댓글이 삭제될 때 대댓글 id를 가진 알림들 다 삭제
+    @Transactional
+    public void deleteNoticeWhenRereplyDeleted(Long rereplyId) {
+        noticeRepository.deleteAllByRereplyId(rereplyId);
+    }
+
     private User getUser(Long userId) {
         return userRepository.findById(userId).orElseThrow(
                 () -> BaseException.USER_NOT_FOUND);
