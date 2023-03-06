@@ -4,9 +4,11 @@ import com.devtraces.arterest.common.constant.CommonConstant;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.controller.feed.dto.response.FeedResponse;
 import com.devtraces.arterest.model.bookmark.BookmarkRepository;
+import com.devtraces.arterest.controller.feed.dto.response.FeedResponseConverter;
 import com.devtraces.arterest.model.feed.Feed;
 import com.devtraces.arterest.model.feed.FeedRepository;
 import com.devtraces.arterest.model.follow.Follow;
+import com.devtraces.arterest.model.follow.FollowRepository;
 import com.devtraces.arterest.model.like.LikeRepository;
 import com.devtraces.arterest.model.like.Likes;
 import com.devtraces.arterest.model.likecache.FeedRecommendationCacheRepository;
@@ -15,7 +17,6 @@ import com.devtraces.arterest.model.recommendation.LikeRecommendation;
 import com.devtraces.arterest.model.recommendation.LikeRecommendationRepository;
 import com.devtraces.arterest.model.user.UserRepository;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -38,6 +39,7 @@ public class FeedReadService {
 	private final LikeNumberCacheRepository likeNumberCacheRepository;
 	private final FeedRecommendationCacheRepository feedRecommendationCacheRepository;
 	private final LikeRecommendationRepository likeRecommendationRepository;
+	private final FollowRepository followRepository;
 
 	@Transactional(readOnly = true)
 	public List<FeedResponse> getFeedResponseList(
@@ -48,24 +50,30 @@ public class FeedReadService {
 		Long targetUserId = userRepository.findByNickname(nickname)
 			.orElseThrow(() -> BaseException.USER_NOT_FOUND).getId();
 		return feedRepository
-			.findAllByUserIdOrderByCreatedAtDesc(targetUserId, PageRequest.of(page, pageSize))
+			.findAllFeedJoinUserLatestFirst(targetUserId, PageRequest.of(page, pageSize))
 			.getContent().stream().map(
-			feed -> {
-				Long likeNumber = getOrCacheLikeNumber(feed);
-				return FeedResponse.from(feed, likedFeedSet, likeNumber, bookmarkedFeedSet);
-			}
-		).collect(Collectors.toList());
+				feedResponseConverter -> {
+					Long likeNumber = getOrCacheLikeNumber(feedResponseConverter);
+					return FeedResponse.fromConverter(
+						feedResponseConverter, likedFeedSet, likeNumber, bookmarkedFeedSet
+					);
+				}
+			).collect(Collectors.toList());
 	}
 
 	@Transactional(readOnly = true)
 	public FeedResponse getOneFeed(Long userId, Long feedId){
 		Set<Long> likedFeedSet = getLikedFeedSet(userId);
 		Set<Long> bookmarkedFeedSet = getBookmarkedFeedSet(userId);
-		Feed feed = feedRepository.findById(feedId).orElseThrow(() -> BaseException.FEED_NOT_FOUND);
-		Long likeNumber = getOrCacheLikeNumber(feed);
 
-		return FeedResponse.from(
-			feed, likedFeedSet, likeNumber, bookmarkedFeedSet
+		FeedResponseConverter feedConverter = feedRepository.findOneFeedJoinUser(
+			feedId
+		).orElseThrow(() -> BaseException.FEED_NOT_FOUND);
+
+		Long likeNumber = getOrCacheLikeNumber(feedConverter);
+
+		return FeedResponse.fromConverter(
+			feedConverter, likedFeedSet, likeNumber, bookmarkedFeedSet
 		);
 	}
 
@@ -84,10 +92,8 @@ public class FeedReadService {
 	public List<FeedResponse> getMainFeedList(Long userId, Integer page, Integer pageSize) {
 		Set<Long> likedFeedSet = getLikedFeedSet(userId);
 		Set<Long> bookmarkedFeedSet = getBookmarkedFeedSet(userId);
-		List<Long> followingUserIdList = userRepository.findById(userId).orElseThrow(
-			() -> BaseException.USER_NOT_FOUND
-		).getFollowList().stream().map(Follow::getFollowingId)
-			.collect(Collectors.toList());
+		List<Long> followingUserIdList = followRepository.findAllByUserId(userId).stream()
+			.map(Follow::getFollowingId).collect(Collectors.toList());
 
 		LocalDateTime now = LocalDateTime.now();
 
@@ -99,12 +105,14 @@ public class FeedReadService {
 		LocalDateTime from = to.minusDays(CommonConstant.FEED_CONSTRUCT_DURATION_DAY);
 
 		List<FeedResponse> responseList = feedRepository
-			.findAllByUserIdInAndCreatedAtBetweenOrderByCreatedAtDesc(
+			.findAllMainFeedJoinUserLatestFirst(
 				followingUserIdList, from, to, PageRequest.of(page, pageSize)
 			).getContent().stream().map(
-				feed -> {
-					Long likeNumber = getOrCacheLikeNumber(feed);
-					return FeedResponse.from(feed, likedFeedSet, likeNumber, bookmarkedFeedSet);
+				feedResponseConverter -> {
+					Long likeNumber = getOrCacheLikeNumber(feedResponseConverter);
+					return FeedResponse.fromConverter(
+						feedResponseConverter, likedFeedSet, likeNumber, bookmarkedFeedSet
+					);
 				}
 			).collect(Collectors.toList());
 
@@ -145,24 +153,26 @@ public class FeedReadService {
 				= (numberOfElemsInFirstQuery + pageSize - 1)/pageSize;
 
 			return feedRepository
-				.findAllByIdInOrderByCreatedAtDesc(
+				.findAllRecommendedFeedJoinUserLatestFirst(
 					recommendedFeedIdList,
 					PageRequest.of(page - numberOfRequiredPagesForFirstQuery, pageSize)
 				).getContent().stream().map(
-				feed -> {
-					Long likeNumber = getOrCacheLikeNumber(feed);
-					return FeedResponse.from(feed, likedFeedSet, likeNumber, bookmarkedFeedSet);
-				}
-			).collect(Collectors.toList());
+					feedResponseConverter -> {
+						Long likeNumber = getOrCacheLikeNumber(feedResponseConverter);
+						return FeedResponse.fromConverter(
+							feedResponseConverter, likedFeedSet, likeNumber, bookmarkedFeedSet
+						);
+					}
+				).collect(Collectors.toList());
 		}
 	}
 
 	// 피드 별 좋아요 개수는 레디스를 먼저 보게 만들고, 그게 불가능 할때만 Like 테이블에서 찾도록 한다.
-	private Long getOrCacheLikeNumber(Feed feed) {
-		Long likeNumber = likeNumberCacheRepository.getFeedLikeNumber(feed.getId());
+	private Long getOrCacheLikeNumber(FeedResponseConverter feedConverter) {
+		Long likeNumber = likeNumberCacheRepository.getFeedLikeNumber(feedConverter.getFeedId());
 		if(likeNumber == null) {
-			likeNumber = likeRepository.countByFeedId(feed.getId());
-			likeNumberCacheRepository.setLikeNumber(feed.getId(), likeNumber);
+			likeNumber = likeRepository.countByFeedId(feedConverter.getFeedId());
+			likeNumberCacheRepository.setLikeNumber(feedConverter.getFeedId(), likeNumber);
 		}
 		return likeNumber;
 	}

@@ -219,7 +219,9 @@ public class AuthService {
 		for(Reply reply : user.getReplyList()){
 			Optional<Reply> replyOptional = replyRepository.findById(reply.getId());
 			if(replyOptional.isPresent()) {
-				replyService.deleteReply(userId, reply.getId());
+				replyService.deleteReply(
+					userId, reply.getId()
+				);
 			}
 		}
 
@@ -227,7 +229,9 @@ public class AuthService {
 		for(Rereply rereply : user.getRereplyList()){
 			Optional<Rereply> rereplyOptional = rereplyRepository.findById(rereply.getId());
 			if(rereplyOptional.isPresent()){
-				rereplyService.deleteRereply(userId, rereply.getId());
+				rereplyService.deleteRereply(
+					userId, rereply.getId()
+				);
 			}
 		}
 

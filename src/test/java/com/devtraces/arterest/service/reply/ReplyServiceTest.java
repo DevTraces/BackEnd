@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.exception.ErrorCode;
+import com.devtraces.arterest.controller.reply.dto.response.ReplyResponseConverter;
 import com.devtraces.arterest.model.feed.Feed;
 import com.devtraces.arterest.model.feed.FeedRepository;
 import com.devtraces.arterest.model.reply.Reply;
@@ -21,6 +22,8 @@ import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
 import com.devtraces.arterest.controller.reply.dto.request.ReplyRequest;
 import com.devtraces.arterest.controller.reply.dto.response.ReplyResponse;
+import com.devtraces.arterest.service.notice.NoticeService;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -45,6 +48,8 @@ class ReplyServiceTest {
     private ReplyRepository replyRepository;
     @Mock
     private RereplyRepository rereplyRepository;
+    @Mock
+    private NoticeService noticeService;
 
     @InjectMocks
     private ReplyService replyService;
@@ -60,6 +65,7 @@ class ReplyServiceTest {
         Feed feed = Feed.builder()
             .id(1L)
             .user(user)
+            .numberOfReplies(0)
             .build();
 
         Reply reply = Reply.builder()
@@ -73,6 +79,7 @@ class ReplyServiceTest {
         given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
         given(feedRepository.findById(anyLong())).willReturn(Optional.of(feed));
         given(replyRepository.save(any())).willReturn(reply);
+        doNothing().when(noticeService).createReplyNotice(1L,1L, 1L);
 
         // when
         replyService.createReply(1L, 1L, replyRequest);
@@ -81,6 +88,9 @@ class ReplyServiceTest {
         verify(userRepository, times(1)).findById(anyLong());
         verify(feedRepository, times(1)).findById(anyLong());
         verify(replyRepository, times(1)).save(any());
+        verify(noticeService, times(1)).createReplyNotice(
+            anyLong(), anyLong(), anyLong()
+        );
     }
 
     @Test
@@ -147,39 +157,26 @@ class ReplyServiceTest {
     void successGetReplyList(){
         // given
 
-        User user = User.builder()
-            .id(1L)
-            .description("introduction")
-            .profileImageUrl("url1")
-            .nickname("dongvin99")
-            .username("박동빈")
-            .build();
+        ReplyResponseConverter replyResponseConverter
+            = new ReplyResponseConverterImpl(
+            1L, "댓글 내용", "dongvin99",
+            "pdv profile url", 0,
+            LocalDateTime.now(), LocalDateTime.now()
+        );
 
-        Feed feed = Feed.builder()
-            .id(1L)
-            .imageUrls("url2,url3")
-            .user(user)
-            .build();
+        List<ReplyResponseConverter> replyConverterList = new ArrayList<>();
+        replyConverterList.add(replyResponseConverter);
 
-        Reply reply = Reply.builder()
-            .id(1L)
-            .user(user)
-            .feed(feed)
-            .content("this is reply")
-            .build();
+        Slice<ReplyResponseConverter> slice = new PageImpl<>(replyConverterList);
 
-        List<Reply> replyList = new ArrayList<>();
-        replyList.add(reply);
-
-        Slice<Reply> slice = new PageImpl<>(replyList);
-
-        given(replyRepository.findAllByFeedIdOrderByCreatedAtDesc(1L, PageRequest.of(0, 10))).willReturn(slice);
+        given(replyRepository.findAllReplyJoinUserLatestFirst(1L, PageRequest.of(0, 10))).willReturn(slice);
 
         // when
         List<ReplyResponse> replyResponseList = replyService.getReplyList(1L, 0, 10);
 
         // then
-        verify(replyRepository, times(1)).findAllByFeedIdOrderByCreatedAtDesc(1L, PageRequest.of(0, 10));
+        verify(replyRepository, times(1))
+            .findAllReplyJoinUserLatestFirst(1L, PageRequest.of(0, 10));
         assertEquals(replyResponseList.size(), 1);
     }
 
@@ -300,6 +297,7 @@ class ReplyServiceTest {
 
         Feed feed = Feed.builder()
             .id(1L)
+            .numberOfReplies(1)
             .user(user)
             .build();
 

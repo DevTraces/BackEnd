@@ -28,6 +28,23 @@ public class ReplyResponse {
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
 
+    public static ReplyResponse fromConverter(
+        ReplyResponseConverter replyResponseConverter, Long feedId
+    ){
+        return ReplyResponse.builder()
+            .replyId(replyResponseConverter.getReplyId())
+            .feedId(feedId)
+            .authorNickname(replyResponseConverter.getAuthorNickname())
+            .content(replyResponseConverter.getContent())
+            .authorProfileImageUrl(replyResponseConverter.getAuthorProfileImageUrl())
+            .numberOfRereply(
+                replyResponseConverter == null ? 0 : replyResponseConverter.getNumberOfRereply()
+            )
+            .createdAt(replyResponseConverter.getCreatedAt())
+            .modifiedAt(replyResponseConverter.getModifiedAt())
+            .build();
+    }
+
     public static ReplyResponse from(Reply reply){
         return ReplyResponse.builder()
             .replyId(reply.getId())

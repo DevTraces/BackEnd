@@ -159,7 +159,7 @@ class FollowServiceTest {
 
     @Test
     @Disabled
-    @DisplayName("팔로우 관계 추가 실패 - 이미 팔로우한 사람 또 팔로우하려 함")
+    @DisplayName("팔로우 관계 추가 실패 - 이미 팔로우한 사람 또 팔로우하려 함 - 불필요해졌으므로 Disabled처리.")
     void failedCreateFollowRelationDuplicatedFollowRequest(){
         // given
         User requestedUser = User.builder()
@@ -212,8 +212,11 @@ class FollowServiceTest {
             .followList(new ArrayList<>())
             .build();
 
+        List<Follow> followEntityList = new ArrayList<>();
+        followEntityList.add(followEntityOfTargetUser);
+
         given(userRepository.findByNickname("two")).willReturn(Optional.of(targetUser));
-        given(userRepository.findById(2L)).willReturn(Optional.of(requestedUser));
+        given(followRepository.findAllByUserId(2L)).willReturn(followEntityList);
 
         List<User> userList = new ArrayList<>();
         userList.add(requestedUser);
@@ -228,7 +231,7 @@ class FollowServiceTest {
         // then
         assertEquals(1, resultList.size());
         verify(userRepository, times(1)).findByNickname(anyString());
-        verify(userRepository, times(1)).findById(anyLong());
+        verify(followRepository, times(1)).findAllByUserId(anyLong());
         verify(userRepository, times(1)).findAllByIdIn(targetUserFollowingList, PageRequest.of(0, 10));
     }
 
@@ -249,7 +252,8 @@ class FollowServiceTest {
     }
 
     @Test
-    @DisplayName("타깃 유저의 팔로잉 리스트 획득 실패 - 요청한 유저 찾지 못함")
+    @Disabled
+    @DisplayName("타깃 유저의 팔로잉 리스트 획득 실패 - 요청한 유저 찾지 못함 - 불필요해졌으므로 Disabled처리.")
     void failedGetFollowingUserListRequestedUserNotFound(){
         // given
         User targetUser = User.builder()
@@ -308,7 +312,7 @@ class FollowServiceTest {
         Slice<Follow> slice = new PageImpl<>(followEntityList);
 
         given(userRepository.findByNickname(anyString())).willReturn(Optional.of(targetUser));
-        given(userRepository.findById(anyLong())).willReturn(Optional.of(requestUser));
+        given(followRepository.findAllByUserId(1L)).willReturn(followEntityList);
         given(followRepository.findAllByFollowingId(2L, PageRequest.of(0, 10))).willReturn(slice);
 
         // when
@@ -317,7 +321,7 @@ class FollowServiceTest {
         // then
         assertEquals(1, resultList.size());
         verify(userRepository, times(1)).findByNickname(anyString());
-        verify(userRepository, times(1)).findById(anyLong());
+        verify(followRepository, times(1)).findAllByUserId(anyLong());
         verify(followRepository, times(1)).findAllByFollowingId(2L, PageRequest.of(0,10));
     }
 
@@ -338,7 +342,8 @@ class FollowServiceTest {
     }
 
     @Test
-    @DisplayName("타깃 유저의 팔로워 리스트 획득 실패 - 요청한 유저 찾지 못함.")
+    @Disabled
+    @DisplayName("타깃 유저의 팔로워 리스트 획득 실패 - 요청한 유저 찾지 못함. - 불필요해졌으므로 Disabled처리.")
     void failedGetFollowerUserListRequestedUserNotFound(){
         // given
         User targetUser = User.builder()

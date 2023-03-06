@@ -51,8 +51,13 @@ public class ReplyService {
                 .content(replyRequest.getContent())
                 .user(authorUser)
                 .feed(feed)
+                .feedPrimaryKeyId(feedId)
+                .numberOfRereplies(0)
                 .build()
         );
+
+        // Feed 엔티티의 댓글 개수 필드 += 1.
+        feed.plusOneReply();
 
         noticeService.createReplyNotice(authorUser.getId(), feed.getId(), reply.getId());
 
@@ -62,8 +67,12 @@ public class ReplyService {
     @Transactional(readOnly = true)
     public List<ReplyResponse> getReplyList(Long feedId, Integer page, Integer pageSize) {
         return replyRepository
-            .findAllByFeedIdOrderByCreatedAtDesc(feedId, PageRequest.of(page, pageSize))
-            .getContent().stream().map(ReplyResponse::from).collect(Collectors.toList());
+            .findAllReplyJoinUserLatestFirst(feedId, PageRequest.of(page, pageSize))
+            .getContent().stream().map(
+                replyResponseConverter -> ReplyResponse.fromConverter(
+                    replyResponseConverter, feedId
+                )
+            ).collect(Collectors.toList());
     }
 
     @Transactional
@@ -83,7 +92,7 @@ public class ReplyService {
         return ReplyResponse.from(reply);
     }
 
-    // TODO 이 작업도 @Async 로 비동기 멀티 스레딩 처리를 할 경우 응답 지연 시간을 최소화 할 수 있다.
+    @Async
     @Transactional
     public void deleteReply(Long userId, Long replyId) {
         Reply reply = replyRepository.findById(replyId).orElseThrow(
@@ -98,6 +107,9 @@ public class ReplyService {
                 reply.getRereplyList().stream().map(Rereply::getId).collect(Collectors.toList())
             );
         }
+
+        // 게시물의 댓글 개수을 1개 차감한다.
+        reply.getFeed().minusOneReply();
 
         // 댓글을 삭제한다.
         replyRepository.deleteById(replyId);

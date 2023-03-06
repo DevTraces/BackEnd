@@ -41,6 +41,7 @@ public class RereplyService {
         Reply reply = replyRepository.findById(replyId).orElseThrow(
             () -> BaseException.REPLY_NOT_FOUND
         );
+
         Rereply rereply = rereplyRepository.save(
             Rereply.builder()
                 .content(rereplyRequest.getContent())
@@ -48,6 +49,9 @@ public class RereplyService {
                 .reply(reply)
                 .build()
         );
+
+        // 새롭게 만들고자 하는 대댓글이 달리는 댓글의 대댓글 개수를 +=1 해준다.
+        reply.plusOneRereply();
 
         noticeService.createReReplyNotice(authorUser.getId(), feedId, reply.getId(), rereply.getId());
 
@@ -58,10 +62,13 @@ public class RereplyService {
     public List<RereplyResponse> getRereplyList(
         Long feedId, Long replyId, Integer page, Integer pageSize
     ) {
-        return rereplyRepository.findAllByReplyId(replyId, PageRequest.of(page, pageSize))
-            .getContent().stream().map(
-                rereply -> RereplyResponse.from(rereply, feedId)
-            ).collect(Collectors.toList());
+        return rereplyRepository.findAllRereplyJoinUser(
+            replyId, PageRequest.of(page, pageSize)
+        ).getContent().stream().map(
+            rereplyResponseConverter -> RereplyResponse.fromConverter(
+                rereplyResponseConverter, feedId, replyId
+            )
+        ).collect(Collectors.toList());
     }
 
     @Transactional
@@ -79,6 +86,7 @@ public class RereplyService {
         return RereplyResponse.from(rereplyRepository.save(rereply), feedId);
     }
 
+    @Async
     @Transactional
     public void deleteRereply(Long userId, Long rereplyId) {
         Rereply rereply = rereplyRepository.findById(rereplyId).orElseThrow(
@@ -87,6 +95,10 @@ public class RereplyService {
         if(!Objects.equals(rereply.getUser().getId(), userId)){
             throw BaseException.USER_INFO_NOT_MATCH;
         }
+
+        // 삭제되는 대댓글이 달려 있는 댓글의 개수를 1개 차감한다.
+        rereply.getReply().minusOneRereply();
+
         rereplyRepository.deleteById(rereplyId);
     }
 

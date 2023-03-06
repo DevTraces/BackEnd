@@ -41,6 +41,9 @@ public class Feed extends BaseEntity {
 
     private String content;
 
+    private String hashtagStringValues;
+    private Integer numberOfReplies;
+
     @Column(length = 6000) // S3에서 전달하는 이미지 url 길이가 255 바이트보다 길어서 저장가능 제한을 확장해줘야 함.
     private String imageUrls;
 
@@ -66,6 +69,18 @@ public class Feed extends BaseEntity {
 
     public void updateImageUrls(String imageUrls){
         this.imageUrls = imageUrls;
+    }
+
+    public void setHashtagStringValues(String input){
+        this.hashtagStringValues = input;
+    }
+
+    public void plusOneReply(){
+        this.numberOfReplies ++;
+    }
+
+    public void minusOneReply(){
+        this.numberOfReplies --;
     }
 
 }
