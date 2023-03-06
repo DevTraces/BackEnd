@@ -923,4 +923,23 @@ class NoticeServiceTest {
         verify(noticeRepository, times(1))
                 .deleteAllByReplyId(replyId);
     }
+
+    @Test
+    void succes_deleteNoticeWhenFeedDeleted() {
+        //given
+        Long feedId = 1L;
+
+        Feed feed = Feed.builder().id(feedId).build();
+        Notice notice = Notice.builder().feed(feed).build();
+        ArrayList<Notice> notices = new ArrayList<>();
+        notices.add(notice);
+
+        given(noticeRepository.findAllByFeedId(anyLong())).willReturn(notices);
+
+        //when
+        noticeService.deleteNoticeWhenFeedDeleted(feedId);
+
+        //then
+        verify(noticeRepository, times(1)).deleteAll(any());
+    }
 }

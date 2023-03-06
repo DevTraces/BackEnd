@@ -382,6 +382,7 @@ class RereplyServiceTest {
         feed.getReplyList().add(reply);
 
         doNothing().when(rereplyRepository).deleteAllByIdIn(anyList());
+        doNothing().when(noticeService).deleteNoticeWhenRereplyDeleted(anyLong());
 
         // when
         rereplyService.deleteAllFeedRelatedRereply(feed);

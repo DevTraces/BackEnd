@@ -390,6 +390,7 @@ class ReplyServiceTest {
         feed.getReplyList().add(reply);
 
         doNothing().when(replyRepository).deleteAllByIdIn(anyList());
+        doNothing().when(noticeService).deleteNoticeWhenReplyDeleted(anyLong());
 
         // when
         replyService.deleteAllFeedRelatedReply(feed);
