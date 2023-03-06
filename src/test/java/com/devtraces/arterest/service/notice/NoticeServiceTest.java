@@ -36,7 +36,6 @@ import static com.devtraces.arterest.common.type.NoticeType.REPLY;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -897,5 +896,18 @@ class NoticeServiceTest {
 
         //then
         verify(noticeRepository, times(1)).delete(followNotice);
+    }
+
+    @Test
+    void success_deleteNoticeWhenRereplyDelete() {
+        //given
+        Long rereplyId = 324L;
+
+        //when
+        noticeService.deleteNoticeWhenRereplyDeleted(rereplyId);
+
+        //then
+        verify(noticeRepository, times(1))
+                .deleteAllByRereplyId(rereplyId);
     }
 }

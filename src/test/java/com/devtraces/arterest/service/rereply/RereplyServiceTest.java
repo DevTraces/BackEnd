@@ -307,6 +307,7 @@ class RereplyServiceTest {
         reply.getRereplyList().add(rereply);
 
         given(rereplyRepository.findById(anyLong())).willReturn(Optional.of(rereply));
+        doNothing().when(noticeService).deleteNoticeWhenRereplyDeleted(anyLong());
         doNothing().when(rereplyRepository).deleteById(anyLong());
 
         // when
