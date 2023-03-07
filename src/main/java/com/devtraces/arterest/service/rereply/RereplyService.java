@@ -85,8 +85,7 @@ public class RereplyService {
         rereply.updateContent(rereplyRequest.getContent());
         return RereplyResponse.from(rereplyRepository.save(rereply), feedId);
     }
-
-    @Async
+    
     @Transactional
     public void deleteRereply(Long userId, Long rereplyId) {
         Rereply rereply = rereplyRepository.findById(rereplyId).orElseThrow(
