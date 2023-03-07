@@ -35,36 +35,24 @@ public class OauthService {
         UserInfoFromKakaoDto userInfoFromKakaoDto =
                 getUserInfoFromKakao(accessTokenFromKakao);
 
+        assert userInfoFromKakaoDto != null;
         return kakaoSignUpOrSignIn(userInfoFromKakaoDto);
     }
 
     public TokenWithNicknameDto kakaoSignUpOrSignIn(UserInfoFromKakaoDto userInfoFromKakaoDto) {
 
         Optional<User> optionalUser =
-                userRepository.findByUsername(userInfoFromKakaoDto.getUsername());
+                userRepository.findByKakaoUserId(userInfoFromKakaoDto.getKakaoUserId());
 
-        // 사용자명 중복이고, EMAIL로 가입했으면 일반 회원가입한 회원이므로 예외처리
-        // 카카오에서 받은 nickname을 현재 서버에선 username으로 사용하고 있음
-        alreadySignUpUser(optionalUser);
-
-        // 사용자명 중복이고, KAKAO_TALK으로 가입했으면 카카오 소셜 로그인
-        if (optionalUser.isPresent() &&
-                optionalUser.get().getSignupType().equals(UserSignUpType.KAKAO_TALK)
-        ) {
-            return createTokenWithNicknameDto(optionalUser.get());
-        }
-
-        // 사용자명 중복이 아니고, kakaoUserId가 없는 사람만 회원가입 실행
-        long kakaoUserId = userInfoFromKakaoDto.getKakaoUserId();
-        if (!optionalUser.isPresent() &&
-                !userRepository.findByKakaoUserId(kakaoUserId).isPresent()
-        ) {
-            User savedUser = getSavedUser(userInfoFromKakaoDto, kakaoUserId);
+        // 카카오로 회원가입하지 않은 유저(이메일 유저 포함)는 회원가입 진행
+        if (!optionalUser.isPresent()) {
+            User savedUser = getSavedUser(userInfoFromKakaoDto);
 
             return createTokenWithNicknameDto(savedUser);
         }
 
-        return null;
+        // 카카오로 회원가입한 유저는 바로 로그인 진행
+        return createTokenWithNicknameDto(optionalUser.get());
     }
 
     // 카카오 서버로 요청하는 함수
@@ -85,15 +73,15 @@ public class OauthService {
             // 요청을 통해 얻은 JSON타입의 Response 메세지 읽어오기
             BufferedReader br =
                     new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String line = "";
-            String result = "";
+            String line;
+            StringBuilder result = new StringBuilder();
 
             while ((line = br.readLine()) != null) {
-                result += line;
+                result.append(line);
             }
 
             // 카카오 서버로부터 받은 사용자 정보를 담은 DTO
-            UserInfoFromKakaoDto userInfoFromKakaoDto = parseResponseToJson(result);
+            UserInfoFromKakaoDto userInfoFromKakaoDto = parseResponseToJson(result.toString());
 
             br.close();
 
@@ -141,7 +129,7 @@ public class OauthService {
     }
 
     private String generateRandomNickname() {
-        String randomNickname = "";
+        String randomNickname;
         do {
             randomNickname = ARTIST_NAME_LIST.get((int) (Math.random() * 10)) + "_"
                 + (int) (Math.random() * 10000000);
@@ -150,9 +138,9 @@ public class OauthService {
         return randomNickname;
     }
 
-    private User getSavedUser(UserInfoFromKakaoDto userInfoFromKakaoDto, long kakaoUserId) {
-        User savedUser = userRepository.save(User.builder()
-                .kakaoUserId(kakaoUserId)
+    private User getSavedUser(UserInfoFromKakaoDto userInfoFromKakaoDto) {
+        return userRepository.save(User.builder()
+                .kakaoUserId(userInfoFromKakaoDto.getKakaoUserId())
                 .email(userInfoFromKakaoDto.getEmail())
                 // 사용자가 비밀번호에 접근하지 못하고, 소셜 로그인에서 비밀번호는 의미가 없으므로
                 // 임의로 생성한 닉네임을 비밀번호로 설정
@@ -164,7 +152,6 @@ public class OauthService {
                 .userStatus(UserStatusType.ACTIVE)
                 .signupType(UserSignUpType.KAKAO_TALK)
                 .build());
-        return savedUser;
     }
 
     private TokenWithNicknameDto createTokenWithNicknameDto(User user) {
