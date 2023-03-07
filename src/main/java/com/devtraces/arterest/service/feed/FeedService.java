@@ -73,7 +73,6 @@ public class FeedService {
 
         if(hashtagList != null){
             for(String hashtagInputString : hashtagList){
-                log.info("hashtagInputString: " + hashtagInputString);
                 Hashtag hashtagEntity = hashtagRepository.findByHashtagString(hashtagInputString).orElse(
                     hashtagRepository.save(
                         Hashtag.builder()
