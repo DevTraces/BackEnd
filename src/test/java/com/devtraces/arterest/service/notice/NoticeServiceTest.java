@@ -942,4 +942,36 @@ class NoticeServiceTest {
         //then
         verify(noticeRepository, times(1)).deleteAll(any());
     }
+
+    @Test
+    void success_deleteNoticeWhenUserDeleted() {
+        //given
+        Long userId = 1L;
+        User user = User.builder().id(userId).build();
+        given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
+
+        //when
+        noticeService.deleteNoticeWhenUserDeleted(userId);
+
+        //then
+        verify(noticeRepository, times(1))
+                .deleteAllByUser(user);
+
+    }
+
+    @Test
+    void fail_deleteNoticeWhenUserDeleted_USER_NOT_FOUND() {
+        //given
+        Long userId = 1L;
+        given(userRepository.findById(anyLong())).willReturn(Optional.empty());
+
+        //when
+        BaseException exception = assertThrows(
+                BaseException.class,
+                () -> noticeService.deleteNoticeWhenUserDeleted(userId)
+        );
+
+        //then
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+    }
 }
