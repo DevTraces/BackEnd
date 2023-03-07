@@ -319,6 +319,8 @@ class ReplyServiceTest {
 
         given(replyRepository.findById(anyLong())).willReturn(Optional.of(reply));
         doNothing().when(rereplyRepository).deleteAllByIdIn(anyList());
+        doNothing().when(noticeService).deleteNoticeWhenRereplyDeleted(anyLong());
+        doNothing().when(noticeService).deleteNoticeWhenReplyDeleted(anyLong());
 
         // when
         replyService.deleteReply(1L, 1L);
@@ -388,6 +390,7 @@ class ReplyServiceTest {
         feed.getReplyList().add(reply);
 
         doNothing().when(replyRepository).deleteAllByIdIn(anyList());
+        doNothing().when(noticeService).deleteNoticeWhenReplyDeleted(anyLong());
 
         // when
         replyService.deleteAllFeedRelatedReply(feed);

@@ -36,7 +36,6 @@ import static com.devtraces.arterest.common.type.NoticeType.REPLY;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -897,5 +896,50 @@ class NoticeServiceTest {
 
         //then
         verify(noticeRepository, times(1)).delete(followNotice);
+    }
+
+    @Test
+    void success_deleteNoticeWhenRereplyDelete() {
+        //given
+        Long rereplyId = 324L;
+
+        //when
+        noticeService.deleteNoticeWhenRereplyDeleted(rereplyId);
+
+        //then
+        verify(noticeRepository, times(1))
+                .deleteAllByRereplyId(rereplyId);
+    }
+
+    @Test
+    void success_deleteNoticeWhenReplyDeleted() {
+        //given
+        Long replyId = 1L;
+
+        //when
+        noticeService.deleteNoticeWhenReplyDeleted(replyId);
+
+        //then
+        verify(noticeRepository, times(1))
+                .deleteAllByReplyId(replyId);
+    }
+
+    @Test
+    void succes_deleteNoticeWhenFeedDeleted() {
+        //given
+        Long feedId = 1L;
+
+        Feed feed = Feed.builder().id(feedId).build();
+        Notice notice = Notice.builder().feed(feed).build();
+        ArrayList<Notice> notices = new ArrayList<>();
+        notices.add(notice);
+
+        given(noticeRepository.findAllByFeedId(anyLong())).willReturn(notices);
+
+        //when
+        noticeService.deleteNoticeWhenFeedDeleted(feedId);
+
+        //then
+        verify(noticeRepository, times(1)).deleteAll(any());
     }
 }

@@ -219,6 +219,26 @@ public class NoticeService {
         }
     }
 
+    // 대댓글이 삭제되면 해당 대댓글의 알림을 가져올 때 에러가 발생
+    // 대댓글이 삭제될 때 대댓글 id를 가진 알림들 다 삭제
+    @Transactional
+    public void deleteNoticeWhenRereplyDeleted(Long rereplyId) {
+        noticeRepository.deleteAllByRereplyId(rereplyId);
+    }
+
+    @Transactional
+    public void deleteNoticeWhenReplyDeleted(Long replyId) {
+        noticeRepository.deleteAllByReplyId(replyId);
+    }
+
+    @Transactional
+    public void deleteNoticeWhenFeedDeleted(Long feedId) {
+        List<Notice> notices = noticeRepository.findAllByFeedId(feedId);
+        if (notices.size() > 0) {
+            noticeRepository.deleteAll(notices);
+        }
+    }
+
     private User getUser(Long userId) {
         return userRepository.findById(userId).orElseThrow(
                 () -> BaseException.USER_NOT_FOUND);

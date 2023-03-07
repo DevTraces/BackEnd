@@ -1,8 +1,7 @@
 package com.devtraces.arterest.service.feed.application;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -17,6 +16,7 @@ import com.devtraces.arterest.service.feed.FeedDeleteService;
 import com.devtraces.arterest.service.feed.FeedReadService;
 import com.devtraces.arterest.service.hashtag.HashtagService;
 import com.devtraces.arterest.service.like.LikeService;
+import com.devtraces.arterest.service.notice.NoticeService;
 import com.devtraces.arterest.service.reply.ReplyService;
 import com.devtraces.arterest.service.rereply.RereplyService;
 import com.devtraces.arterest.service.s3.S3Service;
@@ -51,6 +51,8 @@ class FeedDeleteApplicationTest {
     private RereplyService rereplyService;
     @Mock
     private ReplyService replyService;
+    @Mock
+    private NoticeService noticeService;
     @InjectMocks
     private FeedDeleteApplication feedDeleteApplication;
 
@@ -75,6 +77,7 @@ class FeedDeleteApplicationTest {
         doNothing().when(bookmarkService).deleteAllFeedRelatedBookmark(1L);
         doNothing().when(rereplyService).deleteAllFeedRelatedRereply(any());
         doNothing().when(replyService).deleteAllFeedRelatedReply(any());
+        doNothing().when(noticeService).deleteNoticeWhenFeedDeleted(anyLong());
         doNothing().when(feedDeleteService).deleteFeedEntity(1L);
 
         // when
@@ -88,6 +91,7 @@ class FeedDeleteApplicationTest {
         verify(bookmarkService, times(1)).deleteAllFeedRelatedBookmark(1L);
         verify(rereplyService, times(1)).deleteAllFeedRelatedRereply(any());
         verify(replyService, times(1)).deleteAllFeedRelatedReply(any());
+        verify(noticeService, times(1)).deleteNoticeWhenFeedDeleted(anyLong());
         verify(feedDeleteService, times(1)).deleteFeedEntity(1L);
     }
 

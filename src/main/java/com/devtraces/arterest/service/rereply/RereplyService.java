@@ -99,6 +99,9 @@ public class RereplyService {
         // 삭제되는 대댓글이 달려 있는 댓글의 개수를 1개 차감한다.
         rereply.getReply().minusOneRereply();
 
+        // 대댓글 삭제될 때 관련 알림도 삭제하기
+        noticeService.deleteNoticeWhenRereplyDeleted(rereplyId);
+
         rereplyRepository.deleteById(rereplyId);
     }
 
@@ -106,6 +109,10 @@ public class RereplyService {
     @Transactional
     public void deleteAllFeedRelatedRereply(Feed feed){
         for(Reply reply : feed.getReplyList()){
+            for (Rereply rereply : reply.getRereplyList()) {
+                noticeService.deleteNoticeWhenRereplyDeleted(rereply.getId());
+            }
+
             if(reply.getRereplyList().size() > 0){
                 rereplyRepository.deleteAllByIdIn(
                     reply.getRereplyList().stream().map(Rereply::getId)

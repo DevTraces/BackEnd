@@ -7,6 +7,7 @@ import com.devtraces.arterest.service.feed.FeedDeleteService;
 import com.devtraces.arterest.service.feed.FeedReadService;
 import com.devtraces.arterest.service.hashtag.HashtagService;
 import com.devtraces.arterest.service.like.LikeService;
+import com.devtraces.arterest.service.notice.NoticeService;
 import com.devtraces.arterest.service.reply.ReplyService;
 import com.devtraces.arterest.service.rereply.RereplyService;
 import com.devtraces.arterest.service.s3.S3Service;
@@ -27,6 +28,7 @@ public class FeedDeleteApplication {
     private final BookmarkService bookmarkService;
     private final RereplyService rereplyService;
     private final ReplyService replyService;
+    private final NoticeService noticeService;
 
     // TODO 스프링 @Async를 사용해서 비동기 멀티 스레딩으로 처리하면 응답지연시간 최소화 가능.
     @Transactional
@@ -59,8 +61,10 @@ public class FeedDeleteApplication {
         // 댓글 삭제
         replyService.deleteAllFeedRelatedReply(deleteTargetFeed);
 
-        // 마지막으로 피드 삭제.
+        // 삭제하는 피드와 관련된 알림 삭제
+        noticeService.deleteNoticeWhenFeedDeleted(feedId);
+
+        // 마지막으로 피드 삭제
         feedDeleteService.deleteFeedEntity(feedId);
     }
-
 }
