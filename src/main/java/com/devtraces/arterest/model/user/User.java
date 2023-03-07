@@ -48,9 +48,9 @@ public class User extends BaseEntity {
     private Long id;
 
     private Long kakaoUserId;
-    @Column(name = "username")
+    @Column(name = "username", length = 100)
     private String username;
-    @Column(name = "nickname", unique = true)
+    @Column(name = "nickname", length = 100, unique = true)
     private String nickname;
 
     @Column(unique = true)

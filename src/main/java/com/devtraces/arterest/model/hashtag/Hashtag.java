@@ -26,7 +26,9 @@ import org.hibernate.envers.AuditOverride;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AuditOverride(forClass = BaseEntity.class)
-@Table(name = "hashtag")
+@Table(name = "hashtag", indexes = {
+	@Index(name = "hashtag_string_index", columnList = "hashtag_string")
+})
 @Entity
 public class Hashtag extends BaseEntity {
 
