@@ -79,7 +79,6 @@ public class FeedService {
                 Optional<Hashtag> optionalHashtag = hashtagRepository.findByHashtagString(hashtagInputString);
                 // 존재하지 않는 새로운 해시태그다.
                 if(!optionalHashtag.isPresent()){
-                    System.out.println("새로운 해시태그!!");
                     Hashtag newHashtag = Hashtag.builder()
                         .hashtagString(hashtagInputString)
                         .build();
