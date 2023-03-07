@@ -12,7 +12,6 @@ import com.devtraces.arterest.model.bookmark.BookmarkRepository;
 import com.devtraces.arterest.model.feed.Feed;
 import com.devtraces.arterest.model.follow.FollowRepository;
 import com.devtraces.arterest.model.like.LikeRepository;
-import com.devtraces.arterest.model.notice.NoticeRepository;
 import com.devtraces.arterest.model.reply.Reply;
 import com.devtraces.arterest.model.reply.ReplyRepository;
 import com.devtraces.arterest.model.rereply.Rereply;
@@ -23,6 +22,7 @@ import com.devtraces.arterest.service.auth.util.AuthRedisUtil;
 import com.devtraces.arterest.service.auth.util.TokenRedisUtil;
 import com.devtraces.arterest.service.feed.application.FeedDeleteApplication;
 import com.devtraces.arterest.service.mail.MailService;
+import com.devtraces.arterest.service.notice.NoticeService;
 import com.devtraces.arterest.service.reply.ReplyService;
 import com.devtraces.arterest.service.rereply.RereplyService;
 import com.devtraces.arterest.service.s3.S3Service;
@@ -57,7 +57,7 @@ public class AuthService {
 	private final UserRepository userRepository;
 	private final FeedDeleteApplication feedDeleteApplication;
 	private final FollowRepository followRepository;
-	private final NoticeRepository noticeRepository;
+	private final NoticeService noticeService;
 	private final BookmarkRepository bookmarkRepository;
 	private final LikeRepository likeRepository;
 	private final ReplyRepository replyRepository;
@@ -234,6 +234,9 @@ public class AuthService {
 				);
 			}
 		}
+
+		// 유저와 관련된 알림 삭제
+		noticeService.deleteNoticeWhenUserDeleted(user.getId());
 
 		//유저 삭제
 		userRepository.deleteById(userId);
