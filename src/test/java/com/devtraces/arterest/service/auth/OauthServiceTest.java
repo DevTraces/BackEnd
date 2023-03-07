@@ -82,8 +82,6 @@ class OauthServiceTest {
                 )
                 .build();
 
-        given(userRepository.findByUsername(anyString()))
-                .willReturn(Optional.empty());
         given(userRepository.findByKakaoUserId(anyLong()))
                 .willReturn(Optional.empty());
         given(passwordEncoder.encode(anyString())).willReturn(encodedPassword);
@@ -146,7 +144,7 @@ class OauthServiceTest {
             )
                 .build();
 
-        given(userRepository.findByUsername(anyString()))
+        given(userRepository.findByKakaoUserId(anyLong()))
                 .willReturn(Optional.of(user));
         given(jwtProvider.generateAccessTokenAndRefreshToken(user.getId()))
                 .willReturn(tokenDto);
@@ -159,41 +157,5 @@ class OauthServiceTest {
         assertEquals(tokenDto.getAccessTokenCookie().getValue(), response.getAcceesTokenCookie().getValue());
         assertEquals(tokenDto.getRefreshTokenCookie().getValue(), response.getRefreshTokenCookie().getValue());
         assertEquals(user.getNickname(), response.getNickname());
-    }
-
-    @Test
-    @DisplayName("카카오 소셜 로그인 실패 - 일반 회원가입으로 가입한 유저")
-    void fail_kakaoSignUpOrSignIn_ALREADY_EXIST_USER() {
-        //given
-        UserInfoFromKakaoDto dto = UserInfoFromKakaoDto.builder()
-                .kakaoUserId(320482824L)
-                .email("example@abc.com")
-                .username("username")
-                .nickname("randomNickname")
-                .profileImageUrl("profileImageUrl")
-                .description("description")
-                .build();
-
-        User user = User.builder()
-                .id(1L)
-                .email(dto.getEmail())
-                .username(dto.getUsername())
-                .nickname(dto.getNickname())
-                .profileImageUrl(dto.getProfileImageUrl())
-                .description(dto.getDescription())
-                .userStatus(UserStatusType.ACTIVE)
-                .signupType(UserSignUpType.EMAIL)
-                .build();
-
-        given(userRepository.findByUsername(anyString())).willReturn(Optional.of(user));
-
-        //when
-        BaseException exception = assertThrows(
-                BaseException.class,
-                () -> oauthService.kakaoSignUpOrSignIn(dto)
-        );
-
-        //then
-        assertEquals(ErrorCode.ALREADY_EXIST_USER, exception.getErrorCode());
     }
 }
