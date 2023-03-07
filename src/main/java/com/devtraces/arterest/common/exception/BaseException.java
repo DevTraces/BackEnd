@@ -17,14 +17,14 @@ public class BaseException extends RuntimeException {
 	public static final BaseException WRONG_EMAIL_OR_PASSWORD = new BaseException(ErrorCode.WRONG_EMAIL_OR_PASSWORD);
 	public static final BaseException WRONG_BEFORE_PASSWORD = new BaseException(ErrorCode.WRONG_BEFORE_PASSWORD);
 	public static final BaseException NOT_EXPIRED_ACCESS_TOKEN = new BaseException(ErrorCode.NOT_EXPIRED_ACCESS_TOKEN);
-  public static final BaseException INVALID_IMAGE_EXTENSION = new BaseException(ErrorCode.INVALID_IMAGE_EXTENSION);
+  	public static final BaseException INVALID_IMAGE_EXTENSION = new BaseException(ErrorCode.INVALID_IMAGE_EXTENSION);
 	public static final BaseException INVALID_TOKEN = new BaseException(ErrorCode.INVALID_TOKEN);
 	public static final BaseException FORBIDDEN = new BaseException(ErrorCode.FORBIDDEN);
 	public static final BaseException EXPIRED_OR_PREVIOUS_REFRESH_TOKEN = new BaseException(ErrorCode.EXPIRED_OR_PREVIOUS_REFRESH_TOKEN);
 	public static final BaseException USER_NOT_FOUND = new BaseException(ErrorCode.USER_NOT_FOUND);
 	public static final BaseException FEED_NOT_FOUND = new BaseException(ErrorCode.FEED_NOT_FOUND);
 	public static final BaseException NOTICE_NOT_FOUND = new BaseException(ErrorCode.NOTICE_NOT_FOUND);
-  public static final BaseException FAILED_FILE_UPLOAD = new BaseException(ErrorCode.FAILED_FILE_UPLOAD);
+  	public static final BaseException FAILED_FILE_UPLOAD = new BaseException(ErrorCode.FAILED_FILE_UPLOAD);
 	public static final BaseException FAILED_CACHE_GET_OPERATION = new BaseException(ErrorCode.FAILED_CACHE_GET_OPERATION);
 	public static final BaseException HASHTAG_LIMIT_EXCEED = new BaseException(ErrorCode.HASHTAG_LIMIT_EXCEED);
 	public static final BaseException IMAGE_FILE_COUNT_LIMIT_EXCEED = new BaseException(ErrorCode.IMAGE_FILE_COUNT_LIMIT_EXCEED);
@@ -36,7 +36,7 @@ public class BaseException extends RuntimeException {
 	public static final BaseException FOLLOWING_SELF_NOT_ALLOWED = new BaseException(ErrorCode.FOLLOWING_SELF_NOT_ALLOWED);
 	public static final BaseException DUPLICATED_FOLLOW_OR_LIKE = new BaseException(ErrorCode.DUPLICATED_FOLLOW_OR_LIKE);
 	public static final BaseException LIKE_NUMBER_BELLOW_ZERO = new BaseException(ErrorCode.LIKE_NUMBER_BELLOW_ZERO);
-  public static final BaseException ALREADY_EXIST_USER = new BaseException(ErrorCode.ALREADY_EXIST_USER);
+  	public static final BaseException ALREADY_EXIST_USER = new BaseException(ErrorCode.ALREADY_EXIST_USER);
 	public static final BaseException UPDATE_PASSWORD_NOT_ALLOWED_FOR_KAKAO_USER = new BaseException(ErrorCode.UPDATE_PASSWORD_NOT_ALLOWED_FOR_KAKAO_USER);
 
 

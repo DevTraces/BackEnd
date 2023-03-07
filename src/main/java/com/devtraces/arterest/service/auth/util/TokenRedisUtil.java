@@ -2,6 +2,7 @@ package com.devtraces.arterest.service.auth.util;
 
 import static com.devtraces.arterest.common.jwt.JwtProvider.REFRESH_TOKEN_SUBJECT_PREFIX;
 
+import com.devtraces.arterest.common.exception.BaseException;
 import java.time.Duration;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,8 @@ public class TokenRedisUtil {
 	public boolean hasSameRefreshToken(long userId, String refreshToken) {
 		ValueOperations<String, String> values = redisTemplate.opsForValue();
 		String encodingRefreshToken = values.get(REFRESH_TOKEN_SUBJECT_PREFIX + userId);
+		if(encodingRefreshToken == null) throw BaseException.INVALID_TOKEN;
+
 		return passwordEncoder.matches(refreshToken, encodingRefreshToken);
 	}
 
