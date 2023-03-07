@@ -92,7 +92,6 @@ public class ReplyService {
         return ReplyResponse.from(reply);
     }
 
-    @Async
     @Transactional
     public void deleteReply(Long userId, Long replyId) {
         Reply reply = replyRepository.findById(replyId).orElseThrow(

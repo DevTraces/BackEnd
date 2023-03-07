@@ -29,6 +29,7 @@ import com.devtraces.arterest.common.jwt.dto.TokenDto;
 import com.devtraces.arterest.service.auth.util.AuthRedisUtil;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
+import com.devtraces.arterest.service.notice.NoticeService;
 import com.devtraces.arterest.service.reply.ReplyService;
 import com.devtraces.arterest.service.rereply.RereplyService;
 import java.util.ArrayList;
@@ -68,8 +69,6 @@ class AuthServiceTest {
 	@Mock
 	private S3Service s3Service;
 	@Mock
-	private NoticeRepository noticeRepository;
-	@Mock
 	private FollowRepository followRepository;
 	@Mock
 	private BookmarkRepository bookmarkRepository;
@@ -83,6 +82,8 @@ class AuthServiceTest {
 	private FeedDeleteApplication feedDeleteApplication;
 	@Mock
 	private RedisService redisService;
+	@Mock
+	private NoticeService noticeService;
 
 	@InjectMocks
 	private AuthService authService;
@@ -419,8 +420,6 @@ class AuthServiceTest {
 			.build();
 		given(userRepository.findById(anyLong()))
 			.willReturn(Optional.ofNullable(user));
-		willDoNothing().given(noticeRepository).deleteAllByNoticeOwnerId(anyLong());
-		willDoNothing().given(noticeRepository).deleteAllByUser(any());
 		willDoNothing().given(followRepository).deleteAllByFollowingId(anyLong());
 		willDoNothing().given(followRepository).deleteAllByUser(any());
 		willDoNothing().given(feedDeleteApplication).deleteFeed(anyLong(),any());
@@ -435,6 +434,8 @@ class AuthServiceTest {
 			.willReturn(Optional.ofNullable(Rereply.builder().id(4L).build()));
 		willDoNothing().given(rereplyService).deleteRereply(anyLong(),any());
 
+		willDoNothing().given(noticeService).deleteNoticeWhenUserDeleted(anyLong());
+
 		willDoNothing().given(userRepository).deleteById(any());
 
 		// when
@@ -442,8 +443,6 @@ class AuthServiceTest {
 
 		// then
 		verify(userRepository, times(1)).findById(1L);
-		verify(noticeRepository, times(1)).deleteAllByNoticeOwnerId(1L);
-		verify(noticeRepository, times(1)).deleteAllByUser(user);
 		verify(followRepository, times(1)).deleteAllByFollowingId(1L);
 		verify(followRepository, times(1)).deleteAllByUser(user);
 		verify(feedDeleteApplication, times(1)).deleteFeed(1L, 2L);
@@ -453,6 +452,7 @@ class AuthServiceTest {
 		verify(replyService, times(1)).deleteReply(1L, 3L);
 		verify(rereplyRepository, times(1)).findById(4L);
 		verify(rereplyService, times(1)).deleteRereply(1L, 4L);
+		verify(noticeService, times(1)).deleteNoticeWhenUserDeleted(1L);
 		verify(userRepository, times(1)).deleteById(1L);
 	}
 
