@@ -21,11 +21,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class FeedService {
 
@@ -71,6 +73,7 @@ public class FeedService {
 
         if(hashtagList != null){
             for(String hashtagInputString : hashtagList){
+                log.info("hashtagInputString: " + hashtagInputString);
                 Hashtag hashtagEntity = hashtagRepository.findByHashtagString(hashtagInputString).orElse(
                     hashtagRepository.save(
                         Hashtag.builder()
