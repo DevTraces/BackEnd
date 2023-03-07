@@ -13,6 +13,7 @@ import com.devtraces.arterest.service.rereply.RereplyService;
 import com.devtraces.arterest.service.s3.S3Service;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +31,7 @@ public class FeedDeleteApplication {
     private final ReplyService replyService;
     private final NoticeService noticeService;
 
-    // TODO 스프링 @Async를 사용해서 비동기 멀티 스레딩으로 처리하면 응답지연시간 최소화 가능.
+    @Async
     @Transactional
     public void deleteFeed(Long userId, Long feedId){
         Feed deleteTargetFeed = feedReadService.getOneFeedEntity(feedId);

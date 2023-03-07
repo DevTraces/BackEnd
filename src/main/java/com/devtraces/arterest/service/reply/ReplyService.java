@@ -126,7 +126,6 @@ public class ReplyService {
         replyRepository.deleteById(replyId);
     }
 
-    @Async
     @Transactional
     public void deleteAllFeedRelatedReply(Feed feed){
         for (Reply reply : feed.getReplyList()) {
