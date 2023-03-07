@@ -69,23 +69,36 @@ public class FeedService {
         // FeedHashtagMap에 저장한다.
         // FeedHashtagMap 엔티티를 빌드하기 위해서는 Feed 엔티티와 Hashtag 엔티티 모두가 필요하다.
         // 해시태그의 앞뒤 공백을 제거하고 해시태그가 중복인 경우 1개로 취급한다.
-        hashtagList = hashtagList.stream().map(String::trim).collect(Collectors.toSet()).stream().collect(Collectors.toList());
+        if(hashtagList != null){
+            hashtagList = hashtagList.stream().map(String::trim).collect(Collectors.toSet())
+                .stream().collect(Collectors.toList());
+        }
 
         if(hashtagList != null){
             for(String hashtagInputString : hashtagList){
-                Hashtag hashtagEntity = hashtagRepository.findByHashtagString(hashtagInputString).orElse(
-                    hashtagRepository.save(
-                        Hashtag.builder()
-                            .hashtagString(hashtagInputString)
+                Optional<Hashtag> optionalHashtag = hashtagRepository.findByHashtagString(hashtagInputString);
+                // 존재하지 않는 새로운 해시태그다.
+                if(!optionalHashtag.isPresent()){
+                    Hashtag newHashtag = Hashtag.builder()
+                        .hashtagString(hashtagInputString)
+                        .build();
+                    hashtagRepository.save(newHashtag);
+                    feedHashtagMapRepository.save(
+                        FeedHashtagMap.builder()
+                            .feed(newFeed)
+                            .hashtag(newHashtag)
                             .build()
-                    )
-                );
-                feedHashtagMapRepository.save(
-                    FeedHashtagMap.builder()
-                        .feed(newFeed)
-                        .hashtag(hashtagEntity)
-                        .build()
-                );
+                    );
+                } else {
+                    // 이미 존재하는 해시태그다. 해시태그리포지토리는 더 볼 필요 없고,
+                    // 피드해시태그맵 리포지토리만 초기화 해주면 된다.
+                    feedHashtagMapRepository.save(
+                        FeedHashtagMap.builder()
+                            .feed(newFeed)
+                            .hashtag(optionalHashtag.get())
+                            .build()
+                    );
+                }
             }
         }
 
@@ -164,7 +177,10 @@ public class FeedService {
 
         // 그 후 입력 받은 값에 따라서 새롭게 저장한다.
         // 해시태그의 앞뒤 공백을 제거하고 해시태그가 중복인 경우 1개로 취급한다.
-        hashtagList = hashtagList.stream().map(String::trim).collect(Collectors.toSet()).stream().collect(Collectors.toList());
+        if(hashtagList != null) {
+            hashtagList = hashtagList.stream().map(String::trim).collect(Collectors.toSet())
+                .stream().collect(Collectors.toList());
+        }
 
         if(hashtagList != null){
             for(String hashtagInputString : hashtagList){
@@ -219,6 +235,8 @@ public class FeedService {
                 builder.append(",");
             }
             feed.setHashtagStringValues(builder.toString());
+        } else {
+            feed.setHashtagStringValues(null);
         }
     }
 }
