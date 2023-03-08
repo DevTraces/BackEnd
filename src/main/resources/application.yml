@@ -6,6 +6,10 @@ server:
       force: true
   tomcat:
     keep-alive-timeout: 100
+    threads:
+      max: 200
+      min-spare: 50
+    accept-count: 100
 
 spring:
   profiles:
