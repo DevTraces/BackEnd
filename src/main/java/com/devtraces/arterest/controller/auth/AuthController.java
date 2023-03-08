@@ -1,7 +1,9 @@
 package com.devtraces.arterest.controller.auth;
 
 import static com.devtraces.arterest.common.jwt.JwtProvider.ACCESS_TOKEN_COOKIE_NAME;
+import static com.devtraces.arterest.common.jwt.JwtProvider.REFRESH_TOKEN_COOKIE_NAME;
 
+import com.devtraces.arterest.common.jwt.JwtProvider;
 import com.devtraces.arterest.common.response.ApiSuccessResponse;
 import com.devtraces.arterest.controller.auth.dto.TokenWithNicknameDto;
 import com.devtraces.arterest.controller.auth.dto.request.MailAuthKeyCheckRequest;
@@ -21,6 +23,7 @@ import javax.validation.constraints.NotNull;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -37,6 +40,7 @@ import reactor.util.annotation.Nullable;
 @RequestMapping("/api/auth")
 public class AuthController {
 	private final AuthService authService;
+	private final JwtProvider jwtProvider;
 
 	@PostMapping("sign-up")
 	public ApiSuccessResponse<UserRegistrationResponse> signUp(
@@ -111,9 +115,18 @@ public class AuthController {
 
 	@PostMapping("/withdrawal")
 	public ApiSuccessResponse<?> deleteUser(
-		@AuthenticationPrincipal long userId
+		@AuthenticationPrincipal long userId,
+		@CookieValue(ACCESS_TOKEN_COOKIE_NAME) String accessToken,
+		@CookieValue(REFRESH_TOKEN_COOKIE_NAME) String refreshToken,
+		HttpServletResponse response
 	) {
 		authService.deleteUser(userId);
+		ResponseCookie acceesTokenCookie = jwtProvider.deleteCookie(accessToken, ACCESS_TOKEN_COOKIE_NAME);
+		ResponseCookie refreshTokenCookie = jwtProvider.deleteCookie(refreshToken, REFRESH_TOKEN_COOKIE_NAME);
+
+		response.addHeader(HttpHeaders.SET_COOKIE, acceesTokenCookie.toString());
+		response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+
 		return ApiSuccessResponse.NO_DATA_RESPONSE;
 	}
 }

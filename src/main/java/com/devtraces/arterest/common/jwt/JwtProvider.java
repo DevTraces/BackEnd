@@ -92,10 +92,24 @@ public class JwtProvider {
 		return cookie;
 	}
 
+	public ResponseCookie deleteCookie(String token, String name) {
+
+		ResponseCookie cookie = ResponseCookie.from(name, token)
+			.httpOnly(true)
+			.path("/")
+			.maxAge(0)
+			.secure(true)
+			.sameSite(SameSite.NONE.attributeValue())
+			.build();
+
+		return cookie;
+	}
+
 	// JWT 토큰에서 인증 정보 조회
 	public Authentication getAuthentication(String accessToken) {
-		UserDetails userDetails = userDetailsService.loadUserByUsername(this.getUserId(accessToken));
-		return new UsernamePasswordAuthenticationToken(Long.parseLong(this.getUserId(accessToken)), "", userDetails.getAuthorities());
+		String userId = this.getUserId(accessToken);
+		UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
+		return new UsernamePasswordAuthenticationToken(Long.parseLong(userId), "", userDetails.getAuthorities());
 	}
 
 	// JWT 토큰에서 회원 구별 정보 추출
