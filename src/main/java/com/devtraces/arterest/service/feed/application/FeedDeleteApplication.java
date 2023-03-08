@@ -30,8 +30,7 @@ public class FeedDeleteApplication {
     private final RereplyService rereplyService;
     private final ReplyService replyService;
     private final NoticeService noticeService;
-
-    @Async
+    
     @Transactional
     public void deleteFeed(Long userId, Long feedId){
         Feed deleteTargetFeed = feedReadService.getOneFeedEntity(feedId);
