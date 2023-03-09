@@ -8,7 +8,7 @@ server:
     keep-alive-timeout: 100
     threads:
       max: 200
-      min-spare: 50
+      min-spare: 10
     accept-count: 100
 
 spring:
