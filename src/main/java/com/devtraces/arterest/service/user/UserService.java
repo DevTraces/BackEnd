@@ -3,6 +3,7 @@ package com.devtraces.arterest.service.user;
 import com.devtraces.arterest.controller.user.dto.response.*;
 import com.devtraces.arterest.model.follow.FollowRepository;
 import com.devtraces.arterest.service.mail.MailService;
+import com.devtraces.arterest.service.redis.RedisService;
 import com.devtraces.arterest.service.s3.S3Service;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.exception.ErrorCode;

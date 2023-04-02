@@ -1,4 +1,4 @@
-package com.devtraces.arterest.service.user;
+package com.devtraces.arterest.service.redis;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
