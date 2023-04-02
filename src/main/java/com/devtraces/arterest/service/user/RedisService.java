@@ -34,6 +34,6 @@ public class RedisService {
     }
 
     public boolean existKey(String key) {
-        return stringRedisTemplate.hasKey(key);
+        return Boolean.TRUE.equals(stringRedisTemplate.hasKey(key));
     }
 }

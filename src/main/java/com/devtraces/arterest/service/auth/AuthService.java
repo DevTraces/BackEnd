@@ -18,8 +18,6 @@ import com.devtraces.arterest.model.rereply.Rereply;
 import com.devtraces.arterest.model.rereply.RereplyRepository;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
-import com.devtraces.arterest.service.auth.util.AuthRedisUtil;
-import com.devtraces.arterest.service.auth.util.TokenRedisUtil;
 import com.devtraces.arterest.service.feed.application.FeedDeleteApplication;
 import com.devtraces.arterest.service.mail.MailService;
 import com.devtraces.arterest.service.notice.NoticeService;
@@ -27,7 +25,6 @@ import com.devtraces.arterest.service.reply.ReplyService;
 import com.devtraces.arterest.service.rereply.RereplyService;
 import com.devtraces.arterest.service.s3.S3Service;
 
-import java.time.Duration;
 import java.util.Date;
 import java.util.Optional;
 import java.util.Random;
@@ -35,7 +32,6 @@ import java.util.Random;
 import com.devtraces.arterest.service.user.RedisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,7 +46,10 @@ public class AuthService {
 
 	private static final int AUTH_KEY_DIGIT = 6;
 	private static final String SIGN_UP_KEY = "SIGN_UP_KEY:";
+	private static final String AUTH_KEY_PREFIX = "AK:";
 	private static final String ACCESS_TOKEN_BLACK_LIST_PREFIX = "AT-BL:";
+	private static final String AUTH_COMPLETED_PREFIX = "AC:";
+	private static final int AUTH_KEY_VALID_MINUTE = 10;
 	private static final int SIGN_UP_KEY_VALID_MINUTE = 60 * 3; // 3분
 	private final PasswordEncoder passwordEncoder;
 	private final JwtProvider jwtProvider;
@@ -58,7 +57,6 @@ public class AuthService {
 	private final MailService mailService;
 	private final ReplyService replyService;
 	private final RereplyService rereplyService;
-	private final AuthRedisUtil authRedisUtil;
 	private final UserRepository userRepository;
 	private final FeedDeleteApplication feedDeleteApplication;
 	private final FollowRepository followRepository;
@@ -106,19 +104,6 @@ public class AuthService {
 		return UserRegistrationResponse.from(savedUser, true);
 	}
 
-	private void validateRegistration(String email, String nickname) {
-		if (authRedisUtil.notExistsAuthCompletedValue(email)) {
-			throw BaseException.NOT_AUTHENTICATION_YET;
-		}
-
-		if (userRepository.existsByEmail(email)) {
-			throw BaseException.ALREADY_EXIST_EMAIL;
-		}
-		if (userRepository.existsByNickname(nickname)) {
-			throw BaseException.ALREADY_EXIST_NICKNAME;
-		}
-	}
-
 	@Transactional(readOnly = true)
 	public void sendMailWithAuthKey(String email) {
 		if (userRepository.existsByEmail(email)) {
@@ -126,7 +111,11 @@ public class AuthService {
 		}
 		String authKey = generateAuthKey();
 		sendAuthenticationEmail(email, authKey);
-		authRedisUtil.setAuthKeyValue(email, authKey);
+		redisService.setDataExpire(
+				AUTH_KEY_PREFIX + email,
+				authKey,
+				AUTH_KEY_VALID_MINUTE
+		);
 	}
 
 	public String generateAuthKey() {
@@ -139,25 +128,20 @@ public class AuthService {
 		return resultNumber.toString();
 	}
 
-	private void sendAuthenticationEmail(String email, String authKey) {
-		String subject = "ArtBubble 인증 코드";
-		String text = "<h2>이메일 인증코드</h2>\n"
-			+ "<p>ArtBubble에 가입하신 것을 환영합니다.<br>아래의 인증코드를 입력하시면 가입이 정상적으로 완료됩니다.</p>\n"
-			+ "<p style=\"background: #EFEFEF; font-size: 30px;padding: 10px\">" + authKey + "</p>";
-		mailService.sendMail(email, subject, text);
-	}
-
 	public MailAuthKeyCheckResponse checkAuthKey(String email, String authKey) {
 		if (userRepository.existsByEmail(email)) {
 			throw BaseException.ALREADY_EXIST_EMAIL;
 		}
-		String authKeyInRedis = authRedisUtil.getAuthKeyValue(email);
+		String authKeyInRedis =
+				redisService.getData(AUTH_KEY_PREFIX + email);
 		if (!authKey.equals(authKeyInRedis)) {
 			return MailAuthKeyCheckResponse.from(null, false);
 		}
 		// 인증 완료했으므로 Redis 정보 변경
-		authRedisUtil.deleteAuthKeyValue(email);
-		authRedisUtil.setAuthCompletedValue(email);
+		redisService.deleteData(AUTH_KEY_PREFIX + email);
+
+		// 인증 완료한 이메일을 redis에 저장
+		redisService.setData(AUTH_COMPLETED_PREFIX + email, "O");
 
 		String signUpKey = generateRandomSignUpKey();
 		redisService.setDataExpire(
@@ -178,13 +162,6 @@ public class AuthService {
 
 		return TokenWithNicknameDto.from(user.getNickname(), tokenDto);
 	}
-
-	private void validateLogin(User user, String passwordInput) {
-		if (!passwordEncoder.matches(passwordInput, user.getPassword())) {
-			throw BaseException.WRONG_EMAIL_OR_PASSWORD;
-		}
-	}
-
 	@Transactional
 	public void signOut(long userId, String accessToken) {
 		redisService.deleteData(REFRESH_TOKEN_SUBJECT_PREFIX + userId);
@@ -271,5 +248,31 @@ public class AuthService {
 		} while (redisService.existKey(randomSignUpPasswordKey));
 
 		return randomSignUpPasswordKey;
+	}
+
+	private void sendAuthenticationEmail(String email, String authKey) {
+		String subject = "ArtBubble 인증 코드";
+		String text = "<h2>이메일 인증코드</h2>\n"
+				+ "<p>ArtBubble에 가입하신 것을 환영합니다.<br>아래의 인증코드를 입력하시면 가입이 정상적으로 완료됩니다.</p>\n"
+				+ "<p style=\"background: #EFEFEF; font-size: 30px;padding: 10px\">" + authKey + "</p>";
+		mailService.sendMail(email, subject, text);
+	}
+
+	private void validateRegistration(String email, String nickname) {
+		if (redisService.getData(AUTH_COMPLETED_PREFIX + email) == null) {
+			throw BaseException.NOT_AUTHENTICATION_YET;
+		}
+		if (userRepository.existsByEmail(email)) {
+			throw BaseException.ALREADY_EXIST_EMAIL;
+		}
+		if (userRepository.existsByNickname(nickname)) {
+			throw BaseException.ALREADY_EXIST_NICKNAME;
+		}
+	}
+
+	private void validateLogin(User user, String passwordInput) {
+		if (!passwordEncoder.matches(passwordInput, user.getPassword())) {
+			throw BaseException.WRONG_EMAIL_OR_PASSWORD;
+		}
 	}
 }
