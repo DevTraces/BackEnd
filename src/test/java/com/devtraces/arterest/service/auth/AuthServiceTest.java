@@ -1,4 +1,4 @@
-package com.devtraces.arterest.service.user;
+package com.devtraces.arterest.service.auth;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.devtraces.arterest.service.s3.S3Service;
+import com.devtraces.arterest.service.user.RedisService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
