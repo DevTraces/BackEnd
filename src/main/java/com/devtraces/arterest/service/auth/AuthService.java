@@ -49,7 +49,7 @@ public class AuthService {
 	private static final String AUTH_KEY_PREFIX = "AK:";
 	private static final String ACCESS_TOKEN_BLACK_LIST_PREFIX = "AT-BL:";
 	private static final String AUTH_COMPLETED_PREFIX = "AC:";
-	private static final int AUTH_KEY_VALID_MINUTE = 10;
+	private static final int AUTH_KEY_VALID_MINUTE = 60 * 3;
 	private static final int SIGN_UP_KEY_VALID_MINUTE = 60 * 3; // 3분
 	private final PasswordEncoder passwordEncoder;
 	private final JwtProvider jwtProvider;
