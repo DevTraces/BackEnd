@@ -26,6 +26,8 @@ import com.devtraces.arterest.service.notice.NoticeService;
 import com.devtraces.arterest.service.reply.ReplyService;
 import com.devtraces.arterest.service.rereply.RereplyService;
 import com.devtraces.arterest.service.s3.S3Service;
+
+import java.time.Duration;
 import java.util.Date;
 import java.util.Optional;
 import java.util.Random;
@@ -33,10 +35,13 @@ import java.util.Random;
 import com.devtraces.arterest.service.user.RedisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import static com.devtraces.arterest.common.jwt.JwtProvider.REFRESH_TOKEN_SUBJECT_PREFIX;
 
 @RequiredArgsConstructor
 @Service
@@ -45,6 +50,7 @@ public class AuthService {
 
 	private static final int AUTH_KEY_DIGIT = 6;
 	private static final String SIGN_UP_KEY = "SIGN_UP_KEY:";
+	private static final String ACCESS_TOKEN_BLACK_LIST_PREFIX = "AT-BL:";
 	private static final int SIGN_UP_KEY_VALID_MINUTE = 60 * 3; // 3분
 	private final PasswordEncoder passwordEncoder;
 	private final JwtProvider jwtProvider;
@@ -53,7 +59,6 @@ public class AuthService {
 	private final ReplyService replyService;
 	private final RereplyService rereplyService;
 	private final AuthRedisUtil authRedisUtil;
-	private final TokenRedisUtil tokenRedisUtil;
 	private final UserRepository userRepository;
 	private final FeedDeleteApplication feedDeleteApplication;
 	private final FollowRepository followRepository;
@@ -182,11 +187,13 @@ public class AuthService {
 
 	@Transactional
 	public void signOut(long userId, String accessToken) {
-		tokenRedisUtil.deleteRefreshTokenBy(userId);
+		redisService.deleteData(REFRESH_TOKEN_SUBJECT_PREFIX + userId);
 
 		// Access Token을 무효화시킬 수 없으므로 Redis에 블랙리스트 작성
 		Date expiredDate = jwtProvider.getExpiredDate(accessToken);
-		tokenRedisUtil.setAccessTokenBlackListValue(accessToken, userId, expiredDate);
+
+		// 블랙리스트에 해당 토큰이 등록되었는지 확인하기 위해 accessToken을 key로 지정
+		setAccessTokenBlackListValue(userId, accessToken, expiredDate);
 	}
 
 	public boolean checkPassword(long userId, String password) {
@@ -240,6 +247,19 @@ public class AuthService {
 
 		//유저 삭제
 		userRepository.deleteById(userId);
+	}
+
+	private void setAccessTokenBlackListValue(long userId, String accessToken, Date expiredDate) {
+		Date now = new Date();
+		long expirationSeconds = (expiredDate.getTime() - now.getTime()) / 1000;
+
+		if (expirationSeconds > 0) {
+			redisService.setDataExpire(
+					ACCESS_TOKEN_BLACK_LIST_PREFIX + accessToken,
+					String.valueOf(userId),
+					expirationSeconds
+			);
+		}
 	}
 
 	private String generateRandomSignUpKey() {
