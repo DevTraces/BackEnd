@@ -1,4 +1,4 @@
-package com.devtraces.arterest.service.user;
+package com.devtraces.arterest.service.auth;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -15,18 +15,15 @@ import com.devtraces.arterest.model.bookmark.BookmarkRepository;
 import com.devtraces.arterest.model.feed.Feed;
 import com.devtraces.arterest.model.follow.FollowRepository;
 import com.devtraces.arterest.model.like.LikeRepository;
-import com.devtraces.arterest.model.notice.NoticeRepository;
 import com.devtraces.arterest.model.reply.Reply;
 import com.devtraces.arterest.model.reply.ReplyRepository;
 import com.devtraces.arterest.model.rereply.Rereply;
 import com.devtraces.arterest.model.rereply.RereplyRepository;
-import com.devtraces.arterest.service.auth.AuthService;
 import com.devtraces.arterest.service.feed.application.FeedDeleteApplication;
 import com.devtraces.arterest.service.mail.MailService;
 import com.devtraces.arterest.common.exception.BaseException;
 import com.devtraces.arterest.common.jwt.JwtProvider;
 import com.devtraces.arterest.common.jwt.dto.TokenDto;
-import com.devtraces.arterest.service.auth.util.AuthRedisUtil;
 import com.devtraces.arterest.model.user.User;
 import com.devtraces.arterest.model.user.UserRepository;
 import com.devtraces.arterest.service.notice.NoticeService;
@@ -38,6 +35,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.devtraces.arterest.service.s3.S3Service;
+import com.devtraces.arterest.service.redis.RedisService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,8 +60,6 @@ class AuthServiceTest {
 	private ReplyService replyService;
 	@Mock
 	private RereplyService rereplyService;
-	@Mock
-	private AuthRedisUtil authRedisUtil;
 	@Mock
 	private UserRepository userRepository;
 	@Mock
@@ -111,8 +107,6 @@ class AuthServiceTest {
 				.build();
 
 		given(redisService.getData(anyString())).willReturn(email);
-		given(authRedisUtil.notExistsAuthCompletedValue(anyString()))
-			.willReturn(false);
 		given(userRepository.existsByEmail(anyString()))
 			.willReturn(false);
 		given(userRepository.existsByNickname(anyString()))
@@ -183,8 +177,6 @@ class AuthServiceTest {
 		String signUpKey = "abcdef";
 
 		given(redisService.getData(anyString())).willReturn(email);
-		given(authRedisUtil.notExistsAuthCompletedValue(anyString()))
-			.willReturn(false);
 		given(userRepository.existsByEmail(anyString()))
 			.willReturn(true);
 
@@ -207,8 +199,6 @@ class AuthServiceTest {
 		String signUpKey = "abcdef";
 
 		given(redisService.getData(anyString())).willReturn(email);
-		given(authRedisUtil.notExistsAuthCompletedValue(anyString()))
-			.willReturn(false);
 		given(userRepository.existsByEmail(anyString()))
 			.willReturn(false);
 		given(userRepository.existsByNickname(anyString()))
@@ -227,7 +217,7 @@ class AuthServiceTest {
 		willDoNothing()
 			.given(mailService).sendMail(anyString(), anyString(), anyString());
 		willDoNothing()
-			.given(authRedisUtil).setAuthKeyValue(anyString(), anyString());
+			.given(redisService).setDataExpire(anyString(), anyString(), anyLong());
 
 		authService.sendMailWithAuthKey("example@gmail.com");
 	}
@@ -259,12 +249,11 @@ class AuthServiceTest {
 	void checkAuthKeyWhenCorrect() {
 		given(userRepository.existsByEmail(anyString()))
 			.willReturn(false);
-		given(authRedisUtil.getAuthKeyValue(anyString()))
-			.willReturn("010101");
+		given(redisService.getData(anyString())).willReturn("010101");
 		willDoNothing()
-			.given(authRedisUtil).deleteAuthKeyValue(anyString());
+				.given(redisService).deleteData(anyString());
 		willDoNothing()
-			.given(authRedisUtil).setAuthCompletedValue(anyString());
+				.given(redisService).setData(anyString(), anyString());
 		given(redisService.existKey(anyString())).willReturn(false);
 
 		MailAuthKeyCheckResponse response =
@@ -279,8 +268,8 @@ class AuthServiceTest {
 	void checkAuthKeyWhenNotCorrect() {
 		given(userRepository.existsByEmail(anyString()))
 			.willReturn(false);
-		given(authRedisUtil.getAuthKeyValue(anyString()))
-			.willReturn("111111");
+		given(redisService.getData(anyString()))
+				.willReturn("111111");
 
 		MailAuthKeyCheckResponse response =
 				authService.checkAuthKey("example@gmail.com", "010101");

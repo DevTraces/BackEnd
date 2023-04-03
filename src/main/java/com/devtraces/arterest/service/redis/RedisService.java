@@ -1,4 +1,4 @@
-package com.devtraces.arterest.service.user;
+package com.devtraces.arterest.service.redis;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -34,6 +34,6 @@ public class RedisService {
     }
 
     public boolean existKey(String key) {
-        return stringRedisTemplate.hasKey(key);
+        return Boolean.TRUE.equals(stringRedisTemplate.hasKey(key));
     }
 }
